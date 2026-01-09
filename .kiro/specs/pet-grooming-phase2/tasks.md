@@ -1,0 +1,300 @@
+# Implementation Plan: Pet Grooming Phase 2
+
+## Overview
+
+本任务列表将第二阶段设计文档转化为可执行的编码任务。在 MVP 基础上扩展多萌宠支持、技能系统、宠物笼和智能摄像头。所有脚本放置在 `Assets/Scripts/PetGrooming/` 目录下。
+
+## Tasks
+
+- [x] 1. 扩展配置系统
+  - [x] 1.1 创建 Phase2GameConfig ScriptableObject
+    - 添加多萌宠模式配置（2宠/3宠阈值）
+    - 添加所有技能冷却时间配置
+    - 添加技能效果参数配置
+    - 添加摄像头参数配置
+    - _Requirements: 1.1, 1.2, 3.2-3.8, 4.2-4.4, 5.2-5.5, 6.1, 6.2_
+
+- [x] 2. 实现技能系统框架
+  - [x] 2.1 创建 SkillBase 抽象基类
+    - 实现冷却时间管理
+    - 实现技能就绪状态检测
+    - 实现事件回调（OnCooldownChanged, OnSkillActivated, OnSkillReady）
+    - _Requirements: 3.3, 3.6, 3.8, 4.2, 4.3, 4.4, 5.2, 5.4, 5.5_
+  - [x] 2.2 创建 SkillEffectData 数据结构
+    - 实现效果类型枚举（Slow, Stun, Invisible, SpeedBoost, Invulnerable）
+    - 实现效果持续时间追踪
+    - _Requirements: 3.2, 3.7, 4.4, 5.4_
+
+- [x] 3. 实现洗护师技能
+  - [x] 3.1 创建 CaptureNetSkill 组件
+    - 实现投掷物发射逻辑
+    - 实现命中检测和减速效果（50%减速，3秒）
+    - 实现8秒冷却
+    - _Requirements: 3.2, 3.3_
+  - [x] 3.2 编写 CaptureNetSkill 属性测试
+    - **Property 8: Capture Net Slow Effect**
+    - **Validates: Requirements 3.2**
+  - [x] 3.3 创建 LeashSkill 组件
+    - 实现钩爪发射和拉拽逻辑
+    - 实现挣脱概率（猫60%，狗40%）
+    - 实现12秒冷却
+    - _Requirements: 3.4, 3.5, 3.6_
+  - [ ]* 3.4 编写 LeashSkill 属性测试
+    - **Property 9: Leash Break Free Chance By Pet Type**
+    - **Validates: Requirements 3.5**
+  - [x] 3.5 创建 CalmingSpraySkill 组件
+    - 实现范围效果释放
+    - 实现眩晕效果（1秒）
+    - 实现13秒冷却
+    - _Requirements: 3.7, 3.8_
+  - [ ]* 3.6 编写 CalmingSpraySkill 属性测试
+    - **Property 10: Calming Spray Stun Effect**
+    - **Validates: Requirements 3.7**
+  - [x] 3.7 创建 GroomerSkillManager 组件
+    - 整合三个技能
+    - 实现技能激活接口
+    - _Requirements: 3.1_
+
+- [ ] 4. Checkpoint - 洗护师技能验证
+  - 确保所有测试通过，如有问题请询问用户
+
+- [x] 5. 扩展 PetAI 支持类型差异
+  - [x] 5.1 扩展 PetAI 添加 PetType 枚举
+    - 添加 Cat 和 Dog 类型
+    - 实现类型相关属性（碰撞半径、逃脱概率、击退力）
+    - _Requirements: 2.2, 2.3, 2.4_
+  - [ ]* 5.2 编写 PetAI 类型属性测试
+    - **Property 5: Pet Type Attribute Differences**
+    - **Property 6: Dog Knockback Force Greater Than Cat**
+    - **Validates: Requirements 2.2, 2.3, 2.4**
+  - [x] 5.3 实现状态效果系统
+    - 实现 ApplySlow、ApplyStun、SetInvisible、SetInvulnerable 方法
+    - 实现效果持续时间追踪和自动移除
+    - _Requirements: 3.2, 3.7, 4.4, 8.4_
+  - [x] 5.4 实现狗狗移动差异
+    - 实现狗狗无法攀爬高台的限制
+    - 实现狗狗逃跑时偏好开阔区域
+    - _Requirements: 2.5, 2.6_
+  - [ ]* 5.5 编写狗狗移动限制属性测试
+    - **Property 7: Dog Cannot Climb Elevated Surfaces**
+    - **Validates: Requirements 2.6**
+
+- [x] 6. 实现猫咪技能
+  - [x] 6.1 创建 AgileJumpSkill 组件
+    - 实现二段跳逻辑
+    - 实现6秒冷却
+    - _Requirements: 4.2_
+  - [x] 6.2 创建 FurDistractionSkill 组件
+    - 实现毛团投掷和视野遮挡（2秒）
+    - 实现10秒冷却
+    - _Requirements: 4.3_
+  - [x] 6.3 创建 HideInGapSkill 组件
+    - 实现隐身效果（静止时完全隐身，移动时半透明）
+    - 实现14秒冷却
+    - _Requirements: 4.4, 4.5_
+  - [ ]* 6.4 编写 HideInGapSkill 属性测试
+    - **Property 11: Hide In Gap Visibility State**
+    - **Validates: Requirements 4.4, 4.5**
+  - [x] 6.5 创建 CatSkillManager 组件
+    - 整合三个猫咪技能
+    - 实现 AI 技能使用决策逻辑
+    - _Requirements: 4.1, 4.6_
+
+- [x] 7. 实现狗狗技能
+  - [x] 7.1 创建 PowerChargeSkill 组件
+    - 实现冲撞和击退效果
+    - 实现释放被抓宠物的效果
+    - 实现8秒冷却
+    - _Requirements: 5.2, 5.3_
+  - [ ]* 7.2 编写 PowerChargeSkill 属性测试
+    - **Property 12: Power Charge Releases Captured Pet**
+    - **Validates: Requirements 5.3**
+  - [x] 7.3 创建 IntimidatingBarkSkill 组件
+    - 实现范围减速效果（20%减速，3秒）
+    - 实现12秒冷却
+    - _Requirements: 5.4_
+  - [ ]* 7.4 编写 IntimidatingBarkSkill 属性测试
+    - **Property 13: Intimidating Bark Slow Effect**
+    - **Validates: Requirements 5.4**
+  - [x] 7.5 创建 StealToolSkill 组件
+    - 实现从洗护台移除工具的逻辑
+    - 实现增加洗护步骤的效果
+    - 实现12秒冷却
+    - _Requirements: 5.5_
+  - [ ]* 7.6 编写 StealToolSkill 属性测试
+    - **Property 14: Steal Tool Increases Grooming Steps**
+    - **Validates: Requirements 5.5**
+  - [x] 7.7 创建 DogSkillManager 组件
+    - 整合三个狗狗技能
+    - 实现 AI 技能使用决策逻辑
+    - _Requirements: 5.1, 5.6_
+
+- [ ] 8. Checkpoint - 萌宠技能验证
+  - 确保所有测试通过，如有问题请询问用户
+
+- [x] 9. 实现多萌宠生成系统
+  - [x] 9.1 创建 PetSpawnManager 组件
+    - 实现 GameMode 枚举（TwoPets, ThreePets）
+    - 实现多萌宠生成逻辑
+    - 实现萌宠追踪和计数
+    - _Requirements: 1.1, 1.2_
+  - [ ]* 9.2 编写 PetSpawnManager 属性测试
+    - **Property 1: Pet Spawn Count Matches Game Mode**
+    - **Validates: Requirements 1.1, 1.2**
+  - [x] 9.3 扩展 GroomerController 单宠物携带限制
+    - 实现携带状态检测
+    - 实现重复抓捕拒绝逻辑
+    - _Requirements: 1.3_
+  - [ ]* 9.4 编写单宠物携带属性测试
+    - **Property 2: Single Pet Carry Constraint**
+    - **Validates: Requirements 1.3**
+  - [x] 9.5 扩展 GameManager 多萌宠胜利条件
+    - 实现所有萌宠洗护完成检测
+    - 实现胜利状态触发
+    - _Requirements: 1.7_
+  - [ ]* 9.6 编写多萌宠胜利条件属性测试
+    - **Property 4: All Pets Groomed Victory Condition**
+    - **Validates: Requirements 1.7**
+
+- [x] 10. 实现宠物笼系统
+  - [x] 10.1 创建 PetCage 组件
+    - 实现存储和释放逻辑
+    - 实现60秒计时器
+    - 实现10秒警告
+    - _Requirements: 1.4, 1.5, 1.6, 8.1, 8.2, 8.3_
+  - [ ]* 10.2 编写 PetCage 属性测试
+    - **Property 3: Pet Cage Storage Duration**
+    - **Validates: Requirements 1.5, 1.6**
+  - [x] 10.3 实现释放后无敌效果
+    - 实现3秒无敌状态
+    - _Requirements: 8.4_
+  - [ ]* 10.4 编写释放无敌属性测试
+    - **Property 19: Caged Pet Release Invulnerability**
+    - **Validates: Requirements 8.4**
+  - [x] 10.5 实现笼中宠物捣乱值隔离
+    - 实现笼中宠物不累积捣乱值
+    - _Requirements: 8.6_
+  - [ ]* 10.6 编写笼中宠物捣乱值属性测试
+    - **Property 20: Caged Pet No Mischief Accumulation**
+    - **Validates: Requirements 8.6**
+  - [x] 10.7 实现手动释放交互
+    - 实现洗护师与宠物笼的交互
+    - _Requirements: 8.5_
+
+- [ ] 11. Checkpoint - 多萌宠和宠物笼验证
+  - 确保所有测试通过，如有问题请询问用户
+
+- [x] 12. 扩展捣乱值系统
+  - [x] 12.1 实现动态阈值
+    - 根据游戏模式设置阈值（2宠800，3宠1000）
+    - _Requirements: 6.1, 6.2_
+  - [ ]* 12.2 编写动态阈值属性测试
+    - **Property 15: Mischief Threshold Matches Game Mode**
+    - **Validates: Requirements 6.1, 6.2**
+  - [x] 12.3 实现技能命中捣乱值
+    - 实现宠物技能命中洗护师增加30点
+    - _Requirements: 6.6_
+  - [ ]* 12.4 编写技能命中捣乱值属性测试
+    - **Property 18: Pet Skill Hit Mischief Value**
+    - **Validates: Requirements 6.6**
+
+- [x] 13. 实现警报系统
+  - [x] 13.1 创建 AlertSystem 组件
+    - 实现警报触发条件（阈值-100）
+    - 实现灯光闪烁和音效
+    - 实现洗护师10%加速
+    - _Requirements: 6.3, 6.4, 6.5_
+  - [ ]* 13.2 编写警报系统属性测试
+    - **Property 16: Alert State Trigger Condition**
+    - **Property 17: Alert State Speed Bonus**
+    - **Validates: Requirements 6.3, 6.5**
+
+- [x] 14. 实现智能摄像头系统
+  - [x] 14.1 创建 CameraController 组件
+    - 实现平滑跟随
+    - 实现可配置偏移和视野
+    - _Requirements: 9.1, 9.2, 9.9_
+  - [x] 14.2 实现摄像头边界限制
+    - 实现场景边界检测
+    - 实现位置钳制
+    - _Requirements: 9.3_
+  - [ ]* 14.3 编写摄像头边界属性测试
+    - **Property 22: Camera Boundary Clamping**
+    - **Validates: Requirements 9.3**
+  - [x] 14.4 实现摄像头缩放
+    - 实现抓捕时缩放
+    - 实现释放时恢复
+    - _Requirements: 9.4, 9.5_
+  - [ ]* 14.5 编写摄像头缩放属性测试
+    - **Property 21: Camera Zoom State Consistency**
+    - **Validates: Requirements 9.4, 9.5**
+  - [x] 14.6 实现洗护视角切换
+    - 实现洗护状态固定视角
+    - _Requirements: 9.6_
+  - [ ]* 14.7 编写洗护视角属性测试
+    - **Property 24: Camera Grooming View Switch**
+    - **Validates: Requirements 9.6**
+  - [x] 14.8 实现摄像头碰撞避免
+    - 实现障碍物检测
+    - 实现距离调整
+    - _Requirements: 9.7, 9.8_
+  - [ ]* 14.9 编写摄像头碰撞属性测试
+    - **Property 23: Camera Collision Avoidance**
+    - **Validates: Requirements 9.7, 9.8**
+  - [x] 14.10 实现警报屏幕震动
+    - 实现警报状态下的震动效果
+    - _Requirements: 9.10_
+
+- [ ] 15. Checkpoint - 摄像头系统验证
+  - 确保所有测试通过，如有问题请询问用户
+
+- [x] 16. 实现技能冷却 UI
+  - [x] 16.1 创建 SkillCooldownUI 组件
+    - 实现技能图标显示
+    - 实现冷却遮罩动画
+    - 实现剩余时间文字
+    - _Requirements: 7.1, 7.2, 7.3_
+  - [x] 16.2 实现技能就绪动画
+    - 实现就绪时的提示动画
+    - _Requirements: 7.4_
+  - [x] 16.3 创建技能 UI 布局
+    - 实现 HUD 位置配置
+    - _Requirements: 7.5_
+
+- [x] 17. 场景集成
+  - [x] 17.1 创建宠物笼 Prefab
+    - 配置 PetCage 组件
+    - 添加视觉指示器
+    - _Requirements: 1.4, 8.1_
+  - [x] 17.2 创建狗狗 Prefab
+    - 配置 DogAI 组件
+    - 配置 DogSkillManager
+    - 配置碰撞体（半径1.0）
+    - _Requirements: 2.1, 2.2_
+  - [x] 17.3 更新猫咪 Prefab
+    - 添加 CatSkillManager
+    - 确认碰撞体（半径0.5）
+    - _Requirements: 4.1_
+  - [x] 17.4 更新洗护师 Prefab
+    - 添加 GroomerSkillManager
+    - 配置技能 Prefabs
+    - _Requirements: 3.1_
+  - [x] 17.5 配置游戏场景
+    - 放置宠物笼
+    - 配置多萌宠生成点
+    - 配置摄像头边界
+    - _Requirements: 1.4, 9.3_
+
+- [x] 18. Final Checkpoint - 完整游戏测试
+  - 确保所有测试通过
+  - 验证2宠模式完整游戏循环
+  - 验证3宠模式完整游戏循环
+  - 如有问题请询问用户
+
+## Notes
+
+- 任务标记 `*` 为可选测试任务
+- 每个任务引用具体需求以确保可追溯性
+- Checkpoint 任务用于阶段性验证
+- 属性测试使用 NUnit + FsCheck 框架
+- 所有脚本放置在 `Assets/Scripts/PetGrooming/` 目录下

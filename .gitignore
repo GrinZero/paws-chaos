@@ -1,0 +1,36 @@
+# Unity 生成的文件夹
+Library/
+Temp/
+Obj/
+Build/
+Builds/
+Logs/
+UserSettings/
+MemoryCaptures/
+
+# Unity 缓存
+*.pidb
+*.pdb
+*.mdb
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+sysinfo.txt
+
+# IDE
+.idea/
+.vs/
+*.csproj
+*.sln
+
+# 日志和测试结果
+*.log
+TestResults*.xml
+
+# macOS
+.DS_Store
+*.swp
+*~.nib
+
+# Crashlytics
+crashlytics-build.properties

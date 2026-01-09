@@ -1,0 +1,22 @@
+{
+    "name": "PetGrooming.Setup.Editor",
+    "rootNamespace": "PetGrooming.Setup.Editor",
+    "references": [
+        "PetGrooming.Core",
+        "PetGrooming.Systems",
+        "PetGrooming.AI",
+        "PetGrooming.Setup",
+        "PetGrooming.UI"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

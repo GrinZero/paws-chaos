@@ -1,0 +1,20 @@
+{
+    "name": "PetGrooming.Setup",
+    "rootNamespace": "PetGrooming.Setup",
+    "references": [
+        "PetGrooming.Core",
+        "PetGrooming.Systems",
+        "PetGrooming.AI",
+        "PetGrooming.UI",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
