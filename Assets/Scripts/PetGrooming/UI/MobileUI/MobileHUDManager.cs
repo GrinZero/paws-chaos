@@ -684,6 +684,9 @@ namespace PetGrooming.UI.MobileUI
             // Apply settings
             ApplySettings();
             
+            // 确保 OnScreenControl 组件能够正常工作
+            EnsureOnScreenControlsWork();
+            
             // Determine initial UI mode
             bool shouldUseMobile = DetermineInitialUIMode();
             
@@ -704,51 +707,124 @@ namespace PetGrooming.UI.MobileUI
             Debug.Log("[MobileHUDManager] Initialization complete.");
         }
         
+        /// <summary>
+        /// 确保 OnScreenControl 组件能够正常工作。
+        /// OnScreenStick 和 OnScreenButton 通过模拟 Gamepad 输入工作，
+        /// 需要确保 PlayerInput 能够接收这些输入。
+        /// 
+        /// 关键原理：OnScreenStick 会创建一个虚拟 Gamepad 设备，
+        /// 但 PlayerInput 默认可能只监听 KeyboardMouse 方案。
+        /// 解决方案是让 PlayerInput 同时监听所有设备。
+        /// </summary>
+        private void EnsureOnScreenControlsWork()
+        {
+            // 查找场景中的 PlayerInput 组件
+            var playerInput = FindObjectOfType<UnityEngine.InputSystem.PlayerInput>();
+            if (playerInput == null)
+            {
+                Debug.LogWarning("[MobileHUDManager] No PlayerInput found in scene! OnScreenControls may not work.");
+                return;
+            }
+            
+            Debug.Log($"[MobileHUDManager] Found PlayerInput on: {playerInput.gameObject.name}");
+            Debug.Log($"[MobileHUDManager] Current control scheme: {playerInput.currentControlScheme}");
+            Debug.Log($"[MobileHUDManager] Notification behavior: {playerInput.notificationBehavior}");
+            
+            // 检查是否有虚拟 Gamepad 设备
+            var gamepads = UnityEngine.InputSystem.Gamepad.all;
+            Debug.Log($"[MobileHUDManager] Total Gamepad devices: {gamepads.Count}");
+            
+            // 关键修复：禁用自动控制方案切换，让 PlayerInput 同时响应所有设备
+            // 这样无论当前是什么控制方案，OnScreenStick 的虚拟 Gamepad 输入都能被接收
+            if (_onScreenStick != null)
+            {
+                // 方案1：禁用自动切换，保持当前方案但允许所有设备输入
+                playerInput.neverAutoSwitchControlSchemes = true;
+                
+                // 方案2：尝试切换到 Gamepad 方案（需要有 Gamepad 设备）
+                // OnScreenStick 启用时会自动创建虚拟 Gamepad
+                if (gamepads.Count > 0)
+                {
+                    try
+                    {
+                        // 使用虚拟 Gamepad 设备切换控制方案
+                        var virtualGamepad = gamepads[gamepads.Count - 1]; // 最后添加的通常是虚拟的
+                        playerInput.SwitchCurrentControlScheme("Gamepad", virtualGamepad);
+                        Debug.Log($"[MobileHUDManager] Switched to Gamepad scheme with device: {virtualGamepad.name}");
+                    }
+                    catch (System.Exception e)
+                    {
+                        Debug.LogWarning($"[MobileHUDManager] Failed to switch control scheme: {e.Message}");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("[MobileHUDManager] No Gamepad devices found. OnScreenStick may not create virtual device until first touch.");
+                    // 延迟检查：OnScreenStick 可能在第一次触摸时才创建虚拟设备
+                    StartCoroutine(DelayedControlSchemeSwitch(playerInput));
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 延迟切换控制方案，等待 OnScreenStick 创建虚拟 Gamepad。
+        /// </summary>
+        private System.Collections.IEnumerator DelayedControlSchemeSwitch(UnityEngine.InputSystem.PlayerInput playerInput)
+        {
+            // 等待一帧，让 OnScreenStick 有机会初始化
+            yield return null;
+            
+            var gamepads = UnityEngine.InputSystem.Gamepad.all;
+            if (gamepads.Count > 0)
+            {
+                try
+                {
+                    var virtualGamepad = gamepads[gamepads.Count - 1];
+                    playerInput.SwitchCurrentControlScheme("Gamepad", virtualGamepad);
+                    Debug.Log($"[MobileHUDManager] Delayed switch to Gamepad scheme with device: {virtualGamepad.name}");
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"[MobileHUDManager] Delayed switch failed: {e.Message}");
+                }
+            }
+        }
+        
         private void FindReferences()
         {
-            // Find joystick if not assigned
+            // Find joystick if not assigned (旧版组件，V2 可能为 null)
             if (_joystick == null)
             {
                 _joystick = GetComponentInChildren<VirtualJoystick>(true);
             }
             
-            // Find skill wheel if not assigned
+            // Find skill wheel if not assigned (旧版组件，V2 可能为 null)
             if (_skillWheel == null)
             {
                 _skillWheel = GetComponentInChildren<SkillWheelUI>(true);
             }
             
-            // Find struggle button if not assigned
+            // Find struggle button if not assigned (旧版组件，V2 可能为 null)
             if (_struggleButton == null)
             {
                 _struggleButton = GetComponentInChildren<StruggleButtonUI>(true);
             }
             
-            // Find screen adapter if not assigned
+            // Find screen adapter if not assigned (可选组件)
             if (_screenAdapter == null)
             {
                 _screenAdapter = GetComponentInChildren<ScreenAdapter>(true);
-                
-                // Create one if not found
-                if (_screenAdapter == null)
-                {
-                    _screenAdapter = gameObject.AddComponent<ScreenAdapter>();
-                }
+                // V2 模式不强制创建
             }
             
-            // Find multi-touch handler if not assigned
+            // Find multi-touch handler if not assigned (可选组件)
             if (_multiTouchHandler == null)
             {
                 _multiTouchHandler = GetComponentInChildren<MultiTouchHandler>(true);
-                
-                // Create one if not found
-                if (_multiTouchHandler == null)
-                {
-                    _multiTouchHandler = gameObject.AddComponent<MultiTouchHandler>();
-                }
+                // V2 模式不强制创建
             }
             
-            // Set up screen adapter containers
+            // Set up screen adapter containers (仅当组件存在时)
             if (_screenAdapter != null)
             {
                 RectTransform joystickRect = _joystick != null ? _joystick.GetComponent<RectTransform>() : null;
@@ -758,25 +834,54 @@ namespace PetGrooming.UI.MobileUI
                 _screenAdapter.SetContainers(joystickRect, skillWheelRect, struggleRect);
             }
             
-            // Set up multi-touch handler references
+            // Set up multi-touch handler references (仅当组件存在时)
             if (_multiTouchHandler != null)
             {
                 _multiTouchHandler.SetReferences(_joystick, _skillWheel, _struggleButton);
             }
             
-            // Find OnScreenStick if not assigned
+            // Find OnScreenStick if not assigned (V2 核心组件)
             if (_onScreenStick == null)
             {
                 _onScreenStick = GetComponentInChildren<OnScreenStick>(true);
             }
             
-            // Find OnScreenButtons if not assigned
+            // 验证 OnScreenStick 配置
+            if (_onScreenStick != null)
+            {
+                Debug.Log($"[MobileHUDManager] Found OnScreenStick: {_onScreenStick.gameObject.name}, " +
+                          $"enabled: {_onScreenStick.enabled}, " +
+                          $"controlPath: {_onScreenStick.controlPath}");
+            }
+            else
+            {
+                Debug.LogWarning("[MobileHUDManager] OnScreenStick not found in MobileHUD hierarchy!");
+            }
+            
+            // Find OnScreenButtons if not assigned (V2 核心组件)
             if (_skillButtons == null || _skillButtons.Length == 0)
             {
                 _skillButtons = GetComponentsInChildren<OnScreenButton>(true);
             }
             
-            // Find SkillButtonVisuals if not assigned
+            // 验证 OnScreenButton 配置
+            if (_skillButtons != null && _skillButtons.Length > 0)
+            {
+                Debug.Log($"[MobileHUDManager] Found {_skillButtons.Length} OnScreenButtons:");
+                foreach (var btn in _skillButtons)
+                {
+                    if (btn != null)
+                    {
+                        Debug.Log($"  - {btn.gameObject.name}: enabled={btn.enabled}, controlPath={btn.controlPath}");
+                    }
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[MobileHUDManager] No OnScreenButtons found in MobileHUD hierarchy!");
+            }
+            
+            // Find SkillButtonVisuals if not assigned (V2 核心组件)
             if (_skillButtonVisuals == null || _skillButtonVisuals.Length == 0)
             {
                 _skillButtonVisuals = GetComponentsInChildren<SkillButtonVisual>(true);
@@ -801,13 +906,13 @@ namespace PetGrooming.UI.MobileUI
         
         private void SubscribeToEvents()
         {
-            // Subscribe to skill wheel capture button
+            // Subscribe to skill wheel capture button (仅当旧组件存在时)
             if (_skillWheel != null)
             {
                 _skillWheel.OnCapturePressed += HandleCapturePressed;
             }
             
-            // Subscribe to struggle button completion
+            // Subscribe to struggle button completion (仅当旧组件存在时)
             if (_struggleButton != null)
             {
                 _struggleButton.OnStruggleComplete += HandleStruggleComplete;
@@ -829,14 +934,7 @@ namespace PetGrooming.UI.MobileUI
         
         private bool DetermineInitialUIMode()
         {
-            // Check saved preference first
-            // Requirement 5.6: Restore saved preference
-            if (PlayerPrefs.HasKey(_uiModePrefsKey))
-            {
-                return PlayerPrefs.GetInt(_uiModePrefsKey) == 1;
-            }
-            
-            // Force mobile mode in editor for testing
+            // Force mobile mode in editor for testing (优先级最高)
             #if UNITY_EDITOR
             if (_forceMobileInEditor)
             {
@@ -844,6 +942,13 @@ namespace PetGrooming.UI.MobileUI
                 return true;
             }
             #endif
+            
+            // Check saved preference
+            // Requirement 5.6: Restore saved preference
+            if (PlayerPrefs.HasKey(_uiModePrefsKey))
+            {
+                return PlayerPrefs.GetInt(_uiModePrefsKey) == 1;
+            }
             
             // Auto-detect if enabled
             // Requirement 5.1, 5.2: Auto-detect device type
@@ -866,6 +971,13 @@ namespace PetGrooming.UI.MobileUI
         
         private void SetMobileUIVisibility(bool visible)
         {
+            // 首先激活 MobileHUD 根对象（如果是启用模式）
+            // 这是关键！prefab 默认是禁用的，必须先激活根对象
+            if (visible)
+            {
+                gameObject.SetActive(true);
+            }
+            
             // Joystick visibility (legacy VirtualJoystick)
             if (_joystick != null)
             {
@@ -873,9 +985,18 @@ namespace PetGrooming.UI.MobileUI
             }
             
             // OnScreenStick visibility (Input System)
+            // 注意：OnScreenStick 组件在 Handle 子对象上，需要找到父容器来控制可见性
             if (_onScreenStick != null)
             {
-                _onScreenStick.gameObject.SetActive(visible);
+                // 找到 OnScreenStick 的根容器（向上查找直到找到名为 "OnScreenStick" 的对象或到达 MobileHUD 根）
+                Transform stickContainer = _onScreenStick.transform;
+                while (stickContainer.parent != null && 
+                       stickContainer.parent.name != "MobileHUD_V2" && 
+                       stickContainer.parent.name != "MobileHUD")
+                {
+                    stickContainer = stickContainer.parent;
+                }
+                stickContainer.gameObject.SetActive(visible);
             }
             
             // Skill wheel visibility (only for Groomer)

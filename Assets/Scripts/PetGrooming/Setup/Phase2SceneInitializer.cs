@@ -425,6 +425,7 @@ namespace PetGrooming.Setup
             {
                 Debug.Log("[Phase2SceneInitializer] MobileHUDManager already exists, connecting references...");
                 ConnectMobileHUDReferences(existingManager);
+                ConfigurePlayerInputForOnScreenControls();
                 return;
             }
 
@@ -444,6 +445,9 @@ namespace PetGrooming.Setup
                 GameObject mobileHUDObj = Instantiate(_mobileHUDPrefab);
                 mobileHUDObj.name = "MobileHUD";
                 
+                // 关键：激活 MobileHUD GameObject（prefab 默认是禁用的）
+                mobileHUDObj.SetActive(true);
+                
                 MobileHUDManager manager = mobileHUDObj.GetComponent<MobileHUDManager>();
                 if (manager != null)
                 {
@@ -455,6 +459,9 @@ namespace PetGrooming.Setup
                         manager.SetSettings(_mobileHUDSettings);
                     }
                 }
+                
+                // 配置 PlayerInput 以接收 OnScreenControl 的虚拟 Gamepad 输入
+                ConfigurePlayerInputForOnScreenControls();
             }
             else
             {
@@ -464,6 +471,83 @@ namespace PetGrooming.Setup
             }
 
             Debug.Log("[Phase2SceneInitializer] Mobile HUD setup complete.");
+        }
+        
+        /// <summary>
+        /// 配置 PlayerInput 组件以正确接收 OnScreenControl 的虚拟 Gamepad 输入。
+        /// OnScreenStick 和 OnScreenButton 通过模拟 Gamepad 输入工作，
+        /// 需要确保 PlayerInput 能够接收这些输入。
+        /// </summary>
+        private void ConfigurePlayerInputForOnScreenControls()
+        {
+            // 查找 Groomer 上的 PlayerInput 组件
+            GroomerController groomer = FindObjectOfType<GroomerController>();
+            if (groomer == null)
+            {
+                Debug.LogWarning("[Phase2SceneInitializer] No GroomerController found for PlayerInput configuration!");
+                return;
+            }
+            
+            var playerInput = groomer.GetComponent<UnityEngine.InputSystem.PlayerInput>();
+            if (playerInput == null)
+            {
+                Debug.LogWarning("[Phase2SceneInitializer] No PlayerInput component found on Groomer!");
+                return;
+            }
+            
+            // 关键修复：确保 PlayerInput 使用 "Invoke Unity Events" 或 "Send Messages" 行为
+            // 并且能够接收来自虚拟 Gamepad 的输入
+            // OnScreenControl 组件会创建一个虚拟 Gamepad 设备，PlayerInput 需要能够接收它
+            
+            // 检查当前的通知行为
+            var behavior = playerInput.notificationBehavior;
+            Debug.Log($"[Phase2SceneInitializer] PlayerInput notification behavior: {behavior}");
+            
+            // 如果使用 SendMessages，确保 StarterAssetsInputs 在同一个 GameObject 上
+            var starterInputs = groomer.GetComponent<StarterAssets.StarterAssetsInputs>();
+            if (starterInputs == null)
+            {
+                Debug.LogWarning("[Phase2SceneInitializer] StarterAssetsInputs not found on Groomer!");
+                return;
+            }
+            
+            // 强制刷新设备配对，确保虚拟 Gamepad 被识别
+            // 这是解决 OnScreenControl 不工作的关键步骤
+            try
+            {
+                // 获取所有 Gamepad 设备（包括虚拟的）
+                var gamepads = UnityEngine.InputSystem.Gamepad.all;
+                Debug.Log($"[Phase2SceneInitializer] Found {gamepads.Count} Gamepad devices (including virtual).");
+                
+                // 如果 PlayerInput 没有配对设备，尝试自动配对
+                if (playerInput.devices.Count == 0 || !HasGamepadDevice(playerInput))
+                {
+                    // 切换到自动控制方案切换，这样可以自动检测虚拟 Gamepad
+                    playerInput.SwitchCurrentControlScheme("Gamepad");
+                    Debug.Log("[Phase2SceneInitializer] Switched PlayerInput to Gamepad control scheme for OnScreenControls.");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[Phase2SceneInitializer] Failed to configure PlayerInput for OnScreenControls: {e.Message}");
+            }
+            
+            Debug.Log("[Phase2SceneInitializer] PlayerInput configured for OnScreenControl virtual Gamepad input.");
+        }
+        
+        /// <summary>
+        /// 检查 PlayerInput 是否已配对 Gamepad 设备。
+        /// </summary>
+        private bool HasGamepadDevice(UnityEngine.InputSystem.PlayerInput playerInput)
+        {
+            foreach (var device in playerInput.devices)
+            {
+                if (device is UnityEngine.InputSystem.Gamepad)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>

@@ -44,7 +44,9 @@ namespace StarterAssets
 		
 		public void OnMove(InputValue value)
 		{
-			MoveInput(value.Get<Vector2>());
+			var moveValue = value.Get<Vector2>();
+			Debug.Log($"[StarterAssetsInputs] OnMove callback: {moveValue}");
+			MoveInput(moveValue);
 		}
 		
 		// 兼容 PlayerInput 组件的事件绑定（InputMove 是旧的命名）
@@ -142,6 +144,11 @@ namespace StarterAssets
 		public void MoveInput(Vector2 newMoveDirection)
 		{
 			move = newMoveDirection;
+			// 调试日志：追踪移动输入来源
+			if (newMoveDirection.sqrMagnitude > 0.01f)
+			{
+				Debug.Log($"[StarterAssetsInputs] MoveInput received: {newMoveDirection}");
+			}
 		} 
 
 		public void LookInput(Vector2 newLookDirection)
