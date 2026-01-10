@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 using TMPro;
 
 namespace PetGrooming.Utils
@@ -99,6 +100,29 @@ namespace PetGrooming.Utils
             sb.AppendLine($"触摸支持: {Input.touchSupported}");
             sb.AppendLine($"触摸数量: {Input.touchCount}");
             
+            // EventSystem 状态（关键！）
+            var eventSystem = UnityEngine.EventSystems.EventSystem.current;
+            if (eventSystem != null)
+            {
+                sb.AppendLine($"EventSystem: ✓");
+                sb.AppendLine($"当前选中: {(eventSystem.currentSelectedGameObject != null ? eventSystem.currentSelectedGameObject.name : "无")}");
+                
+                // 检查 InputModule
+                var inputModule = eventSystem.currentInputModule;
+                if (inputModule != null)
+                {
+                    sb.AppendLine($"InputModule: {inputModule.GetType().Name}");
+                }
+                else
+                {
+                    sb.AppendLine($"InputModule: ✗ 无!");
+                }
+            }
+            else
+            {
+                sb.AppendLine("EventSystem: ✗ 未找到!");
+            }
+            
             // PlayerInput 状态
             if (_playerInput != null)
             {
@@ -127,11 +151,32 @@ namespace PetGrooming.Utils
                 sb.AppendLine("StarterAssetsInputs: 未找到!");
             }
             
-            // 触摸信息
-            for (int i = 0; i < Input.touchCount && i < 3; i++)
+            // 新 Input System 触摸信息
+            var touchscreen = UnityEngine.InputSystem.Touchscreen.current;
+            if (touchscreen != null)
+            {
+                sb.AppendLine($"Touchscreen: ✓");
+                int activeTouches = 0;
+                foreach (var touch in touchscreen.touches)
+                {
+                    if (touch.press.isPressed)
+                    {
+                        activeTouches++;
+                        sb.AppendLine($"  Touch: {touch.position.ReadValue()}");
+                    }
+                }
+                sb.AppendLine($"活跃触摸: {activeTouches}");
+            }
+            else
+            {
+                sb.AppendLine("Touchscreen: ✗ 无设备!");
+            }
+            
+            // 旧 Input 触摸信息
+            for (int i = 0; i < Input.touchCount && i < 2; i++)
             {
                 Touch touch = Input.GetTouch(i);
-                sb.AppendLine($"Touch{i}: {touch.position} ({touch.phase})");
+                sb.AppendLine($"OldTouch{i}: {touch.position}");
             }
             
             return sb.ToString();

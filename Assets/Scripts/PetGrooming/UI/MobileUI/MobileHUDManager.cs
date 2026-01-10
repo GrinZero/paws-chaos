@@ -780,38 +780,63 @@ namespace PetGrooming.UI.MobileUI
         /// <summary>
         /// 确保 OnScreenControl 组件能够正常工作。
         /// 
-        /// 关键修复：移动端使用 OnScreenStick 时，需要确保 PlayerInput 能接收虚拟 Gamepad 输入。
-        /// 最可靠的方案是直接监听 Input System 的 Action，而不是依赖控制方案切换。
+        /// 关键原理：OnScreenStick 在被拖动时会创建虚拟 Gamepad 设备。
+        /// PlayerInput 需要切换到 Gamepad 方案才能接收这些输入。
+        /// 但虚拟设备只有在第一次交互时才会创建，所以需要延迟检测。
         /// </summary>
         private void EnsureOnScreenControlsWork()
         {
-            // 查找场景中的 PlayerInput 组件
             var playerInput = FindObjectOfType<UnityEngine.InputSystem.PlayerInput>();
             if (playerInput == null)
             {
-                Debug.LogWarning("[MobileHUDManager] No PlayerInput found in scene! OnScreenControls may not work.");
+                Debug.LogWarning("[MobileHUDManager] No PlayerInput found in scene!");
                 return;
             }
             
-            Debug.Log($"[MobileHUDManager] Found PlayerInput on: {playerInput.gameObject.name}");
-            Debug.Log($"[MobileHUDManager] Current control scheme: {playerInput.currentControlScheme}");
-            Debug.Log($"[MobileHUDManager] Notification behavior: {playerInput.notificationBehavior}");
+            Debug.Log($"[MobileHUDManager] PlayerInput on: {playerInput.gameObject.name}, scheme: {playerInput.currentControlScheme}");
             
-            // 检查是否有虚拟 Gamepad 设备
-            var gamepads = UnityEngine.InputSystem.Gamepad.all;
-            Debug.Log($"[MobileHUDManager] Total Gamepad devices: {gamepads.Count}");
-            
-            // 关键修复：在移动端强制切换到 Gamepad 方案
-            // OnScreenStick 模拟的是 Gamepad 左摇杆，必须使用 Gamepad 方案才能接收输入
-            if (_onScreenStick != null && IsTouchDevice())
+            if (_onScreenStick == null)
             {
-                Debug.Log("[MobileHUDManager] Touch device detected, configuring for OnScreenStick...");
-                
-                // 禁用自动切换，防止切回 KeyboardMouse
-                playerInput.neverAutoSwitchControlSchemes = true;
-                
-                // 延迟切换，等待 OnScreenStick 创建虚拟设备
-                StartCoroutine(ForceGamepadScheme(playerInput));
+                Debug.LogWarning("[MobileHUDManager] OnScreenStick not found!");
+                return;
+            }
+            
+            // 关键：监听设备变化，当虚拟 Gamepad 被创建时自动切换方案
+            UnityEngine.InputSystem.InputSystem.onDeviceChange += (device, change) =>
+            {
+                if (change == UnityEngine.InputSystem.InputDeviceChange.Added && 
+                    device is UnityEngine.InputSystem.Gamepad)
+                {
+                    Debug.Log($"[MobileHUDManager] Gamepad added: {device.name}, switching scheme...");
+                    try
+                    {
+                        playerInput.SwitchCurrentControlScheme("Gamepad", device);
+                        Debug.Log("[MobileHUDManager] ✓ Switched to Gamepad scheme");
+                    }
+                    catch (System.Exception e)
+                    {
+                        Debug.LogWarning($"[MobileHUDManager] Switch failed: {e.Message}");
+                    }
+                }
+            };
+            
+            // 如果已经有 Gamepad，立即切换
+            var gamepads = UnityEngine.InputSystem.Gamepad.all;
+            if (gamepads.Count > 0)
+            {
+                try
+                {
+                    playerInput.SwitchCurrentControlScheme("Gamepad", gamepads[0]);
+                    Debug.Log($"[MobileHUDManager] ✓ Switched to existing Gamepad: {gamepads[0].name}");
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"[MobileHUDManager] Switch failed: {e.Message}");
+                }
+            }
+            else
+            {
+                Debug.Log("[MobileHUDManager] No Gamepad yet, waiting for OnScreenStick interaction...");
             }
         }
         
