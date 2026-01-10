@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using PetGrooming.Core;
@@ -8,6 +9,13 @@ namespace PetGrooming.Systems
     /// Handles player movement input and character controller movement.
     /// Supports both WASD and Arrow keys, with camera-relative movement.
     /// </summary>
+    /// <remarks>
+    /// [已废弃] 此组件已被 Unity Starter Assets 的 ThirdPersonController 替代。
+    /// ThirdPersonController 通过 StarterAssetsInputs 接收输入，
+    /// 移动端输入由 OnScreenStick 自动发送到 PlayerInput 组件。
+    /// 迁移指南：参见 .kiro/specs/mobile-input-migration/design.md
+    /// </remarks>
+    [Obsolete("PlayerMovement 已废弃，请使用 ThirdPersonController + StarterAssetsInputs。参见 mobile-input-migration 规范。")]
     [RequireComponent(typeof(CharacterController))]
     public class PlayerMovement : MonoBehaviour
     {

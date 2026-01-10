@@ -669,9 +669,10 @@ namespace PetGrooming.Setup
             GroomerController groomerController = groomer.AddComponent<GroomerController>();
             ConfigureGroomerController(groomerController);
             
-            // Add PlayerMovement for input handling
-            PlayerMovement playerMovement = groomer.AddComponent<PlayerMovement>();
-            ConfigurePlayerMovement(playerMovement);
+            // PlayerMovement 已废弃，不再添加
+            // 移动控制现在由 ThirdPersonController + StarterAssetsInputs 处理
+            // 输入由 OnScreenStick 通过 Input System 直接发送到 StarterAssetsInputs
+            // 参见 .kiro/specs/mobile-input-migration/design.md
             
             // Add GroomerSkillManager - Requirement 3.1
             GroomerSkillManager skillManager = groomer.AddComponent<GroomerSkillManager>();
@@ -682,7 +683,7 @@ namespace PetGrooming.Setup
             holdPoint.transform.SetParent(groomer.transform);
             holdPoint.transform.localPosition = new Vector3(0f, 1f, 0.5f);
             
-            Debug.Log("[Phase2PrefabSetup] Groomer template created with PlayerMovement and GroomerSkillManager.");
+            Debug.Log("[Phase2PrefabSetup] Groomer template created with GroomerController and GroomerSkillManager (PlayerMovement deprecated).");
             return groomer;
         }
         
@@ -763,31 +764,9 @@ namespace PetGrooming.Setup
 #endif
         }
         
-        /// <summary>
-        /// Configures the PlayerMovement component.
-        /// </summary>
-        private void ConfigurePlayerMovement(PlayerMovement playerMovement)
-        {
-#if UNITY_EDITOR
-            var serializedObj = new UnityEditor.SerializedObject(playerMovement);
-            
-            // Set game config
-            var configProp = serializedObj.FindProperty("_gameConfig");
-            if (configProp != null && _gameConfig != null)
-                configProp.objectReferenceValue = _gameConfig;
-            
-            // Set camera reference
-            Camera mainCamera = Camera.main;
-            if (mainCamera != null)
-            {
-                var cameraProp = serializedObj.FindProperty("_cameraTransform");
-                if (cameraProp != null)
-                    cameraProp.objectReferenceValue = mainCamera.transform;
-            }
-            
-            serializedObj.ApplyModifiedProperties();
-#endif
-        }
+        // ConfigurePlayerMovement 已移除 - PlayerMovement 已废弃
+        // 移动控制现在由 ThirdPersonController + StarterAssetsInputs 处理
+        // 参见 .kiro/specs/mobile-input-migration/design.md
         
         /// <summary>
         /// Configures the GroomerSkillManager with all three groomer skills.

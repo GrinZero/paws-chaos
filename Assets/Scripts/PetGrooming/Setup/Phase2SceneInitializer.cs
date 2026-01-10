@@ -1,11 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 using PetGrooming.Core;
 using PetGrooming.Systems;
 using PetGrooming.Systems.Skills;
 using PetGrooming.AI;
 using PetGrooming.UI;
 using PetGrooming.UI.MobileUI;
+using StarterAssets;
 
 namespace PetGrooming.Setup
 {
@@ -132,37 +134,98 @@ namespace PetGrooming.Setup
                 groomer = CreateGroomer();
             }
 
-            // Disable ThirdPersonController if it exists (conflicts with our system)
-            // var thirdPersonController = groomer.GetComponent("ThirdPersonController") as MonoBehaviour;
-            // if (thirdPersonController != null && thirdPersonController.enabled)
-            // {
-            //     thirdPersonController.enabled = false;
-            //     Debug.Log("[Phase2SceneInitializer] Disabled ThirdPersonController to use PlayerMovement instead.");
-            // }
-
-            // Ensure PlayerMovement component exists
-            PlayerMovement playerMovement = groomer.GetComponent<PlayerMovement>();
-            if (playerMovement == null)
+            // 迁移后架构：使用 ThirdPersonController 作为唯一的移动控制器
+            // Requirement 5.1, 5.2, 5.3: 确保玩家有 ThirdPersonController、PlayerInput、StarterAssetsInputs 组件
+            
+            // 确保 ThirdPersonController 存在并启用
+            var thirdPersonController = groomer.GetComponent<StarterAssets.ThirdPersonController>();
+            if (thirdPersonController != null)
             {
-                Debug.Log("[Phase2SceneInitializer] Adding PlayerMovement to Groomer...");
-                playerMovement = groomer.gameObject.AddComponent<PlayerMovement>();
+                thirdPersonController.enabled = true;
+                Debug.Log("[Phase2SceneInitializer] ThirdPersonController enabled as sole movement controller.");
+            }
+            else
+            {
+                Debug.LogWarning("[Phase2SceneInitializer] ThirdPersonController not found on Groomer!");
+            }
+            
+            // 确保 PlayerInput 组件存在
+            var playerInput = groomer.GetComponent<UnityEngine.InputSystem.PlayerInput>();
+            if (playerInput != null)
+            {
+                Debug.Log("[Phase2SceneInitializer] PlayerInput component found.");
+            }
+            else
+            {
+                Debug.LogWarning("[Phase2SceneInitializer] PlayerInput component not found on Groomer!");
+            }
+            
+            // 确保 StarterAssetsInputs 组件存在
+            var starterAssetsInputs = groomer.GetComponent<StarterAssets.StarterAssetsInputs>();
+            if (starterAssetsInputs != null)
+            {
+                Debug.Log("[Phase2SceneInitializer] StarterAssetsInputs component found.");
+                
+                // 连接技能输入事件到 GroomerSkillManager
+                // Requirement 3.3: 连接技能输入事件到技能管理器
+                GroomerSkillManager skillManager = groomer.GetComponent<GroomerSkillManager>();
+                if (skillManager != null)
+                {
+                    ConnectSkillInputEvents(starterAssetsInputs, skillManager, groomer);
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[Phase2SceneInitializer] StarterAssetsInputs component not found on Groomer!");
+            }
+
+            // PlayerMovement 已废弃，不再添加
+            // 输入现在由 OnScreenStick 通过 Input System 直接发送到 StarterAssetsInputs
+            PlayerMovement playerMovement = groomer.GetComponent<PlayerMovement>();
+            if (playerMovement != null)
+            {
+                // 标记为废弃但不删除，保持向后兼容
+                playerMovement.enabled = false;
+                Debug.Log("[Phase2SceneInitializer] PlayerMovement disabled (deprecated, using ThirdPersonController).");
             }
 
             // Ensure GroomerSkillManager exists
-            GroomerSkillManager skillManager = groomer.GetComponent<GroomerSkillManager>();
-            if (skillManager == null)
+            GroomerSkillManager existingSkillManager = groomer.GetComponent<GroomerSkillManager>();
+            if (existingSkillManager == null)
             {
                 Debug.Log("[Phase2SceneInitializer] Adding GroomerSkillManager to Groomer...");
-                skillManager = groomer.gameObject.AddComponent<GroomerSkillManager>();
-            }
-
-            // Set camera reference for PlayerMovement
-            if (Camera.main != null)
-            {
-                playerMovement.SetCameraTransform(Camera.main.transform);
+                existingSkillManager = groomer.gameObject.AddComponent<GroomerSkillManager>();
             }
 
             Debug.Log("[Phase2SceneInitializer] Groomer setup complete.");
+        }
+        
+        /// <summary>
+        /// 连接 StarterAssetsInputs 的技能输入事件到 GroomerSkillManager。
+        /// Requirement 3.3: 连接技能输入事件到技能管理器。
+        /// Requirement 6.6: StarterAssetsInputs 扩展支持技能输入。
+        /// </summary>
+        private void ConnectSkillInputEvents(
+            StarterAssets.StarterAssetsInputs inputs, 
+            GroomerSkillManager skillManager,
+            GroomerController groomer)
+        {
+            // 连接技能1事件 (CaptureNet)
+            inputs.OnSkill1Pressed += () => skillManager.TryActivateSkill(0);
+            
+            // 连接技能2事件 (Leash)
+            inputs.OnSkill2Pressed += () => skillManager.TryActivateSkill(1);
+            
+            // 连接技能3事件 (CalmingSpray)
+            inputs.OnSkill3Pressed += () => skillManager.TryActivateSkill(2);
+            
+            // 连接捕获事件
+            inputs.OnCapturePressed += () => groomer.TryCapturePet();
+            
+            // 连接挣扎事件（用于宠物逃脱，暂时不处理）
+            // inputs.OnStrugglePressed += () => { };
+            
+            Debug.Log("[Phase2SceneInitializer] Skill input events connected to GroomerSkillManager.");
         }
 
         private GroomerController CreateGroomer()
@@ -406,6 +469,7 @@ namespace PetGrooming.Setup
         /// <summary>
         /// Connects MobileHUDManager to Groomer controller and movement components.
         /// Requirement 1.8: Joystick input equivalent to keyboard/gamepad.
+        /// Requirement 5.4: 配置 OnScreenStick 和 OnScreenButton，绑定 SkillButtonVisual 到技能系统。
         /// </summary>
         private void ConnectMobileHUDReferences(MobileHUDManager manager)
         {
@@ -425,20 +489,23 @@ namespace PetGrooming.Setup
                     Debug.Log("[Phase2SceneInitializer] Bound GroomerController to MobileHUD capture button.");
                 }
                 
-                // Set player movement reference
-                PlayerMovement playerMovement = groomer.GetComponent<PlayerMovement>();
-                if (playerMovement != null)
-                {
-                    manager.SetPlayerMovement(playerMovement);
-                    Debug.Log("[Phase2SceneInitializer] Connected MobileHUD to PlayerMovement.");
-                }
+                // 输入现在由 OnScreenStick 通过 Input System 直接发送到 StarterAssetsInputs
+                // 不再需要 PlayerMovement 引用
                 
                 // Bind skill wheel to groomer skills
                 GroomerSkillManager skillManager = groomer.GetComponent<GroomerSkillManager>();
-                if (skillManager != null && manager.SkillWheel != null)
+                if (skillManager != null)
                 {
-                    manager.SkillWheel.BindToGroomerSkills(skillManager);
-                    Debug.Log("[Phase2SceneInitializer] Bound SkillWheel to GroomerSkillManager.");
+                    // 绑定 SkillWheel（旧版 UI）
+                    if (manager.SkillWheel != null)
+                    {
+                        manager.SkillWheel.BindToGroomerSkills(skillManager);
+                        Debug.Log("[Phase2SceneInitializer] Bound SkillWheel to GroomerSkillManager.");
+                    }
+                    
+                    // 绑定 SkillButtonVisual 组件到技能系统
+                    // Requirement 5.4: 绑定 SkillButtonVisual 到技能系统
+                    BindSkillButtonVisualsToSkills(manager, skillManager);
                 }
             }
             else
@@ -453,6 +520,39 @@ namespace PetGrooming.Setup
                 // The MobileHUDManager will handle visibility toggling
                 Debug.Log("[Phase2SceneInitializer] Found SkillBarUI for desktop/mobile toggle.");
             }
+        }
+        
+        /// <summary>
+        /// 绑定 SkillButtonVisual 组件到 GroomerSkillManager 的技能。
+        /// Requirement 5.4: 绑定 SkillButtonVisual 到技能系统。
+        /// Requirement 7.1, 7.2, 7.5: 技能按钮显示冷却和就绪动画。
+        /// </summary>
+        private void BindSkillButtonVisualsToSkills(MobileHUDManager manager, GroomerSkillManager skillManager)
+        {
+            var skillButtonVisuals = manager.SkillButtonVisuals;
+            if (skillButtonVisuals == null || skillButtonVisuals.Length == 0)
+            {
+                Debug.LogWarning("[Phase2SceneInitializer] No SkillButtonVisual components found in MobileHUD.");
+                return;
+            }
+            
+            // 绑定每个 SkillButtonVisual 到对应的技能
+            // 按钮顺序：Skill1 (CaptureNet), Skill2 (Leash), Skill3 (CalmingSpray)
+            for (int i = 0; i < skillButtonVisuals.Length && i < skillManager.SkillCount; i++)
+            {
+                var visual = skillButtonVisuals[i];
+                if (visual != null)
+                {
+                    var skill = skillManager.GetSkill(i);
+                    if (skill != null)
+                    {
+                        visual.BindToSkill(skill);
+                        Debug.Log($"[Phase2SceneInitializer] Bound SkillButtonVisual[{i}] to {skill.SkillName}.");
+                    }
+                }
+            }
+            
+            Debug.Log("[Phase2SceneInitializer] SkillButtonVisual components bound to skills.");
         }
 
         /// <summary>

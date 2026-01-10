@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -13,12 +14,27 @@ namespace StarterAssets
 		public bool jump;
 		public bool sprint;
 
+		[Header("Skill Input Values")]
+		// 技能输入状态字段
+		public bool skill1;
+		public bool skill2;
+		public bool skill3;
+		public bool capture;
+		public bool struggle;
+
 		[Header("Movement Settings")]
 		public bool analogMovement;
 
 		[Header("Mouse Cursor Settings")]
 		public bool cursorLocked = true;
 		public bool cursorInputForLook = true;
+
+		// 技能按下事件
+		public event Action OnSkill1Pressed;
+		public event Action OnSkill2Pressed;
+		public event Action OnSkill3Pressed;
+		public event Action OnCapturePressed;
+		public event Action OnStrugglePressed;
 
 
 
@@ -63,6 +79,56 @@ namespace StarterAssets
 		{
 			SprintInput(value.isPressed);
 		}
+
+		// 技能1回调 (键盘1键 / 手柄buttonWest)
+		public void OnSkill1(InputValue value)
+		{
+			Skill1Input(value.isPressed);
+			if (value.isPressed)
+			{
+				OnSkill1Pressed?.Invoke();
+			}
+		}
+
+		// 技能2回调 (键盘2键 / 手柄buttonNorth)
+		public void OnSkill2(InputValue value)
+		{
+			Skill2Input(value.isPressed);
+			if (value.isPressed)
+			{
+				OnSkill2Pressed?.Invoke();
+			}
+		}
+
+		// 技能3回调 (键盘3键 / 手柄buttonEast)
+		public void OnSkill3(InputValue value)
+		{
+			Skill3Input(value.isPressed);
+			if (value.isPressed)
+			{
+				OnSkill3Pressed?.Invoke();
+			}
+		}
+
+		// 捕获回调 (键盘E键 / 手柄buttonSouth)
+		public void OnCapture(InputValue value)
+		{
+			CaptureInput(value.isPressed);
+			if (value.isPressed)
+			{
+				OnCapturePressed?.Invoke();
+			}
+		}
+
+		// 挣扎回调 (键盘Space键 / 手柄rightTrigger)
+		public void OnStruggle(InputValue value)
+		{
+			StruggleInput(value.isPressed);
+			if (value.isPressed)
+			{
+				OnStrugglePressed?.Invoke();
+			}
+		}
 #endif
 
 			private void Awake()
@@ -91,6 +157,32 @@ namespace StarterAssets
 		public void SprintInput(bool newSprintState)
 		{
 			sprint = newSprintState;
+		}
+
+		// 技能输入方法
+		public void Skill1Input(bool newSkill1State)
+		{
+			skill1 = newSkill1State;
+		}
+
+		public void Skill2Input(bool newSkill2State)
+		{
+			skill2 = newSkill2State;
+		}
+
+		public void Skill3Input(bool newSkill3State)
+		{
+			skill3 = newSkill3State;
+		}
+
+		public void CaptureInput(bool newCaptureState)
+		{
+			capture = newCaptureState;
+		}
+
+		public void StruggleInput(bool newStruggleState)
+		{
+			struggle = newStruggleState;
 		}
 
 		private void OnApplicationFocus(bool hasFocus)

@@ -1,9 +1,9 @@
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.OnScreen;
 using PetGrooming.Core;
 using PetGrooming.Systems;
-using StarterAssets;
 
 namespace PetGrooming.UI.MobileUI
 {
@@ -72,12 +72,6 @@ namespace PetGrooming.UI.MobileUI
         public const string DefaultUIModePrefKey = "MobileUIMode";
         
         [Header("Character References")]
-        [Tooltip("Reference to player movement component (legacy, optional)")]
-        [SerializeField] private PlayerMovement _playerMovement;
-        
-        [Tooltip("Reference to StarterAssetsInputs for ThirdPersonController")]
-        [SerializeField] private StarterAssetsInputs _starterAssetsInputs;
-        
         [Tooltip("Reference to groomer controller")]
         [SerializeField] private GroomerController _groomerController;
         
@@ -88,6 +82,17 @@ namespace PetGrooming.UI.MobileUI
         [Header("Multi-Touch")]
         [Tooltip("Multi-touch handler for simultaneous inputs")]
         [SerializeField] private MultiTouchHandler _multiTouchHandler;
+        
+        [Header("OnScreen Controls (Input System)")]
+        [Tooltip("OnScreenStick for movement input (replaces VirtualJoystick)")]
+        [SerializeField] private OnScreenStick _onScreenStick;
+        
+        [Tooltip("OnScreenButton array for skill buttons")]
+        [SerializeField] private OnScreenButton[] _skillButtons;
+        
+        [Header("Skill Button Visuals")]
+        [Tooltip("SkillButtonVisual components for cooldown display")]
+        [SerializeField] private SkillButtonVisual[] _skillButtonVisuals;
         
         #endregion
 
@@ -151,6 +156,21 @@ namespace PetGrooming.UI.MobileUI
         public MultiTouchHandler MultiTouchHandler => _multiTouchHandler;
         
         /// <summary>
+        /// Reference to the OnScreenStick (Input System).
+        /// </summary>
+        public OnScreenStick OnScreenStick => _onScreenStick;
+        
+        /// <summary>
+        /// Reference to the OnScreenButton array (Input System).
+        /// </summary>
+        public OnScreenButton[] SkillButtons => _skillButtons;
+        
+        /// <summary>
+        /// Reference to the SkillButtonVisual array.
+        /// </summary>
+        public SkillButtonVisual[] SkillButtonVisuals => _skillButtonVisuals;
+        
+        /// <summary>
         /// Currently controlled character type.
         /// </summary>
         public CharacterType ControlledCharacter => _controlledCharacter;
@@ -193,10 +213,8 @@ namespace PetGrooming.UI.MobileUI
         
         private void Update()
         {
-            if (!_isInitialized || !_isMobileMode) return;
-            
-            // Update movement input from joystick
-            UpdateMovementInput();
+            // 输入处理已迁移到 OnScreenStick，不再需要在 Update 中处理
+            // OnScreenStick 通过 Input System 直接发送输入到 StarterAssetsInputs
         }
         
         private void OnDestroy()
@@ -298,7 +316,8 @@ namespace PetGrooming.UI.MobileUI
         
         /// <summary>
         /// Gets the current movement input from the joystick.
-        /// Requirement 1.8: Movement input equivalent to keyboard/gamepad.
+        /// 注意：迁移后，输入由 OnScreenStick 直接发送到 Input System，
+        /// 此方法仅用于兼容性，返回 VirtualJoystick 的当前值。
         /// </summary>
         /// <returns>Normalized movement vector from joystick.</returns>
         public Vector2 GetMovementInput()
@@ -309,14 +328,6 @@ namespace PetGrooming.UI.MobileUI
             }
             
             return _joystick.InputVector;
-        }
-        
-        /// <summary>
-        /// Sets the player movement reference for joystick integration.
-        /// </summary>
-        public void SetPlayerMovement(PlayerMovement playerMovement)
-        {
-            _playerMovement = playerMovement;
         }
         
         /// <summary>
@@ -417,6 +428,95 @@ namespace PetGrooming.UI.MobileUI
         /// Gets the PlayerPrefs key used for UI mode preference.
         /// </summary>
         public string UIModePrefKey => _uiModePrefsKey;
+        
+        #endregion
+        
+        #region OnScreenControl Management (Requirement 4.4)
+        
+        /// <summary>
+        /// Enables all OnScreenControl components (OnScreenStick and OnScreenButtons).
+        /// Requirement 4.4: Support enabling/disabling OnScreenControl components.
+        /// 
+        /// Property 3: 控件启用/禁用状态同步
+        /// Validates: Requirements 4.4
+        /// </summary>
+        public void EnableMobileControls()
+        {
+            // Enable OnScreenStick
+            if (_onScreenStick != null)
+            {
+                _onScreenStick.enabled = true;
+            }
+            
+            // Enable all OnScreenButtons
+            if (_skillButtons != null)
+            {
+                foreach (var button in _skillButtons)
+                {
+                    if (button != null)
+                    {
+                        button.enabled = true;
+                    }
+                }
+            }
+            
+            Debug.Log("[MobileHUDManager] Mobile controls enabled.");
+        }
+        
+        /// <summary>
+        /// Disables all OnScreenControl components (OnScreenStick and OnScreenButtons).
+        /// Requirement 4.4: Support enabling/disabling OnScreenControl components.
+        /// 
+        /// Property 3: 控件启用/禁用状态同步
+        /// Validates: Requirements 4.4
+        /// </summary>
+        public void DisableMobileControls()
+        {
+            // Disable OnScreenStick
+            if (_onScreenStick != null)
+            {
+                _onScreenStick.enabled = false;
+            }
+            
+            // Disable all OnScreenButtons
+            if (_skillButtons != null)
+            {
+                foreach (var button in _skillButtons)
+                {
+                    if (button != null)
+                    {
+                        button.enabled = false;
+                    }
+                }
+            }
+            
+            Debug.Log("[MobileHUDManager] Mobile controls disabled.");
+        }
+        
+        /// <summary>
+        /// Gets the enabled state of all OnScreenControl components.
+        /// Used for property-based testing.
+        /// </summary>
+        /// <returns>Tuple of (stickEnabled, allButtonsEnabled)</returns>
+        public (bool stickEnabled, bool allButtonsEnabled) GetOnScreenControlStates()
+        {
+            bool stickEnabled = _onScreenStick != null && _onScreenStick.enabled;
+            
+            bool allButtonsEnabled = true;
+            if (_skillButtons != null && _skillButtons.Length > 0)
+            {
+                foreach (var button in _skillButtons)
+                {
+                    if (button != null && !button.enabled)
+                    {
+                        allButtonsEnabled = false;
+                        break;
+                    }
+                }
+            }
+            
+            return (stickEnabled, allButtonsEnabled);
+        }
         
         #endregion
         
@@ -551,6 +651,22 @@ namespace PetGrooming.UI.MobileUI
             return resultMode == false;
         }
         
+        /// <summary>
+        /// Validates that OnScreenControl enabled states match the expected state.
+        /// Used for property-based testing.
+        /// 
+        /// Property 3: 控件启用/禁用状态同步
+        /// Validates: Requirements 4.4
+        /// </summary>
+        /// <param name="expectedEnabled">Expected enabled state</param>
+        /// <param name="stickEnabled">Actual OnScreenStick enabled state</param>
+        /// <param name="allButtonsEnabled">Whether all OnScreenButtons are enabled</param>
+        /// <returns>True if all states match expected</returns>
+        public static bool ValidateOnScreenControlStates(bool expectedEnabled, bool stickEnabled, bool allButtonsEnabled)
+        {
+            return stickEnabled == expectedEnabled && allButtonsEnabled == expectedEnabled;
+        }
+        
         #endregion
 
         #region Private Methods
@@ -648,21 +764,28 @@ namespace PetGrooming.UI.MobileUI
                 _multiTouchHandler.SetReferences(_joystick, _skillWheel, _struggleButton);
             }
             
-            // Find player movement if not assigned
-            if (_playerMovement == null)
+            // Find OnScreenStick if not assigned
+            if (_onScreenStick == null)
             {
-                var groomer = FindObjectOfType<GroomerController>();
-                if (groomer != null)
-                {
-                    _playerMovement = groomer.GetComponent<PlayerMovement>();
-                    _groomerController = groomer;
-                }
+                _onScreenStick = GetComponentInChildren<OnScreenStick>(true);
             }
             
-            // 查找 StarterAssetsInputs（用于 ThirdPersonController）
-            if (_starterAssetsInputs == null)
+            // Find OnScreenButtons if not assigned
+            if (_skillButtons == null || _skillButtons.Length == 0)
             {
-                _starterAssetsInputs = FindFirstObjectByType<StarterAssetsInputs>();
+                _skillButtons = GetComponentsInChildren<OnScreenButton>(true);
+            }
+            
+            // Find SkillButtonVisuals if not assigned
+            if (_skillButtonVisuals == null || _skillButtonVisuals.Length == 0)
+            {
+                _skillButtonVisuals = GetComponentsInChildren<SkillButtonVisual>(true);
+            }
+            
+            // Find player's groomer controller if not assigned
+            if (_groomerController == null)
+            {
+                _groomerController = FindObjectOfType<GroomerController>();
             }
             
             // Find desktop UI (skill bar) if not assigned
@@ -743,16 +866,56 @@ namespace PetGrooming.UI.MobileUI
         
         private void SetMobileUIVisibility(bool visible)
         {
-            // Joystick visibility
+            // Joystick visibility (legacy VirtualJoystick)
             if (_joystick != null)
             {
                 _joystick.gameObject.SetActive(visible);
+            }
+            
+            // OnScreenStick visibility (Input System)
+            if (_onScreenStick != null)
+            {
+                _onScreenStick.gameObject.SetActive(visible);
             }
             
             // Skill wheel visibility (only for Groomer)
             if (_skillWheel != null)
             {
                 _skillWheel.gameObject.SetActive(visible && _controlledCharacter == CharacterType.Groomer);
+            }
+            
+            // OnScreenButtons visibility
+            if (_skillButtons != null)
+            {
+                foreach (var button in _skillButtons)
+                {
+                    if (button != null)
+                    {
+                        button.gameObject.SetActive(visible);
+                    }
+                }
+            }
+            
+            // SkillButtonVisuals visibility
+            if (_skillButtonVisuals != null)
+            {
+                foreach (var visual in _skillButtonVisuals)
+                {
+                    if (visual != null)
+                    {
+                        visual.gameObject.SetActive(visible);
+                    }
+                }
+            }
+            
+            // Enable/disable OnScreenControl components
+            if (visible)
+            {
+                EnableMobileControls();
+            }
+            else
+            {
+                DisableMobileControls();
             }
             
             // Struggle button is controlled by capture state, not mode
@@ -792,27 +955,6 @@ namespace PetGrooming.UI.MobileUI
                         _skillWheel.gameObject.SetActive(false);
                     }
                     break;
-            }
-        }
-        
-        private void UpdateMovementInput()
-        {
-            if (_joystick == null) return;
-            
-            // Get joystick input
-            Vector2 input = _joystick.InputVector;
-            
-            // 优先使用 ThirdPersonController（通过 StarterAssetsInputs）
-            // VirtualJoystick 已经直接发送输入到 StarterAssetsInputs
-            // 这里作为备用，确保输入被正确传递
-            if (_starterAssetsInputs != null)
-            {
-                _starterAssetsInputs.MoveInput(input);
-            }
-            // 兼容旧的 PlayerMovement（如果仍在使用）
-            else if (_playerMovement != null)
-            {
-                _playerMovement.SetMobileInput(input);
             }
         }
         
@@ -856,6 +998,19 @@ namespace PetGrooming.UI.MobileUI
             _skillWheel = skillWheel;
             _struggleButton = struggleButton;
             _desktopUI = desktopUI;
+        }
+        
+        /// <summary>
+        /// Sets OnScreenControl references for testing purposes.
+        /// </summary>
+        public void SetOnScreenControlsForTesting(
+            OnScreenStick onScreenStick,
+            OnScreenButton[] skillButtons,
+            SkillButtonVisual[] skillButtonVisuals)
+        {
+            _onScreenStick = onScreenStick;
+            _skillButtons = skillButtons;
+            _skillButtonVisuals = skillButtonVisuals;
         }
         
         /// <summary>

@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using TMPro;
 using PetGrooming.Core;
@@ -10,107 +9,66 @@ using PetGrooming.Systems.Skills;
 namespace PetGrooming.UI.MobileUI
 {
     /// <summary>
-    /// Mobile skill button component for touch interaction.
-    /// Handles touch input, cooldown display, and visual feedback animations.
+    /// 技能按钮视觉效果组件，负责冷却显示和动画。
+    /// 与 OnScreenButton 输入处理分离，仅处理 UI 视觉反馈。
     /// 
-    /// Requirements: 2.5, 2.6, 2.7, 2.8, 4.1, 4.2, 4.3, 4.4
+    /// Requirements: 7.1, 7.2, 7.4, 7.5
     /// </summary>
-    /// <remarks>
-    /// [已废弃] 此组件已被 Unity 官方 OnScreenButton + SkillButtonVisual 组合替代。
-    /// 输入处理：使用 UnityEngine.InputSystem.OnScreen.OnScreenButton
-    /// 视觉效果：使用 PetGrooming.UI.MobileUI.SkillButtonVisual
-    /// 迁移指南：参见 .kiro/specs/mobile-input-migration/design.md
-    /// </remarks>
-    [Obsolete("MobileSkillButton 已废弃，请使用 OnScreenButton + SkillButtonVisual 组合。参见 mobile-input-migration 规范。")]
-    public class MobileSkillButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
+    public class SkillButtonVisual : MonoBehaviour
     {
         #region Serialized Fields
         
         [Header("UI References")]
-        [Tooltip("Background image of the button")]
-        [SerializeField] private Image _background;
-        
-        [Tooltip("Skill icon image")]
+        [Tooltip("技能图标 Image")]
         [SerializeField] private Image _iconImage;
         
-        [Tooltip("Cooldown overlay image (radial fill)")]
+        [Tooltip("冷却遮罩 Image (radial fill)")]
         [SerializeField] private Image _cooldownOverlay;
         
-        [Tooltip("Cooldown time text")]
+        [Tooltip("冷却时间文本")]
         [SerializeField] private TextMeshProUGUI _cooldownText;
         
-        [Tooltip("Glow effect image for ready animation")]
+        [Tooltip("就绪发光效果 Image")]
         [SerializeField] private Image _glowEffect;
         
         [Header("Settings")]
-        [Tooltip("Mobile HUD settings asset")]
+        [Tooltip("Mobile HUD 设置资产")]
         [SerializeField] private MobileHUDSettings _settings;
         
-        [Tooltip("Button size in pixels")]
-        [SerializeField] private float _buttonSize = 100f;
-        
-        [Tooltip("Color when skill is ready")]
+        [Tooltip("就绪时图标颜色")]
         [SerializeField] private Color _readyColor = Color.white;
         
-        [Tooltip("Color when skill is on cooldown (desaturated)")]
+        [Tooltip("冷却中图标颜色 (灰度)")]
         [SerializeField] private Color _cooldownColor = new Color(0.5f, 0.5f, 0.5f, 1f);
         
         #endregion
 
         #region Private Fields
         
-        private RectTransform _rectTransform;
         private SkillBase _boundSkill;
         private Vector3 _originalScale;
-        private Coroutine _pressAnimationCoroutine;
         private Coroutine _readyAnimationCoroutine;
-        private Coroutine _failAnimationCoroutine;
+        private Coroutine _pressAnimationCoroutine;
         private Coroutine _glowPulseCoroutine;
-        private bool _isPressed;
-        private float _lastTapTime;
         
         #endregion
 
         #region Properties
         
         /// <summary>
-        /// Whether the skill is currently on cooldown.
-        /// </summary>
-        public bool IsOnCooldown => _boundSkill != null && !_boundSkill.IsReady;
-        
-        /// <summary>
-        /// Remaining cooldown time in seconds.
-        /// </summary>
-        public float RemainingCooldown => _boundSkill != null ? _boundSkill.RemainingCooldown : 0f;
-        
-        /// <summary>
-        /// The bound skill reference.
+        /// 绑定的技能引用。
         /// </summary>
         public SkillBase BoundSkill => _boundSkill;
         
         /// <summary>
-        /// Current button size.
+        /// 技能是否在冷却中。
         /// </summary>
-        public float ButtonSize => _buttonSize;
-        
-        #endregion
-
-        #region Events
+        public bool IsOnCooldown => _boundSkill != null && !_boundSkill.IsReady;
         
         /// <summary>
-        /// Fired when the button is pressed.
+        /// 剩余冷却时间（秒）。
         /// </summary>
-        public event Action OnButtonPressed;
-        
-        /// <summary>
-        /// Fired when the button is released.
-        /// </summary>
-        public event Action OnButtonReleased;
-        
-        /// <summary>
-        /// Fired when skill activation fails (on cooldown).
-        /// </summary>
-        public event Action OnActivationFailed;
+        public float RemainingCooldown => _boundSkill != null ? _boundSkill.RemainingCooldown : 0f;
         
         #endregion
 
@@ -118,16 +76,13 @@ namespace PetGrooming.UI.MobileUI
         
         private void Awake()
         {
-            _rectTransform = GetComponent<RectTransform>();
             _originalScale = transform.localScale;
-            
             ValidateReferences();
-            ApplySettings();
         }
         
         private void Start()
         {
-            // Initialize cooldown display
+            // 初始化冷却显示
             UpdateCooldownDisplay(0f, 1f);
             HideGlow();
         }
@@ -145,64 +100,14 @@ namespace PetGrooming.UI.MobileUI
         
         #endregion
 
-        #region IPointerDownHandler
-        
-        /// <summary>
-        /// Called when pointer is pressed on the button.
-        /// Requirement 4.1: Button scales down as press feedback.
-        /// </summary>
-        public void OnPointerDown(PointerEventData eventData)
-        {
-            if (_isPressed) return;
-            
-            // Debounce check
-            if (_settings != null && Time.time - _lastTapTime < _settings.TapDebounceInterval)
-            {
-                return;
-            }
-            _lastTapTime = Time.time;
-            
-            _isPressed = true;
-            
-            // Play press animation (Requirement 4.1)
-            PlayPressAnimation();
-            
-            // Fire event
-            OnButtonPressed?.Invoke();
-            
-            // Try to activate skill
-            TryActivateSkill();
-        }
-        
-        #endregion
-
-        #region IPointerUpHandler
-        
-        /// <summary>
-        /// Called when pointer is released.
-        /// Requirement 4.2: Button returns to normal scale with bounce.
-        /// </summary>
-        public void OnPointerUp(PointerEventData eventData)
-        {
-            if (!_isPressed) return;
-            
-            _isPressed = false;
-            
-            // Play release animation (Requirement 4.2)
-            PlayReleaseAnimation();
-            
-            // Fire event
-            OnButtonReleased?.Invoke();
-        }
-        
-        #endregion
-
         #region Public Methods
         
         /// <summary>
-        /// Binds this button to a skill.
+        /// 绑定技能到此视觉组件。
+        /// Requirement 7.5: SkillButtonVisual 观察技能状态并更新 UI。
         /// </summary>
-        public void SetSkill(SkillBase skill)
+        /// <param name="skill">要绑定的技能</param>
+        public void BindToSkill(SkillBase skill)
         {
             UnbindSkill();
             
@@ -210,22 +115,25 @@ namespace PetGrooming.UI.MobileUI
             
             if (_boundSkill != null)
             {
+                // 订阅技能事件
                 _boundSkill.OnCooldownChanged += OnSkillCooldownChanged;
                 _boundSkill.OnSkillReady += OnSkillBecameReady;
                 
-                // Initialize display
+                // 初始化图标
                 if (_boundSkill.Icon != null)
                 {
                     SetIcon(_boundSkill.Icon);
                 }
                 
+                // 初始化冷却显示
                 UpdateCooldownDisplay(_boundSkill.RemainingCooldown, _boundSkill.Cooldown);
             }
         }
         
         /// <summary>
-        /// Sets the skill icon sprite.
+        /// 设置技能图标。
         /// </summary>
+        /// <param name="icon">图标 Sprite</param>
         public void SetIcon(Sprite icon)
         {
             if (_iconImage != null)
@@ -236,8 +144,9 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Sets the icon from SkillIconData entry.
+        /// 从 SkillIconData 设置图标。
         /// </summary>
+        /// <param name="iconEntry">图标数据条目</param>
         public void SetIconFromData(SkillIconData.SkillIconEntry iconEntry)
         {
             if (iconEntry == null) return;
@@ -249,7 +158,7 @@ namespace PetGrooming.UI.MobileUI
                 _glowEffect.sprite = iconEntry.GlowSprite;
             }
             
-            // Apply theme color to glow
+            // 应用主题颜色到发光效果
             if (_glowEffect != null)
             {
                 Color glowColor = iconEntry.ThemeColor;
@@ -259,18 +168,37 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Updates the cooldown display.
-        /// Requirement 2.6: Radial cooldown overlay.
-        /// Requirement 2.7: Cooldown time text.
+        /// 更新冷却显示。
+        /// Requirement 7.1: 显示径向冷却遮罩。
+        /// Requirement 7.2: 显示剩余冷却时间（秒）。
         /// </summary>
-        public void UpdateCooldown(float remaining, float total)
+        /// <param name="remaining">剩余冷却时间</param>
+        /// <param name="total">总冷却时间</param>
+        public void UpdateCooldownDisplay(float remaining, float total)
         {
-            UpdateCooldownDisplay(remaining, total);
+            var state = CalculateCooldownDisplayState(remaining, total);
+            
+            // 更新遮罩可见性和填充量
+            if (_cooldownOverlay != null)
+            {
+                _cooldownOverlay.enabled = state.overlayVisible;
+                _cooldownOverlay.fillAmount = state.fillAmount;
+            }
+            
+            // 更新文本可见性和内容
+            if (_cooldownText != null)
+            {
+                _cooldownText.enabled = state.textVisible;
+                _cooldownText.text = state.displayText;
+            }
+            
+            // 根据冷却状态更新图标颜色
+            SetIconColor(state.overlayVisible ? _cooldownColor : _readyColor);
         }
         
         /// <summary>
-        /// Plays the ready animation when skill becomes available.
-        /// Requirement 2.8: Glow/pulse animation when ready.
+        /// 播放就绪动画（技能冷却结束时）。
+        /// Requirement 7.4: 技能就绪时播放发光/脉冲动画。
         /// </summary>
         public void PlayReadyAnimation()
         {
@@ -283,8 +211,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Plays the press scale animation.
-        /// Requirement 4.1: Scale down to 95%.
+        /// 播放按下动画（缩放反馈）。
         /// </summary>
         public void PlayPressAnimation()
         {
@@ -297,8 +224,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Plays the release animation with bounce.
-        /// Requirement 4.2: Return to normal with bounce.
+        /// 播放释放动画（带弹跳效果）。
         /// </summary>
         public void PlayReleaseAnimation()
         {
@@ -311,37 +237,11 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Plays the fail animation when activation fails.
-        /// Requirement 4.4: Shake and show "冷却中" text.
-        /// </summary>
-        public void PlayFailAnimation()
-        {
-            StopFailAnimation();
-            
-            if (gameObject.activeInHierarchy)
-            {
-                _failAnimationCoroutine = StartCoroutine(FailShakeAnimation());
-            }
-        }
-        
-        /// <summary>
-        /// Applies settings from MobileHUDSettings asset.
+        /// 应用 MobileHUDSettings 设置。
         /// </summary>
         public void ApplySettings()
         {
             if (_settings == null) return;
-            
-            _buttonSize = _settings.SkillButtonSize;
-            
-            if (_rectTransform != null)
-            {
-                _rectTransform.sizeDelta = new Vector2(_buttonSize, _buttonSize);
-            }
-            
-            if (_background != null)
-            {
-                _background.color = _settings.ButtonBackgroundColor;
-            }
             
             if (_cooldownOverlay != null)
             {
@@ -355,39 +255,27 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Sets the settings asset and applies it.
+        /// 设置 MobileHUDSettings 并应用。
         /// </summary>
+        /// <param name="settings">设置资产</param>
         public void SetSettings(MobileHUDSettings settings)
         {
             _settings = settings;
             ApplySettings();
         }
         
-        /// <summary>
-        /// Sets the button size.
-        /// </summary>
-        public void SetButtonSize(float size)
-        {
-            _buttonSize = size;
-            
-            if (_rectTransform != null)
-            {
-                _rectTransform.sizeDelta = new Vector2(_buttonSize, _buttonSize);
-            }
-        }
-        
         #endregion
 
-        #region Static Methods (for testing)
+        #region Static Methods (用于属性测试)
         
         /// <summary>
-        /// Calculates the cooldown display state.
-        /// Used for property-based testing.
-        /// Requirement 2.6, 2.7: Cooldown overlay and text visibility.
+        /// 计算冷却显示状态。
+        /// 用于属性测试验证。
+        /// Requirement 7.1, 7.2: 冷却遮罩和文本可见性。
         /// </summary>
-        /// <param name="remainingCooldown">Remaining cooldown time</param>
-        /// <param name="totalCooldown">Total cooldown duration</param>
-        /// <returns>Tuple of (overlayVisible, textVisible, displayText, fillAmount)</returns>
+        /// <param name="remainingCooldown">剩余冷却时间</param>
+        /// <param name="totalCooldown">总冷却时间</param>
+        /// <returns>元组 (overlayVisible, textVisible, displayText, fillAmount)</returns>
         public static (bool overlayVisible, bool textVisible, string displayText, float fillAmount) 
             CalculateCooldownDisplayState(float remainingCooldown, float totalCooldown)
         {
@@ -395,12 +283,12 @@ namespace PetGrooming.UI.MobileUI
             bool overlayVisible = isOnCooldown;
             bool textVisible = isOnCooldown;
             
-            // Calculate fill amount (1 = full cooldown, 0 = ready)
+            // 计算填充量 (1 = 完全冷却, 0 = 就绪)
             float fillAmount = totalCooldown > 0f 
                 ? Mathf.Clamp01(remainingCooldown / totalCooldown) 
                 : 0f;
             
-            // Calculate display text (rounded up to nearest second)
+            // 计算显示文本（向上取整到最近的秒）
             string displayText = isOnCooldown 
                 ? Mathf.CeilToInt(remainingCooldown).ToString() 
                 : "";
@@ -409,31 +297,34 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Calculates the press scale value.
-        /// Used for property-based testing.
-        /// Requirement 4.1: Scale to 95% on press.
+        /// 计算按下缩放值。
+        /// 用于属性测试验证。
         /// </summary>
-        /// <param name="originalScale">Original scale of the button</param>
-        /// <param name="pressScaleMultiplier">Scale multiplier (default 0.95)</param>
-        /// <returns>The pressed scale value</returns>
+        /// <param name="originalScale">原始缩放</param>
+        /// <param name="pressScaleMultiplier">缩放乘数（默认 0.95）</param>
+        /// <returns>按下时的缩放值</returns>
         public static Vector3 CalculatePressScale(Vector3 originalScale, float pressScaleMultiplier = 0.95f)
         {
             return originalScale * pressScaleMultiplier;
         }
         
         /// <summary>
-        /// Determines if cooldown overlay should be visible.
-        /// Used for property-based testing.
+        /// 判断是否应显示冷却遮罩。
+        /// 用于属性测试验证。
         /// </summary>
+        /// <param name="remainingCooldown">剩余冷却时间</param>
+        /// <returns>是否显示遮罩</returns>
         public static bool ShouldShowCooldownOverlay(float remainingCooldown)
         {
             return remainingCooldown > 0f;
         }
         
         /// <summary>
-        /// Calculates the cooldown text to display.
-        /// Used for property-based testing.
+        /// 计算冷却文本。
+        /// 用于属性测试验证。
         /// </summary>
+        /// <param name="remainingCooldown">剩余冷却时间</param>
+        /// <returns>显示文本</returns>
         public static string CalculateCooldownText(float remainingCooldown)
         {
             if (remainingCooldown <= 0f) return "";
@@ -446,24 +337,19 @@ namespace PetGrooming.UI.MobileUI
         
         private void ValidateReferences()
         {
-            if (_background == null)
-            {
-                Debug.LogWarning("[MobileSkillButton] Background Image is not assigned!");
-            }
-            
             if (_iconImage == null)
             {
-                Debug.LogWarning("[MobileSkillButton] Icon Image is not assigned!");
+                Debug.LogWarning("[SkillButtonVisual] Icon Image 未配置！");
             }
             
             if (_cooldownOverlay == null)
             {
-                Debug.LogWarning("[MobileSkillButton] Cooldown Overlay Image is not assigned!");
+                Debug.LogWarning("[SkillButtonVisual] Cooldown Overlay Image 未配置！");
             }
             
             if (_cooldownText == null)
             {
-                Debug.LogWarning("[MobileSkillButton] Cooldown Text is not assigned!");
+                Debug.LogWarning("[SkillButtonVisual] Cooldown Text 未配置！");
             }
         }
         
@@ -477,26 +363,6 @@ namespace PetGrooming.UI.MobileUI
             }
         }
         
-        private void TryActivateSkill()
-        {
-            if (_boundSkill == null) return;
-            
-            if (_boundSkill.TryActivate())
-            {
-                // Requirement 4.3: Flash on successful activation
-                PlayActivationFlash();
-                
-                // Trigger haptic feedback if enabled
-                TriggerHapticFeedback();
-            }
-            else
-            {
-                // Requirement 4.4: Shake on failed activation
-                PlayFailAnimation();
-                OnActivationFailed?.Invoke();
-            }
-        }
-        
         private void OnSkillCooldownChanged(float remainingCooldown)
         {
             if (_boundSkill != null)
@@ -507,33 +373,11 @@ namespace PetGrooming.UI.MobileUI
         
         private void OnSkillBecameReady()
         {
-            // Requirement 2.8: Play ready animation
+            // Requirement 7.4: 技能就绪时播放动画
             PlayReadyAnimation();
             
-            // Update icon color
+            // 更新图标颜色
             SetIconColor(_readyColor);
-        }
-        
-        private void UpdateCooldownDisplay(float remaining, float total)
-        {
-            var state = CalculateCooldownDisplayState(remaining, total);
-            
-            // Update overlay visibility and fill
-            if (_cooldownOverlay != null)
-            {
-                _cooldownOverlay.enabled = state.overlayVisible;
-                _cooldownOverlay.fillAmount = state.fillAmount;
-            }
-            
-            // Update text visibility and content
-            if (_cooldownText != null)
-            {
-                _cooldownText.enabled = state.textVisible;
-                _cooldownText.text = state.displayText;
-            }
-            
-            // Update icon color based on cooldown state
-            SetIconColor(state.overlayVisible ? _cooldownColor : _readyColor);
         }
         
         private void SetIconColor(Color color)
@@ -560,41 +404,11 @@ namespace PetGrooming.UI.MobileUI
             }
         }
         
-        private void PlayActivationFlash()
-        {
-            // Brief flash effect on successful activation
-            if (_background != null)
-            {
-                StartCoroutine(FlashAnimation());
-            }
-        }
-        
-        private void TriggerHapticFeedback()
-        {
-            if (_settings != null && _settings.EnableHapticFeedback)
-            {
-                // Unity's Handheld.Vibrate() for basic haptic feedback
-                #if UNITY_IOS || UNITY_ANDROID
-                Handheld.Vibrate();
-                #endif
-            }
-        }
-        
         private void StopAllAnimations()
         {
-            StopPressAnimation();
             StopReadyAnimation();
-            StopFailAnimation();
+            StopPressAnimation();
             StopGlowPulse();
-        }
-        
-        private void StopPressAnimation()
-        {
-            if (_pressAnimationCoroutine != null)
-            {
-                StopCoroutine(_pressAnimationCoroutine);
-                _pressAnimationCoroutine = null;
-            }
         }
         
         private void StopReadyAnimation()
@@ -606,12 +420,12 @@ namespace PetGrooming.UI.MobileUI
             }
         }
         
-        private void StopFailAnimation()
+        private void StopPressAnimation()
         {
-            if (_failAnimationCoroutine != null)
+            if (_pressAnimationCoroutine != null)
             {
-                StopCoroutine(_failAnimationCoroutine);
-                _failAnimationCoroutine = null;
+                StopCoroutine(_pressAnimationCoroutine);
+                _pressAnimationCoroutine = null;
             }
         }
         
@@ -662,11 +476,11 @@ namespace PetGrooming.UI.MobileUI
             Vector3 startScale = transform.localScale;
             float elapsed = 0f;
             
-            // Overshoot for bounce effect
+            // 过冲以产生弹跳效果
             Vector3 overshootScale = _originalScale * 1.05f;
             float halfDuration = duration * 0.6f;
             
-            // First half: scale up past original
+            // 前半段：放大超过原始大小
             while (elapsed < halfDuration)
             {
                 elapsed += Time.deltaTime;
@@ -676,7 +490,7 @@ namespace PetGrooming.UI.MobileUI
                 yield return null;
             }
             
-            // Second half: settle to original
+            // 后半段：回到原始大小
             elapsed = 0f;
             float secondHalfDuration = duration * 0.4f;
             startScale = transform.localScale;
@@ -700,11 +514,11 @@ namespace PetGrooming.UI.MobileUI
             
             ShowGlow();
             
-            // Pulse scale
+            // 脉冲缩放
             Vector3 pulseScale = _originalScale * 1.1f;
             float elapsed = 0f;
             
-            // Scale up
+            // 放大
             while (elapsed < duration * 0.5f)
             {
                 elapsed += Time.deltaTime;
@@ -713,7 +527,7 @@ namespace PetGrooming.UI.MobileUI
                 yield return null;
             }
             
-            // Scale down
+            // 缩小
             elapsed = 0f;
             while (elapsed < duration * 0.5f)
             {
@@ -725,7 +539,7 @@ namespace PetGrooming.UI.MobileUI
             
             transform.localScale = _originalScale;
             
-            // Start continuous glow pulse
+            // 开始持续发光脉冲
             _glowPulseCoroutine = StartCoroutine(GlowPulseAnimation());
             
             _readyAnimationCoroutine = null;
@@ -751,96 +565,16 @@ namespace PetGrooming.UI.MobileUI
             }
         }
         
-        private IEnumerator FailShakeAnimation()
-        {
-            float duration = _settings != null ? _settings.FailShakeDuration : 0.2f;
-            float intensity = _settings != null ? _settings.FailShakeIntensity : 10f;
-            
-            Vector3 originalPosition = transform.localPosition;
-            float elapsed = 0f;
-            
-            // Show "冷却中" text briefly
-            if (_cooldownText != null)
-            {
-                string originalText = _cooldownText.text;
-                _cooldownText.text = "冷却中";
-                _cooldownText.enabled = true;
-                
-                // Shake
-                while (elapsed < duration)
-                {
-                    elapsed += Time.deltaTime;
-                    float progress = elapsed / duration;
-                    float damping = 1f - progress;
-                    
-                    float offsetX = Mathf.Sin(elapsed * 50f) * intensity * damping;
-                    transform.localPosition = originalPosition + new Vector3(offsetX, 0f, 0f);
-                    
-                    yield return null;
-                }
-                
-                transform.localPosition = originalPosition;
-                
-                // Restore original text after a short delay
-                yield return new WaitForSeconds(0.3f);
-                
-                if (_boundSkill != null && _boundSkill.RemainingCooldown > 0f)
-                {
-                    _cooldownText.text = Mathf.CeilToInt(_boundSkill.RemainingCooldown).ToString();
-                }
-                else
-                {
-                    _cooldownText.text = originalText;
-                    _cooldownText.enabled = false;
-                }
-            }
-            else
-            {
-                // Just shake without text
-                while (elapsed < duration)
-                {
-                    elapsed += Time.deltaTime;
-                    float progress = elapsed / duration;
-                    float damping = 1f - progress;
-                    
-                    float offsetX = Mathf.Sin(elapsed * 50f) * intensity * damping;
-                    transform.localPosition = originalPosition + new Vector3(offsetX, 0f, 0f);
-                    
-                    yield return null;
-                }
-                
-                transform.localPosition = originalPosition;
-            }
-            
-            _failAnimationCoroutine = null;
-        }
-        
-        private IEnumerator FlashAnimation()
-        {
-            if (_background == null) yield break;
-            
-            Color originalColor = _background.color;
-            Color flashColor = Color.white;
-            
-            // Flash to white
-            _background.color = flashColor;
-            yield return new WaitForSeconds(0.05f);
-            
-            // Return to original
-            _background.color = originalColor;
-        }
-        
         #endregion
 
         #region Editor Support
 #if UNITY_EDITOR
         /// <summary>
-        /// Sets references for testing purposes.
+        /// 为测试设置引用。
         /// </summary>
-        public void SetReferencesForTesting(Image background, Image icon, Image cooldownOverlay, 
+        public void SetReferencesForTesting(Image icon, Image cooldownOverlay, 
             TextMeshProUGUI cooldownText, Image glowEffect)
         {
-            _background = background;
             _iconImage = icon;
             _cooldownOverlay = cooldownOverlay;
             _cooldownText = cooldownText;
@@ -848,7 +582,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Gets the current scale for testing.
+        /// 获取当前缩放（测试用）。
         /// </summary>
         public Vector3 GetCurrentScaleForTesting()
         {
@@ -856,7 +590,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Gets the original scale for testing.
+        /// 获取原始缩放（测试用）。
         /// </summary>
         public Vector3 GetOriginalScaleForTesting()
         {
@@ -864,7 +598,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Sets the original scale for testing.
+        /// 设置原始缩放（测试用）。
         /// </summary>
         public void SetOriginalScaleForTesting(Vector3 scale)
         {
@@ -872,7 +606,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Gets cooldown overlay visibility for testing.
+        /// 获取冷却遮罩可见性（测试用）。
         /// </summary>
         public bool GetCooldownOverlayVisibleForTesting()
         {
@@ -880,11 +614,27 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Gets cooldown text for testing.
+        /// 获取冷却文本（测试用）。
         /// </summary>
         public string GetCooldownTextForTesting()
         {
             return _cooldownText != null ? _cooldownText.text : "";
+        }
+        
+        /// <summary>
+        /// 获取冷却遮罩填充量（测试用）。
+        /// </summary>
+        public float GetCooldownFillAmountForTesting()
+        {
+            return _cooldownOverlay != null ? _cooldownOverlay.fillAmount : 0f;
+        }
+        
+        /// <summary>
+        /// 获取发光效果可见性（测试用）。
+        /// </summary>
+        public bool GetGlowVisibleForTesting()
+        {
+            return _glowEffect != null && _glowEffect.enabled;
         }
         
         private void OnValidate()

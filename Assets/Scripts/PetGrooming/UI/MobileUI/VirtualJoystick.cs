@@ -14,6 +14,12 @@ namespace PetGrooming.UI.MobileUI
     /// 
     /// Requirements: 1.1, 1.3, 1.4, 1.5, 1.6, 1.7
     /// </summary>
+    /// <remarks>
+    /// [已废弃] 此组件已被 Unity 官方 OnScreenStick 组件替代。
+    /// 请使用 UnityEngine.InputSystem.OnScreen.OnScreenStick 代替。
+    /// 迁移指南：参见 .kiro/specs/mobile-input-migration/design.md
+    /// </remarks>
+    [Obsolete("VirtualJoystick 已废弃，请使用 Unity 官方的 OnScreenStick 组件。参见 mobile-input-migration 规范。")]
     public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
     {
         #region Serialized Fields
