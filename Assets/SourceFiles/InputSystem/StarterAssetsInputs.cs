@@ -35,6 +35,7 @@ namespace StarterAssets
 		public event Action OnSkill3Pressed;
 		public event Action OnCapturePressed;
 		public event Action OnStrugglePressed;
+		public event Action OnJumpPressed;
 
 
 
@@ -133,13 +134,91 @@ namespace StarterAssets
 		}
 #endif
 
-			private void Awake()
-	{
-		SetCursorState(cursorLocked);
-		Cursor.visible = false;
-
+		private void Awake()
+		{
+			SetCursorState(cursorLocked);
+			Cursor.visible = false;
+		}
 		
-	}
+		/// <summary>
+		/// 直接从 Gamepad 读取输入，绕过 PlayerInput 的消息传递问题。
+		/// 遍历所有 Gamepad 设备，因为 OnScreenControl 可能创建多个虚拟设备。
+		/// </summary>
+		private void Update()
+		{
+			#if ENABLE_INPUT_SYSTEM
+			var gamepads = Gamepad.all;
+			if (gamepads.Count == 0) 
+			{
+				move = Vector2.zero;
+				return;
+			}
+			
+			// 遍历所有 Gamepad，合并输入（OnScreenStick 和 OnScreenButton 可能在不同设备上）
+			Vector2 totalMove = Vector2.zero;
+			bool anySkill1 = false, anySkill2 = false, anySkill3 = false, anyCapture = false;
+			bool skill1Pressed = false, skill2Pressed = false, skill3Pressed = false, capturePressed = false;
+			
+			foreach (var gamepad in gamepads)
+			{
+				// 合并摇杆输入（取最大值）
+				Vector2 stickValue = gamepad.leftStick.ReadValue();
+				if (stickValue.sqrMagnitude > totalMove.sqrMagnitude)
+				{
+					totalMove = stickValue;
+				}
+				
+				// 检查按钮状态
+				if (gamepad.buttonWest.isPressed) anySkill1 = true;
+				if (gamepad.buttonNorth.isPressed) anySkill2 = true;
+				if (gamepad.buttonEast.isPressed) anySkill3 = true;
+				if (gamepad.buttonSouth.isPressed) anyCapture = true;
+				
+				if (gamepad.buttonWest.wasPressedThisFrame) skill1Pressed = true;
+				if (gamepad.buttonNorth.wasPressedThisFrame) skill2Pressed = true;
+				if (gamepad.buttonEast.wasPressedThisFrame) skill3Pressed = true;
+				if (gamepad.buttonSouth.wasPressedThisFrame) capturePressed = true;
+				
+				// 检查跳跃（rightShoulder 或 leftShoulder）
+				if (gamepad.rightShoulder.wasPressedThisFrame || gamepad.leftShoulder.wasPressedThisFrame)
+				{
+					jump = true;
+					OnJumpPressed?.Invoke();
+				}
+			}
+			
+			// 应用移动输入
+			move = totalMove;
+			
+			// 应用技能输入
+			skill1 = anySkill1;
+			skill2 = anySkill2;
+			skill3 = anySkill3;
+			capture = anyCapture;
+			
+			// 触发事件（添加调试日志）
+			if (skill1Pressed)
+			{
+				Debug.Log("[StarterAssetsInputs] Skill1 (buttonWest) 按下");
+				OnSkill1Pressed?.Invoke();
+			}
+			if (skill2Pressed)
+			{
+				Debug.Log("[StarterAssetsInputs] Skill2 (buttonNorth) 按下");
+				OnSkill2Pressed?.Invoke();
+			}
+			if (skill3Pressed)
+			{
+				Debug.Log("[StarterAssetsInputs] Skill3 (buttonEast) 按下");
+				OnSkill3Pressed?.Invoke();
+			}
+			if (capturePressed)
+			{
+				Debug.Log("[StarterAssetsInputs] Capture (buttonSouth) 按下");
+				OnCapturePressed?.Invoke();
+			}
+			#endif
+		}
 
 		public void MoveInput(Vector2 newMoveDirection)
 		{

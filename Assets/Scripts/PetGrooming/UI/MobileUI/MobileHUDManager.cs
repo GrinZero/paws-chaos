@@ -372,6 +372,9 @@ namespace PetGrooming.UI.MobileUI
                 return;
             }
             
+            // 加载技能图标数据
+            var skillIconData = Resources.Load<Core.SkillIconData>("SkillIconData");
+            
             // 绑定技能到视觉组件
             // 按钮顺序：Skill1 (CaptureNet), Skill2 (Leash), Skill3 (CalmingSpray), MainButton (Capture)
             for (int i = 0; i < _skillButtonVisuals.Length && i < skillManager.SkillCount; i++)
@@ -382,7 +385,28 @@ namespace PetGrooming.UI.MobileUI
                 if (visual != null && skill != null)
                 {
                     visual.BindToSkill(skill);
+                    
+                    // 设置技能图标
+                    if (skillIconData != null)
+                    {
+                        var iconEntry = skillIconData.GetIconForSkill(skill.SkillName);
+                        if (iconEntry != null)
+                        {
+                            visual.SetIconFromData(iconEntry);
+                        }
+                    }
+                    
                     Debug.Log($"[MobileHUDManager] Bound skill '{skill.SkillName}' to SkillButtonVisual {i}");
+                }
+            }
+            
+            // 设置捕获按钮图标（第4个按钮，如果存在）
+            if (_skillButtonVisuals.Length > 3 && _skillButtonVisuals[3] != null && skillIconData != null)
+            {
+                var captureIconEntry = skillIconData.CaptureButton;
+                if (captureIconEntry != null)
+                {
+                    _skillButtonVisuals[3].SetIconFromData(captureIconEntry);
                 }
             }
             
@@ -394,7 +418,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// 技能激活时的回调，播放按下动画。
+        /// 技能激活时的回调，播放按下动画并停止发光。
         /// </summary>
         private void OnSkillActivated(int skillIndex, Systems.Skills.SkillBase skill)
         {
@@ -403,8 +427,8 @@ namespace PetGrooming.UI.MobileUI
                 var visual = _skillButtonVisuals[skillIndex];
                 if (visual != null)
                 {
-                    visual.PlayPressAnimation();
-                    visual.PlayReleaseAnimation();
+                    // 停止发光动画并播放按下效果
+                    visual.OnSkillUsed();
                 }
             }
         }
@@ -781,8 +805,7 @@ namespace PetGrooming.UI.MobileUI
         /// 确保 OnScreenControl 组件能够正常工作。
         /// 
         /// 关键原理：OnScreenStick 在被拖动时会创建虚拟 Gamepad 设备。
-        /// PlayerInput 需要切换到 Gamepad 方案才能接收这些输入。
-        /// 但虚拟设备只有在第一次交互时才会创建，所以需要延迟检测。
+        /// PlayerInput 需要切换到 Gamepad 方案并绑定正确的设备才能接收输入。
         /// </summary>
         private void EnsureOnScreenControlsWork()
         {
@@ -801,42 +824,85 @@ namespace PetGrooming.UI.MobileUI
                 return;
             }
             
-            // 关键：监听设备变化，当虚拟 Gamepad 被创建时自动切换方案
-            UnityEngine.InputSystem.InputSystem.onDeviceChange += (device, change) =>
+            // 关键修复：持续监控并确保 PlayerInput 绑定到正确的虚拟 Gamepad
+            StartCoroutine(MonitorAndBindGamepad(playerInput));
+        }
+        
+        /// <summary>
+        /// 持续监控 Gamepad 设备，确保 PlayerInput 绑定到 OnScreenStick 创建的虚拟 Gamepad。
+        /// </summary>
+        private System.Collections.IEnumerator MonitorAndBindGamepad(UnityEngine.InputSystem.PlayerInput playerInput)
+        {
+            // 等待一帧让 OnScreenStick 初始化
+            yield return null;
+            
+            float checkInterval = 0.5f;
+            
+            while (true)
             {
-                if (change == UnityEngine.InputSystem.InputDeviceChange.Added && 
-                    device is UnityEngine.InputSystem.Gamepad)
+                var gamepads = UnityEngine.InputSystem.Gamepad.all;
+                
+                // 检查是否需要重新绑定
+                bool needRebind = playerInput.devices.Count == 0;
+                
+                if (!needRebind && gamepads.Count > 0)
                 {
-                    Debug.Log($"[MobileHUDManager] Gamepad added: {device.name}, switching scheme...");
+                    // 检查当前绑定的设备是否在 gamepads 列表中
+                    bool foundBoundDevice = false;
+                    foreach (var device in playerInput.devices)
+                    {
+                        foreach (var gp in gamepads)
+                        {
+                            if (device == gp)
+                            {
+                                foundBoundDevice = true;
+                                break;
+                            }
+                        }
+                        if (foundBoundDevice) break;
+                    }
+                    needRebind = !foundBoundDevice;
+                }
+                
+                if (needRebind && gamepads.Count > 0)
+                {
+                    // 使用第一个可用的 Gamepad（OnScreenStick 创建的虚拟设备）
+                    var targetGamepad = gamepads[0];
+                    
                     try
                     {
-                        playerInput.SwitchCurrentControlScheme("Gamepad", device);
-                        Debug.Log("[MobileHUDManager] ✓ Switched to Gamepad scheme");
+                        // 尝试多种控制方案名称
+                        string[] schemeNames = { "Gamepad", "Xbox Controller", "XboxController" };
+                        bool success = false;
+                        
+                        foreach (var scheme in schemeNames)
+                        {
+                            try
+                            {
+                                playerInput.SwitchCurrentControlScheme(scheme, targetGamepad);
+                                Debug.Log($"[MobileHUDManager] ✓ Bound to {targetGamepad.name} with scheme '{scheme}'");
+                                success = true;
+                                break;
+                            }
+                            catch
+                            {
+                                // 尝试下一个方案名称
+                            }
+                        }
+                        
+                        if (!success)
+                        {
+                            // 如果所有方案都失败，尝试直接设置设备
+                            Debug.LogWarning("[MobileHUDManager] All scheme names failed, trying direct device assignment...");
+                        }
                     }
                     catch (System.Exception e)
                     {
-                        Debug.LogWarning($"[MobileHUDManager] Switch failed: {e.Message}");
+                        Debug.LogWarning($"[MobileHUDManager] Bind failed: {e.Message}");
                     }
                 }
-            };
-            
-            // 如果已经有 Gamepad，立即切换
-            var gamepads = UnityEngine.InputSystem.Gamepad.all;
-            if (gamepads.Count > 0)
-            {
-                try
-                {
-                    playerInput.SwitchCurrentControlScheme("Gamepad", gamepads[0]);
-                    Debug.Log($"[MobileHUDManager] ✓ Switched to existing Gamepad: {gamepads[0].name}");
-                }
-                catch (System.Exception e)
-                {
-                    Debug.LogWarning($"[MobileHUDManager] Switch failed: {e.Message}");
-                }
-            }
-            else
-            {
-                Debug.Log("[MobileHUDManager] No Gamepad yet, waiting for OnScreenStick interaction...");
+                
+                yield return new WaitForSeconds(checkInterval);
             }
         }
         

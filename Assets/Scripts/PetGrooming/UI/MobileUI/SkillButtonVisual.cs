@@ -368,6 +368,13 @@ namespace PetGrooming.UI.MobileUI
             if (_boundSkill != null)
             {
                 UpdateCooldownDisplay(remainingCooldown, _boundSkill.Cooldown);
+                
+                // 技能进入冷却时，停止发光动画
+                if (remainingCooldown > 0f)
+                {
+                    StopGlowPulse();
+                    HideGlow();
+                }
             }
         }
         
@@ -378,6 +385,16 @@ namespace PetGrooming.UI.MobileUI
             
             // 更新图标颜色
             SetIconColor(_readyColor);
+        }
+        
+        /// <summary>
+        /// 技能被使用时调用，停止发光动画。
+        /// </summary>
+        public void OnSkillUsed()
+        {
+            StopGlowPulse();
+            HideGlow();
+            PlayPressAnimation();
         }
         
         private void SetIconColor(Color color)

@@ -54,6 +54,9 @@ namespace PetGrooming.Setup.Editor
             var (skill2Btn, skill2Visual) = CreateSkillButton(skillButtonsContainer.transform, "Skill2", "<Gamepad>/buttonNorth", new Vector2(0, 150), 85);
             var (skill3Btn, skill3Visual) = CreateSkillButton(skillButtonsContainer.transform, "Skill3", "<Gamepad>/buttonEast", new Vector2(130, 90), 85);
             
+            // 创建跳跃按钮（左侧，摇杆上方）
+            CreateJumpButton(canvasObj.transform);
+            
             // 设置 MobileHUDManager 引用（注意顺序：Skill1, Skill2, Skill3, Capture）
             SetMobileHUDManagerReferences(manager, onScreenStick, 
                 new OnScreenButton[] { skill1Btn, skill2Btn, skill3Btn, captureBtn },
@@ -377,6 +380,57 @@ namespace PetGrooming.Setup.Editor
             visualSO.ApplyModifiedPropertiesWithoutUndo();
             
             return (onScreenButton, visual);
+        }
+        
+        /// <summary>
+        /// 创建跳跃按钮（位于右下角，技能按钮左下方）
+        /// </summary>
+        private static void CreateJumpButton(Transform parent)
+        {
+            float size = 70;
+            
+            GameObject buttonObj = new GameObject("JumpButton");
+            buttonObj.transform.SetParent(parent, false);
+            buttonObj.layer = 5;
+            
+            RectTransform rect = buttonObj.AddComponent<RectTransform>();
+            rect.anchorMin = new Vector2(1, 0);  // 右下角锚点
+            rect.anchorMax = new Vector2(1, 0);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = new Vector2(-420, 60); // 技能按钮左下方，不重叠
+            rect.sizeDelta = new Vector2(size, size);
+            
+            buttonObj.AddComponent<CanvasRenderer>();
+            
+            // 背景 - 蓝色跳跃按钮
+            Image bgImage = buttonObj.AddComponent<Image>();
+            bgImage.color = new Color(0.3f, 0.6f, 0.9f, 0.85f);
+            
+            // OnScreenButton - 绑定到 rightShoulder
+            OnScreenButton onScreenButton = buttonObj.AddComponent<OnScreenButton>();
+            var buttonSO = new SerializedObject(onScreenButton);
+            buttonSO.FindProperty("m_ControlPath").stringValue = "<Gamepad>/rightShoulder";
+            buttonSO.ApplyModifiedPropertiesWithoutUndo();
+            
+            // 跳跃图标文字
+            GameObject textObj = new GameObject("JumpText");
+            textObj.transform.SetParent(buttonObj.transform, false);
+            textObj.layer = 5;
+            
+            RectTransform textRect = textObj.AddComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.anchoredPosition = Vector2.zero;
+            textRect.sizeDelta = Vector2.zero;
+            
+            textObj.AddComponent<CanvasRenderer>();
+            TextMeshProUGUI jumpText = textObj.AddComponent<TextMeshProUGUI>();
+            jumpText.text = "跳";
+            jumpText.fontSize = 28;
+            jumpText.fontStyle = FontStyles.Bold;
+            jumpText.alignment = TextAlignmentOptions.Center;
+            jumpText.color = Color.white;
+            jumpText.raycastTarget = false;
         }
         
         private static void SetMobileHUDManagerReferences(

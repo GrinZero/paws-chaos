@@ -300,7 +300,7 @@ namespace PetGrooming.AI
             OnStateEnter(newState, previousState);
             OnStateChanged?.Invoke(newState);
             
-            Debug.Log($"[PetAI] State changed: {previousState} → {newState}");
+            // Debug.Log($"[PetAI] State changed: {previousState} → {newState}");
         }
         
         /// <summary>

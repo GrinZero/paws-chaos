@@ -127,7 +127,11 @@ namespace PetGrooming.Utils
             if (_playerInput != null)
             {
                 sb.AppendLine($"控制方案: {_playerInput.currentControlScheme}");
-                sb.AppendLine($"设备: {_playerInput.devices.Count}");
+                sb.AppendLine($"绑定设备数: {_playerInput.devices.Count}");
+                foreach (var device in _playerInput.devices)
+                {
+                    sb.AppendLine($"  绑定: {device.name}");
+                }
             }
             else
             {
@@ -136,7 +140,13 @@ namespace PetGrooming.Utils
             
             // Gamepad 设备
             var gamepads = Gamepad.all;
-            sb.AppendLine($"Gamepad 数量: {gamepads.Count}");
+            sb.AppendLine($"Gamepad 总数: {gamepads.Count}");
+            foreach (var gp in gamepads)
+            {
+                // 显示 Gamepad 的 leftStick 实际值
+                var leftStick = gp.leftStick.ReadValue();
+                sb.AppendLine($"  GP: {gp.name} stick:{leftStick}");
+            }
             
             // StarterAssetsInputs 状态
             if (_starterInputs != null)
