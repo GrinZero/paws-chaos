@@ -346,6 +346,76 @@ namespace PetGrooming.UI.MobileUI
                     _skillWheel.BindToGroomerSkills(skillManager);
                 }
             }
+            
+            // 绑定 SkillButtonVisual 到技能系统
+            BindSkillButtonVisuals(groomerController);
+        }
+        
+        /// <summary>
+        /// 绑定 SkillButtonVisual 组件到 GroomerSkillManager 的技能。
+        /// 这样技能按钮就能显示冷却效果和就绪动画。
+        /// </summary>
+        private void BindSkillButtonVisuals(GroomerController groomerController)
+        {
+            if (groomerController == null) return;
+            
+            var skillManager = groomerController.GetComponent<Systems.Skills.GroomerSkillManager>();
+            if (skillManager == null)
+            {
+                Debug.LogWarning("[MobileHUDManager] GroomerSkillManager not found on GroomerController!");
+                return;
+            }
+            
+            if (_skillButtonVisuals == null || _skillButtonVisuals.Length == 0)
+            {
+                Debug.LogWarning("[MobileHUDManager] No SkillButtonVisuals assigned!");
+                return;
+            }
+            
+            // 绑定技能到视觉组件
+            // 按钮顺序：Skill1 (CaptureNet), Skill2 (Leash), Skill3 (CalmingSpray), MainButton (Capture)
+            for (int i = 0; i < _skillButtonVisuals.Length && i < skillManager.SkillCount; i++)
+            {
+                var visual = _skillButtonVisuals[i];
+                var skill = skillManager.GetSkill(i);
+                
+                if (visual != null && skill != null)
+                {
+                    visual.BindToSkill(skill);
+                    Debug.Log($"[MobileHUDManager] Bound skill '{skill.SkillName}' to SkillButtonVisual {i}");
+                }
+            }
+            
+            // 订阅技能激活事件以播放按下动画
+            skillManager.OnSkillActivated += OnSkillActivated;
+            skillManager.OnSkillActivationFailed += OnSkillActivationFailed;
+            
+            Debug.Log($"[MobileHUDManager] Bound {_skillButtonVisuals.Length} skill button visuals to GroomerSkillManager");
+        }
+        
+        /// <summary>
+        /// 技能激活时的回调，播放按下动画。
+        /// </summary>
+        private void OnSkillActivated(int skillIndex, Systems.Skills.SkillBase skill)
+        {
+            if (_skillButtonVisuals != null && skillIndex < _skillButtonVisuals.Length)
+            {
+                var visual = _skillButtonVisuals[skillIndex];
+                if (visual != null)
+                {
+                    visual.PlayPressAnimation();
+                    visual.PlayReleaseAnimation();
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 技能激活失败时的回调（冷却中）。
+        /// </summary>
+        private void OnSkillActivationFailed(int skillIndex, Systems.Skills.SkillBase skill)
+        {
+            // 可以播放一个"不可用"的抖动动画
+            Debug.Log($"[MobileHUDManager] Skill {skillIndex} activation failed - on cooldown");
         }
         
         /// <summary>
@@ -891,6 +961,12 @@ namespace PetGrooming.UI.MobileUI
             if (_groomerController == null)
             {
                 _groomerController = FindObjectOfType<GroomerController>();
+            }
+            
+            // 自动绑定技能按钮视觉效果到技能系统
+            if (_groomerController != null)
+            {
+                BindSkillButtonVisuals(_groomerController);
             }
             
             // Find desktop UI (skill bar) if not assigned

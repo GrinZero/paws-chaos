@@ -2,6 +2,8 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using PetGrooming.Core;
+using PetGrooming.Systems;
+using StarterAssets;
 
 namespace PetGrooming.Systems.Skills
 {
@@ -41,6 +43,7 @@ namespace PetGrooming.Systems.Skills
         #region Private Fields
         private SkillBase[] _allSkills;
         private Transform _ownerTransform;
+        private StarterAssetsInputs _starterAssetsInputs;
         #endregion
 
         #region Properties
@@ -87,11 +90,17 @@ namespace PetGrooming.Systems.Skills
         private void Start()
         {
             SetupSkillOwners();
+            SubscribeToInputEvents();
         }
 
         private void Update()
         {
             HandleSkillInput();
+        }
+        
+        private void OnDestroy()
+        {
+            UnsubscribeFromInputEvents();
         }
         #endregion
 
@@ -278,6 +287,61 @@ namespace PetGrooming.Systems.Skills
             if (CalmingSpray != null)
             {
                 CalmingSpray.SetOwner(_ownerTransform);
+            }
+        }
+        
+        /// <summary>
+        /// 订阅 StarterAssetsInputs 的技能事件。
+        /// 这样 OnScreenButton 触发的输入也能激活技能。
+        /// </summary>
+        private void SubscribeToInputEvents()
+        {
+            _starterAssetsInputs = GetComponent<StarterAssetsInputs>();
+            if (_starterAssetsInputs == null)
+            {
+                _starterAssetsInputs = FindObjectOfType<StarterAssetsInputs>();
+            }
+            
+            if (_starterAssetsInputs != null)
+            {
+                _starterAssetsInputs.OnSkill1Pressed += OnSkill1Pressed;
+                _starterAssetsInputs.OnSkill2Pressed += OnSkill2Pressed;
+                _starterAssetsInputs.OnSkill3Pressed += OnSkill3Pressed;
+                _starterAssetsInputs.OnCapturePressed += OnCapturePressed;
+                Debug.Log("[GroomerSkillManager] 已订阅 StarterAssetsInputs 技能事件");
+            }
+            else
+            {
+                Debug.LogWarning("[GroomerSkillManager] 未找到 StarterAssetsInputs，移动端技能按钮可能无法工作");
+            }
+        }
+        
+        /// <summary>
+        /// 取消订阅事件。
+        /// </summary>
+        private void UnsubscribeFromInputEvents()
+        {
+            if (_starterAssetsInputs != null)
+            {
+                _starterAssetsInputs.OnSkill1Pressed -= OnSkill1Pressed;
+                _starterAssetsInputs.OnSkill2Pressed -= OnSkill2Pressed;
+                _starterAssetsInputs.OnSkill3Pressed -= OnSkill3Pressed;
+                _starterAssetsInputs.OnCapturePressed -= OnCapturePressed;
+            }
+        }
+        
+        // Input System 事件回调
+        private void OnSkill1Pressed() => TryActivateSkill(0);
+        private void OnSkill2Pressed() => TryActivateSkill(1);
+        private void OnSkill3Pressed() => TryActivateSkill(2);
+        private void OnCapturePressed()
+        {
+            // Capture 使用 GroomerController 的捕获逻辑
+            var groomerController = GetComponent<GroomerController>();
+            if (groomerController != null)
+            {
+                groomerController.TryCapturePet();
+                Debug.Log("[GroomerSkillManager] 触发捕获");
             }
         }
 

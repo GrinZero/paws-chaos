@@ -43,16 +43,18 @@ namespace PetGrooming.Setup.Editor
             GameObject stickObj = CreateOnScreenStick(canvasObj.transform);
             OnScreenStick onScreenStick = stickObj.GetComponentInChildren<OnScreenStick>();
             
-            // 创建技能按钮容器（右下角）
+            // 创建技能按钮容器（右下角）- 王者荣耀风格布局
             GameObject skillButtonsContainer = CreateSkillButtonsContainer(canvasObj.transform);
             
-            // 创建 4 个技能按钮
-            var (skill1Btn, skill1Visual) = CreateSkillButton(skillButtonsContainer.transform, "Skill1", "<Gamepad>/buttonWest", new Vector2(-180, 60));
-            var (skill2Btn, skill2Visual) = CreateSkillButton(skillButtonsContainer.transform, "Skill2", "<Gamepad>/buttonNorth", new Vector2(-60, 120));
-            var (skill3Btn, skill3Visual) = CreateSkillButton(skillButtonsContainer.transform, "Skill3", "<Gamepad>/buttonEast", new Vector2(60, 60));
-            var (captureBtn, captureVisual) = CreateSkillButton(skillButtonsContainer.transform, "Capture", "<Gamepad>/buttonSouth", new Vector2(-60, 0));
+            // 创建主按钮（大按钮，捕获/普攻）- 中心位置，放大
+            var (captureBtn, captureVisual) = CreateMainSkillButton(skillButtonsContainer.transform, "Capture", "<Gamepad>/buttonSouth", Vector2.zero);
             
-            // 设置 MobileHUDManager 引用
+            // 创建 3 个技能按钮（小按钮，环绕主按钮）- 放大并调整位置
+            var (skill1Btn, skill1Visual) = CreateSkillButton(skillButtonsContainer.transform, "Skill1", "<Gamepad>/buttonWest", new Vector2(-130, 90), 85);
+            var (skill2Btn, skill2Visual) = CreateSkillButton(skillButtonsContainer.transform, "Skill2", "<Gamepad>/buttonNorth", new Vector2(0, 150), 85);
+            var (skill3Btn, skill3Visual) = CreateSkillButton(skillButtonsContainer.transform, "Skill3", "<Gamepad>/buttonEast", new Vector2(130, 90), 85);
+            
+            // 设置 MobileHUDManager 引用（注意顺序：Skill1, Skill2, Skill3, Capture）
             SetMobileHUDManagerReferences(manager, onScreenStick, 
                 new OnScreenButton[] { skill1Btn, skill2Btn, skill3Btn, captureBtn },
                 new SkillButtonVisual[] { skill1Visual, skill2Visual, skill3Visual, captureVisual });
@@ -73,7 +75,7 @@ namespace PetGrooming.Setup.Editor
         
         private static GameObject CreateOnScreenStick(Transform parent)
         {
-            // 创建容器
+            // 创建容器 - 向右移动避开刘海屏
             GameObject container = new GameObject("OnScreenStick");
             container.transform.SetParent(parent, false);
             
@@ -81,10 +83,10 @@ namespace PetGrooming.Setup.Editor
             containerRect.anchorMin = new Vector2(0, 0);
             containerRect.anchorMax = new Vector2(0, 0);
             containerRect.pivot = new Vector2(0, 0);
-            containerRect.anchoredPosition = new Vector2(80, 80);
-            containerRect.sizeDelta = new Vector2(200, 200);
+            containerRect.anchoredPosition = new Vector2(120, 60); // 向右移动避开刘海
+            containerRect.sizeDelta = new Vector2(280, 280); // 放大容器
             
-            // 创建背景
+            // 创建背景 - 放大
             GameObject background = new GameObject("Background");
             background.transform.SetParent(container.transform, false);
             background.layer = 5; // UI layer
@@ -93,13 +95,13 @@ namespace PetGrooming.Setup.Editor
             bgRect.anchorMin = new Vector2(0.5f, 0.5f);
             bgRect.anchorMax = new Vector2(0.5f, 0.5f);
             bgRect.anchoredPosition = Vector2.zero;
-            bgRect.sizeDelta = new Vector2(180, 180);
+            bgRect.sizeDelta = new Vector2(240, 240); // 放大背景
             
             background.AddComponent<CanvasRenderer>();
             Image bgImage = background.AddComponent<Image>();
             bgImage.color = new Color(0.15f, 0.15f, 0.15f, 0.6f);
             
-            // 创建手柄
+            // 创建手柄 - 放大
             GameObject handle = new GameObject("Handle");
             handle.transform.SetParent(background.transform, false);
             handle.layer = 5;
@@ -108,7 +110,7 @@ namespace PetGrooming.Setup.Editor
             handleRect.anchorMin = new Vector2(0.5f, 0.5f);
             handleRect.anchorMax = new Vector2(0.5f, 0.5f);
             handleRect.anchoredPosition = Vector2.zero;
-            handleRect.sizeDelta = new Vector2(80, 80);
+            handleRect.sizeDelta = new Vector2(100, 100); // 放大手柄
             
             handle.AddComponent<CanvasRenderer>();
             Image handleImage = handle.AddComponent<Image>();
@@ -116,10 +118,9 @@ namespace PetGrooming.Setup.Editor
             
             // 添加 OnScreenStick 组件到手柄
             OnScreenStick stick = handle.AddComponent<OnScreenStick>();
-            // 使用 SerializedObject 设置 controlPath（确保序列化正确保存）
             var stickSO = new SerializedObject(stick);
             stickSO.FindProperty("m_ControlPath").stringValue = "<Gamepad>/leftStick";
-            stickSO.FindProperty("m_MovementRange").floatValue = 50f;
+            stickSO.FindProperty("m_MovementRange").floatValue = 70f; // 增大移动范围
             stickSO.ApplyModifiedPropertiesWithoutUndo();
             
             return container;
@@ -127,6 +128,7 @@ namespace PetGrooming.Setup.Editor
         
         private static GameObject CreateSkillButtonsContainer(Transform parent)
         {
+            // 技能按钮容器 - 向左移动避开刘海屏
             GameObject container = new GameObject("SkillButtons");
             container.transform.SetParent(parent, false);
             
@@ -134,14 +136,14 @@ namespace PetGrooming.Setup.Editor
             rect.anchorMin = new Vector2(1, 0);
             rect.anchorMax = new Vector2(1, 0);
             rect.pivot = new Vector2(1, 0);
-            rect.anchoredPosition = new Vector2(-80, 80);
-            rect.sizeDelta = new Vector2(300, 200);
+            rect.anchoredPosition = new Vector2(-120, 60); // 向左移动避开刘海
+            rect.sizeDelta = new Vector2(350, 280); // 放大容器
             
             return container;
         }
         
         private static (OnScreenButton, SkillButtonVisual) CreateSkillButton(
-            Transform parent, string name, string controlPath, Vector2 position)
+            Transform parent, string name, string controlPath, Vector2 position, float size = 90)
         {
             // 创建按钮容器
             GameObject buttonObj = new GameObject($"SkillButton_{name}");
@@ -152,13 +154,13 @@ namespace PetGrooming.Setup.Editor
             rect.anchorMin = new Vector2(0.5f, 0.5f);
             rect.anchorMax = new Vector2(0.5f, 0.5f);
             rect.anchoredPosition = position;
-            rect.sizeDelta = new Vector2(90, 90);
+            rect.sizeDelta = new Vector2(size, size);
             
             buttonObj.AddComponent<CanvasRenderer>();
             
             // 背景 Image
             Image bgImage = buttonObj.AddComponent<Image>();
-            bgImage.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
+            bgImage.color = new Color(0.2f, 0.2f, 0.2f, 0.85f);
             
             // OnScreenButton 组件
             OnScreenButton onScreenButton = buttonObj.AddComponent<OnScreenButton>();
@@ -176,7 +178,7 @@ namespace PetGrooming.Setup.Editor
             glowRect.anchorMin = new Vector2(0.5f, 0.5f);
             glowRect.anchorMax = new Vector2(0.5f, 0.5f);
             glowRect.anchoredPosition = Vector2.zero;
-            glowRect.sizeDelta = new Vector2(110, 110);
+            glowRect.sizeDelta = new Vector2(size + 20, size + 20);
             
             glowObj.AddComponent<CanvasRenderer>();
             Image glowImage = glowObj.AddComponent<Image>();
@@ -236,7 +238,7 @@ namespace PetGrooming.Setup.Editor
             textObj.AddComponent<CanvasRenderer>();
             TextMeshProUGUI cooldownText = textObj.AddComponent<TextMeshProUGUI>();
             cooldownText.text = "";
-            cooldownText.fontSize = 24;
+            cooldownText.fontSize = size > 80 ? 28 : 20; // 根据按钮大小调整字体
             cooldownText.fontStyle = FontStyles.Bold;
             cooldownText.alignment = TextAlignmentOptions.Center;
             cooldownText.color = Color.white;
@@ -247,6 +249,126 @@ namespace PetGrooming.Setup.Editor
             SkillButtonVisual visual = buttonObj.AddComponent<SkillButtonVisual>();
             
             // 使用 SerializedObject 设置私有字段（确保序列化正确保存）
+            var visualSO = new SerializedObject(visual);
+            visualSO.FindProperty("_iconImage").objectReferenceValue = iconImage;
+            visualSO.FindProperty("_cooldownOverlay").objectReferenceValue = overlayImage;
+            visualSO.FindProperty("_cooldownText").objectReferenceValue = cooldownText;
+            visualSO.FindProperty("_glowEffect").objectReferenceValue = glowImage;
+            visualSO.ApplyModifiedPropertiesWithoutUndo();
+            
+            return (onScreenButton, visual);
+        }
+        
+        /// <summary>
+        /// 创建主技能按钮（大按钮，王者荣耀风格的普攻/捕获按钮）
+        /// </summary>
+        private static (OnScreenButton, SkillButtonVisual) CreateMainSkillButton(
+            Transform parent, string name, string controlPath, Vector2 position)
+        {
+            float mainSize = 130; // 主按钮放大
+            
+            // 创建按钮容器
+            GameObject buttonObj = new GameObject($"MainButton_{name}");
+            buttonObj.transform.SetParent(parent, false);
+            buttonObj.layer = 5;
+            
+            RectTransform rect = buttonObj.AddComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = position;
+            rect.sizeDelta = new Vector2(mainSize, mainSize);
+            
+            buttonObj.AddComponent<CanvasRenderer>();
+            
+            // 背景 Image - 主按钮用醒目的红色
+            Image bgImage = buttonObj.AddComponent<Image>();
+            bgImage.color = new Color(0.85f, 0.25f, 0.25f, 0.9f);
+            
+            // OnScreenButton 组件
+            OnScreenButton onScreenButton = buttonObj.AddComponent<OnScreenButton>();
+            var buttonSO = new SerializedObject(onScreenButton);
+            buttonSO.FindProperty("m_ControlPath").stringValue = controlPath;
+            buttonSO.ApplyModifiedPropertiesWithoutUndo();
+            
+            // 创建发光效果
+            GameObject glowObj = new GameObject("Glow");
+            glowObj.transform.SetParent(buttonObj.transform, false);
+            glowObj.layer = 5;
+            
+            RectTransform glowRect = glowObj.AddComponent<RectTransform>();
+            glowRect.anchorMin = new Vector2(0.5f, 0.5f);
+            glowRect.anchorMax = new Vector2(0.5f, 0.5f);
+            glowRect.anchoredPosition = Vector2.zero;
+            glowRect.sizeDelta = new Vector2(mainSize + 30, mainSize + 30);
+            
+            glowObj.AddComponent<CanvasRenderer>();
+            Image glowImage = glowObj.AddComponent<Image>();
+            glowImage.color = new Color(1f, 0.5f, 0.3f, 0.8f); // 橙红色发光
+            glowImage.enabled = false;
+            
+            // 创建图标
+            GameObject iconObj = new GameObject("Icon");
+            iconObj.transform.SetParent(buttonObj.transform, false);
+            iconObj.layer = 5;
+            
+            RectTransform iconRect = iconObj.AddComponent<RectTransform>();
+            iconRect.anchorMin = new Vector2(0.15f, 0.15f);
+            iconRect.anchorMax = new Vector2(0.85f, 0.85f);
+            iconRect.anchoredPosition = Vector2.zero;
+            iconRect.sizeDelta = Vector2.zero;
+            
+            iconObj.AddComponent<CanvasRenderer>();
+            Image iconImage = iconObj.AddComponent<Image>();
+            iconImage.color = Color.white;
+            iconImage.raycastTarget = false;
+            iconImage.preserveAspect = true;
+            
+            // 创建冷却遮罩
+            GameObject overlayObj = new GameObject("CooldownOverlay");
+            overlayObj.transform.SetParent(buttonObj.transform, false);
+            overlayObj.layer = 5;
+            
+            RectTransform overlayRect = overlayObj.AddComponent<RectTransform>();
+            overlayRect.anchorMin = Vector2.zero;
+            overlayRect.anchorMax = Vector2.one;
+            overlayRect.anchoredPosition = Vector2.zero;
+            overlayRect.sizeDelta = Vector2.zero;
+            
+            overlayObj.AddComponent<CanvasRenderer>();
+            Image overlayImage = overlayObj.AddComponent<Image>();
+            overlayImage.color = new Color(0, 0, 0, 0.7f);
+            overlayImage.type = Image.Type.Filled;
+            overlayImage.fillMethod = Image.FillMethod.Radial360;
+            overlayImage.fillOrigin = (int)Image.Origin360.Top;
+            overlayImage.fillClockwise = false;
+            overlayImage.fillAmount = 0;
+            overlayImage.raycastTarget = false;
+            overlayImage.enabled = false;
+            
+            // 创建冷却文本
+            GameObject textObj = new GameObject("CooldownText");
+            textObj.transform.SetParent(buttonObj.transform, false);
+            textObj.layer = 5;
+            
+            RectTransform textRect = textObj.AddComponent<RectTransform>();
+            textRect.anchorMin = new Vector2(0.5f, 0.5f);
+            textRect.anchorMax = new Vector2(0.5f, 0.5f);
+            textRect.anchoredPosition = Vector2.zero;
+            textRect.sizeDelta = new Vector2(70, 50);
+            
+            textObj.AddComponent<CanvasRenderer>();
+            TextMeshProUGUI cooldownText = textObj.AddComponent<TextMeshProUGUI>();
+            cooldownText.text = "";
+            cooldownText.fontSize = 32;
+            cooldownText.fontStyle = FontStyles.Bold;
+            cooldownText.alignment = TextAlignmentOptions.Center;
+            cooldownText.color = Color.white;
+            cooldownText.raycastTarget = false;
+            cooldownText.enabled = false;
+            
+            // 添加 SkillButtonVisual 组件
+            SkillButtonVisual visual = buttonObj.AddComponent<SkillButtonVisual>();
+            
             var visualSO = new SerializedObject(visual);
             visualSO.FindProperty("_iconImage").objectReferenceValue = iconImage;
             visualSO.FindProperty("_cooldownOverlay").objectReferenceValue = overlayImage;

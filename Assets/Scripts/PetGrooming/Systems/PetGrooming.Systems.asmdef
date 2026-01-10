@@ -4,7 +4,8 @@
     "references": [
         "PetGrooming.Core",
         "PetGrooming.AI",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "StarterAssets"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
