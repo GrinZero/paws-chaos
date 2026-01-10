@@ -30,12 +30,27 @@ namespace StarterAssets
 		{
 			MoveInput(value.Get<Vector2>());
 		}
+		
+		// 兼容 PlayerInput 组件的事件绑定（InputMove 是旧的命名）
+		public void InputMove(InputAction.CallbackContext context)
+		{
+			MoveInput(context.ReadValue<Vector2>());
+		}
 
 		public void OnLook(InputValue value)
 		{
 			if(cursorInputForLook)
 			{
 				LookInput(value.Get<Vector2>());
+			}
+		}
+		
+		// 兼容 PlayerInput 组件的事件绑定
+		public void InputLook(InputAction.CallbackContext context)
+		{
+			if(cursorInputForLook)
+			{
+				LookInput(context.ReadValue<Vector2>());
 			}
 		}
 

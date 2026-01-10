@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using PetGrooming.Core;
+using StarterAssets;
 
 namespace PetGrooming.UI.MobileUI
 {
@@ -27,6 +28,9 @@ namespace PetGrooming.UI.MobileUI
         [Tooltip("Image component of the handle for opacity control")]
         [SerializeField] private Image _handleImage;
         
+        [Tooltip("Image component of the background for opacity control")]
+        [SerializeField] private Image _backgroundImage;
+        
         [Header("Settings")]
         [Tooltip("Mobile HUD settings asset")]
         [SerializeField] private MobileHUDSettings _settings;
@@ -49,6 +53,10 @@ namespace PetGrooming.UI.MobileUI
         
         [Tooltip("Handle opacity when active")]
         [SerializeField] private float _activeOpacity = 1f;
+        
+        [Header("Player Reference")]
+        [Tooltip("Reference to StarterAssetsInputs for ThirdPersonController")]
+        [SerializeField] private StarterAssetsInputs _starterAssetsInputs;
         
         #endregion
 
@@ -221,6 +229,9 @@ namespace PetGrooming.UI.MobileUI
             // Ensure direction components are clamped to [-1, 1]
             _direction = ClampDirection(_direction);
             
+            // 发送输入到 ThirdPersonController（通过 StarterAssetsInputs）
+            SendInputToPlayer();
+            
             // Fire event
             OnJoystickMoved?.Invoke(_direction);
         }
@@ -243,6 +254,9 @@ namespace PetGrooming.UI.MobileUI
             // Reset direction and magnitude
             _direction = Vector2.zero;
             _magnitude = 0f;
+            
+            // 清零输入
+            SendInputToPlayer();
             
             // Update handle opacity
             SetHandleOpacity(_idleOpacity);
@@ -420,6 +434,18 @@ namespace PetGrooming.UI.MobileUI
             {
                 _handleImage = _handle.GetComponent<Image>();
             }
+            
+            // 自动获取背景 Image 组件
+            if (_backgroundImage == null && _background != null)
+            {
+                _backgroundImage = _background.GetComponent<Image>();
+            }
+            
+            // 自动查找 StarterAssetsInputs（如果未手动指定）
+            if (_starterAssetsInputs == null)
+            {
+                _starterAssetsInputs = FindFirstObjectByType<StarterAssetsInputs>();
+            }
         }
         
         private void CalculateBackgroundRadius()
@@ -440,11 +466,32 @@ namespace PetGrooming.UI.MobileUI
         
         private void SetHandleOpacity(float opacity)
         {
+            // 设置手柄透明度
             if (_handleImage != null)
             {
                 Color color = _handleImage.color;
                 color.a = opacity;
                 _handleImage.color = color;
+            }
+            
+            // 同时设置背景透明度（稍微降低一点）
+            if (_backgroundImage != null)
+            {
+                Color bgColor = _backgroundImage.color;
+                bgColor.a = opacity * 0.8f; // 背景透明度略低于手柄
+                _backgroundImage.color = bgColor;
+            }
+        }
+        
+        /// <summary>
+        /// 发送输入到 ThirdPersonController（通过 StarterAssetsInputs）
+        /// </summary>
+        private void SendInputToPlayer()
+        {
+            if (_starterAssetsInputs != null)
+            {
+                // InputVector = Direction * Magnitude，提供模拟摇杆的渐进输入
+                _starterAssetsInputs.MoveInput(InputVector);
             }
         }
         

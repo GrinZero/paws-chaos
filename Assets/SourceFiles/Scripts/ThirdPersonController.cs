@@ -416,6 +416,55 @@ public bool IsRespawning { get; set; } = false;
                 AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
             }
         }
+        
+        #region Input Event Handlers (for PlayerInput component)
+        
+        /// <summary>
+        /// 处理 PlayerInput 组件的 Move 事件
+        /// </summary>
+        public void InputMove(InputAction.CallbackContext context)
+        {
+            if (_input != null)
+            {
+                _input.MoveInput(context.ReadValue<Vector2>());
+            }
+        }
+        
+        /// <summary>
+        /// 处理 PlayerInput 组件的 Look 事件
+        /// </summary>
+        public void InputLook(InputAction.CallbackContext context)
+        {
+            if (_input != null)
+            {
+                _input.LookInput(context.ReadValue<Vector2>());
+            }
+        }
+        
+        /// <summary>
+        /// 处理 PlayerInput 组件的 Jump 事件
+        /// </summary>
+        public void InputJump(InputAction.CallbackContext context)
+        {
+            if (_input != null)
+            {
+                _input.JumpInput(context.performed);
+            }
+        }
+        
+        /// <summary>
+        /// 处理 PlayerInput 组件的 Sprint 事件
+        /// </summary>
+        public void InputSprint(InputAction.CallbackContext context)
+        {
+            if (_input != null)
+            {
+                _input.SprintInput(context.performed);
+            }
+        }
+        
+        #endregion
+        
         public void ResetCameraRotation(float targetYaw)
 {
     // Reset the yaw and pitch to default values (targetYaw for Y rotation, and 0 for pitch)

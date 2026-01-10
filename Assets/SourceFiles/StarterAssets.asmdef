@@ -1,12 +1,10 @@
 {
-    "name": "PetGrooming.UI",
-    "rootNamespace": "PetGrooming.UI",
+    "name": "StarterAssets",
+    "rootNamespace": "StarterAssets",
     "references": [
-        "PetGrooming.Core",
-        "PetGrooming.Systems",
-        "Unity.TextMeshPro",
         "Unity.InputSystem",
-        "StarterAssets"
+        "Unity.Cinemachine",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

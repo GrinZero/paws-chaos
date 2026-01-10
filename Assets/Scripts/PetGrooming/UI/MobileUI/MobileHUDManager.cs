@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using PetGrooming.Core;
 using PetGrooming.Systems;
+using StarterAssets;
 
 namespace PetGrooming.UI.MobileUI
 {
@@ -71,8 +72,11 @@ namespace PetGrooming.UI.MobileUI
         public const string DefaultUIModePrefKey = "MobileUIMode";
         
         [Header("Character References")]
-        [Tooltip("Reference to player movement component")]
+        [Tooltip("Reference to player movement component (legacy, optional)")]
         [SerializeField] private PlayerMovement _playerMovement;
+        
+        [Tooltip("Reference to StarterAssetsInputs for ThirdPersonController")]
+        [SerializeField] private StarterAssetsInputs _starterAssetsInputs;
         
         [Tooltip("Reference to groomer controller")]
         [SerializeField] private GroomerController _groomerController;
@@ -655,6 +659,12 @@ namespace PetGrooming.UI.MobileUI
                 }
             }
             
+            // 查找 StarterAssetsInputs（用于 ThirdPersonController）
+            if (_starterAssetsInputs == null)
+            {
+                _starterAssetsInputs = FindFirstObjectByType<StarterAssetsInputs>();
+            }
+            
             // Find desktop UI (skill bar) if not assigned
             if (_desktopUI == null)
             {
@@ -787,14 +797,23 @@ namespace PetGrooming.UI.MobileUI
         
         private void UpdateMovementInput()
         {
-            if (_playerMovement == null || _joystick == null) return;
+            if (_joystick == null) return;
             
             // Get joystick input
             Vector2 input = _joystick.InputVector;
             
-            // Apply to player movement
-            // Requirement 1.8: Joystick input equivalent to keyboard/gamepad
-            _playerMovement.SetMobileInput(input);
+            // 优先使用 ThirdPersonController（通过 StarterAssetsInputs）
+            // VirtualJoystick 已经直接发送输入到 StarterAssetsInputs
+            // 这里作为备用，确保输入被正确传递
+            if (_starterAssetsInputs != null)
+            {
+                _starterAssetsInputs.MoveInput(input);
+            }
+            // 兼容旧的 PlayerMovement（如果仍在使用）
+            else if (_playerMovement != null)
+            {
+                _playerMovement.SetMobileInput(input);
+            }
         }
         
         private void HandleCapturePressed()

@@ -20,8 +20,9 @@ namespace PetGrooming.Systems
         [Tooltip("Base movement speed")]
         [SerializeField] private float _moveSpeed = 5f;
 
-        [Tooltip("Rotation speed for turning")]
-        [SerializeField] private float _rotationSpeed = 720f;
+        [Tooltip("Rotation smooth time (lower = faster rotation)")]
+        [Range(0.0f, 0.3f)]
+        [SerializeField] private float _rotationSmoothTime = 0.12f;
 
         [Tooltip("Gravity applied to the character")]
         [SerializeField] private float _gravity = -20f;
@@ -29,6 +30,16 @@ namespace PetGrooming.Systems
         [Header("Camera Reference")]
         [Tooltip("Reference to the main camera for camera-relative movement")]
         [SerializeField] private Transform _cameraTransform;
+
+        [Header("Animation")]
+        [Tooltip("Reference to the Animator component")]
+        [SerializeField] private Animator _animator;
+        
+        [Tooltip("Animator parameter name for movement speed")]
+        [SerializeField] private string _speedParameterName = "Speed";
+        
+        [Tooltip("Animator parameter name for motion speed")]
+        [SerializeField] private string _motionSpeedParameterName = "MotionSpeed";
 
         #endregion
 
@@ -41,6 +52,15 @@ namespace PetGrooming.Systems
         private bool _isGrounded;
         private Vector2 _mobileInput;
         private bool _useMobileInput;
+        
+        // 动画参数 ID（缓存以提高性能）
+        private int _animIDSpeed;
+        private int _animIDMotionSpeed;
+        private float _animationBlend;
+        
+        // 旋转平滑
+        private float _targetRotation;
+        private float _rotationVelocity;
 
         #endregion
 
@@ -88,6 +108,19 @@ namespace PetGrooming.Systems
             if (_cameraTransform == null && Camera.main != null)
             {
                 _cameraTransform = Camera.main.transform;
+            }
+            
+            // 获取 Animator 组件
+            if (_animator == null)
+            {
+                _animator = GetComponent<Animator>();
+            }
+            
+            // 缓存动画参数 ID
+            if (_animator != null)
+            {
+                _animIDSpeed = Animator.StringToHash(_speedParameterName);
+                _animIDMotionSpeed = Animator.StringToHash(_motionSpeedParameterName);
             }
         }
 
@@ -215,11 +248,19 @@ namespace PetGrooming.Systems
                 return;
             }
 
-            Quaternion targetRotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.RotateTowards(
-                transform.rotation,
-                targetRotation,
-                _rotationSpeed * Time.deltaTime);
+            // 使用 SmoothDampAngle 实现平滑旋转（参考 ThirdPersonController）
+            // 计算目标旋转角度（基于相机方向已在 GetCameraRelativeDirection 中处理）
+            _targetRotation = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+            
+            // 使用平滑阻尼插值，避免方向突变时的抖动
+            float rotation = Mathf.SmoothDampAngle(
+                transform.eulerAngles.y, 
+                _targetRotation, 
+                ref _rotationVelocity, 
+                _rotationSmoothTime);
+            
+            // 只旋转 Y 轴
+            transform.rotation = Quaternion.Euler(0f, rotation, 0f);
         }
 
         private void ApplyGravity()
@@ -237,6 +278,25 @@ namespace PetGrooming.Systems
 
             // Apply movement through CharacterController
             _characterController.Move(finalMovement);
+            
+            // 更新动画
+            UpdateAnimation();
+        }
+        
+        private void UpdateAnimation()
+        {
+            if (_animator == null) return;
+            
+            // 计算目标速度（基于移动方向的大小）
+            float targetSpeed = _moveDirection.magnitude > 0.1f ? CurrentMoveSpeed : 0f;
+            
+            // 平滑过渡动画混合值
+            _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * 10f);
+            if (_animationBlend < 0.01f) _animationBlend = 0f;
+            
+            // 设置动画参数
+            _animator.SetFloat(_animIDSpeed, _animationBlend);
+            _animator.SetFloat(_animIDMotionSpeed, _moveDirection.magnitude > 0.1f ? 1f : 0f);
         }
 
         #endregion

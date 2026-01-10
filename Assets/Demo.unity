@@ -9893,7 +9893,7 @@ MonoBehaviour:
   _defaultOffset: {x: 0, y: 8, z: -6}
   _defaultFOV: 60
   _captureZoomMultiplier: 1.2
-  _zoomSpeed: 2
+  _zoomSpeed: 3
   _minDistance: 2
   _collisionLayers:
     serializedVersion: 2

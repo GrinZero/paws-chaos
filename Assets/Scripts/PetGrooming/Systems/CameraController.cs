@@ -508,8 +508,19 @@ namespace PetGrooming.Systems
                 transform.position = CalculateSmoothPosition(transform.position, desiredPosition, FollowSpeed, Time.deltaTime);
             }
 
-            // Look at target
-            transform.LookAt(_target.position + Vector3.up * 1.5f);
+            // 平滑旋转看向目标，避免方向改变时的抖动
+            Vector3 lookTarget = _target.position + Vector3.up * 1.5f;
+            Quaternion targetRotation = Quaternion.LookRotation(lookTarget - transform.position);
+            
+            if (_instantFollow)
+            {
+                // 即使是即时跟随，旋转也需要平滑处理以避免抖动
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.deltaTime);
+            }
+            else
+            {
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, FollowSpeed * Time.deltaTime);
+            }
         }
 
         private void UpdateGroomingView()
