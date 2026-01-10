@@ -779,12 +779,9 @@ namespace PetGrooming.UI.MobileUI
         
         /// <summary>
         /// 确保 OnScreenControl 组件能够正常工作。
-        /// OnScreenStick 和 OnScreenButton 通过模拟 Gamepad 输入工作，
-        /// 需要确保 PlayerInput 能够接收这些输入。
         /// 
-        /// 关键原理：OnScreenStick 会创建一个虚拟 Gamepad 设备，
-        /// 但 PlayerInput 默认可能只监听 KeyboardMouse 方案。
-        /// 解决方案是让 PlayerInput 同时监听所有设备。
+        /// 关键修复：移动端使用 OnScreenStick 时，需要确保 PlayerInput 能接收虚拟 Gamepad 输入。
+        /// 最可靠的方案是直接监听 Input System 的 Action，而不是依赖控制方案切换。
         /// </summary>
         private void EnsureOnScreenControlsWork()
         {
@@ -804,36 +801,55 @@ namespace PetGrooming.UI.MobileUI
             var gamepads = UnityEngine.InputSystem.Gamepad.all;
             Debug.Log($"[MobileHUDManager] Total Gamepad devices: {gamepads.Count}");
             
-            // 关键修复：禁用自动控制方案切换，让 PlayerInput 同时响应所有设备
-            // 这样无论当前是什么控制方案，OnScreenStick 的虚拟 Gamepad 输入都能被接收
-            if (_onScreenStick != null)
+            // 关键修复：在移动端强制切换到 Gamepad 方案
+            // OnScreenStick 模拟的是 Gamepad 左摇杆，必须使用 Gamepad 方案才能接收输入
+            if (_onScreenStick != null && IsTouchDevice())
             {
-                // 方案1：禁用自动切换，保持当前方案但允许所有设备输入
+                Debug.Log("[MobileHUDManager] Touch device detected, configuring for OnScreenStick...");
+                
+                // 禁用自动切换，防止切回 KeyboardMouse
                 playerInput.neverAutoSwitchControlSchemes = true;
                 
-                // 方案2：尝试切换到 Gamepad 方案（需要有 Gamepad 设备）
-                // OnScreenStick 启用时会自动创建虚拟 Gamepad
+                // 延迟切换，等待 OnScreenStick 创建虚拟设备
+                StartCoroutine(ForceGamepadScheme(playerInput));
+            }
+        }
+        
+        /// <summary>
+        /// 强制切换到 Gamepad 控制方案。
+        /// 持续尝试直到成功或超时。
+        /// </summary>
+        private System.Collections.IEnumerator ForceGamepadScheme(UnityEngine.InputSystem.PlayerInput playerInput)
+        {
+            float timeout = 3f;
+            float elapsed = 0f;
+            
+            while (elapsed < timeout)
+            {
+                yield return new WaitForSeconds(0.1f);
+                elapsed += 0.1f;
+                
+                var gamepads = UnityEngine.InputSystem.Gamepad.all;
+                Debug.Log($"[MobileHUDManager] Checking for Gamepad... count: {gamepads.Count}, elapsed: {elapsed:F1}s");
+                
                 if (gamepads.Count > 0)
                 {
                     try
                     {
-                        // 使用虚拟 Gamepad 设备切换控制方案
-                        var virtualGamepad = gamepads[gamepads.Count - 1]; // 最后添加的通常是虚拟的
+                        var virtualGamepad = gamepads[gamepads.Count - 1];
                         playerInput.SwitchCurrentControlScheme("Gamepad", virtualGamepad);
-                        Debug.Log($"[MobileHUDManager] Switched to Gamepad scheme with device: {virtualGamepad.name}");
+                        Debug.Log($"[MobileHUDManager] ✓ Successfully switched to Gamepad scheme: {virtualGamepad.name}");
+                        yield break;
                     }
                     catch (System.Exception e)
                     {
-                        Debug.LogWarning($"[MobileHUDManager] Failed to switch control scheme: {e.Message}");
+                        Debug.LogWarning($"[MobileHUDManager] Switch failed: {e.Message}");
                     }
                 }
-                else
-                {
-                    Debug.LogWarning("[MobileHUDManager] No Gamepad devices found. OnScreenStick may not create virtual device until first touch.");
-                    // 延迟检查：OnScreenStick 可能在第一次触摸时才创建虚拟设备
-                    StartCoroutine(DelayedControlSchemeSwitch(playerInput));
-                }
             }
+            
+            Debug.LogError("[MobileHUDManager] ✗ Failed to switch to Gamepad scheme after timeout! " +
+                          "OnScreenStick may not work. Check if OnScreenStick component is enabled.");
         }
         
         /// <summary>

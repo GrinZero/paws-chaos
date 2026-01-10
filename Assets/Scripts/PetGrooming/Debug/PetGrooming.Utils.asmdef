@@ -1,14 +1,9 @@
 {
-    "name": "PetGrooming.Setup",
-    "rootNamespace": "PetGrooming.Setup",
+    "name": "PetGrooming.Utils",
+    "rootNamespace": "PetGrooming.Utils",
     "references": [
-        "PetGrooming.Core",
-        "PetGrooming.Systems",
-        "PetGrooming.AI",
-        "PetGrooming.UI",
-        "PetGrooming.Utils",
-        "Unity.TextMeshPro",
         "Unity.InputSystem",
+        "Unity.TextMeshPro",
         "StarterAssets"
     ],
     "includePlatforms": [],
