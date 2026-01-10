@@ -114,20 +114,24 @@ namespace PetGrooming.Tests.Editor
         [Category("PropertyBasedTest")]
         public void Property1_VerySmallHandlePosition_ProducesZeroDirection()
         {
-            // Property: Handle positions below threshold produce zero direction
+            // Property: Handle positions with magnitude below threshold produce zero direction
+            // The threshold is sqrMagnitude < 0.0001f, which means magnitude < 0.01f
             for (int i = 0; i < PropertyTestIterations; i++)
             {
-                // Generate very small positions (below 0.01)
+                // Generate positions with magnitude below 0.01 (the threshold)
+                float angle = (float)(_random.NextDouble() * 2 * Math.PI);
+                float magnitude = (float)(_random.NextDouble() * 0.0099); // Below 0.01 threshold
+                
                 Vector2 handlePosition = new Vector2(
-                    (float)(_random.NextDouble() * 0.009),
-                    (float)(_random.NextDouble() * 0.009)
+                    Mathf.Cos(angle) * magnitude,
+                    Mathf.Sin(angle) * magnitude
                 );
                 
                 Vector2 direction = VirtualJoystick.CalculateNormalizedDirection(handlePosition);
                 
                 Assert.AreEqual(
                     0f, direction.magnitude, 0.0001f,
-                    $"Failed for handlePosition={handlePosition}. Very small positions should produce zero direction"
+                    $"Failed for handlePosition={handlePosition} (magnitude={handlePosition.magnitude}). Very small positions should produce zero direction"
                 );
             }
         }

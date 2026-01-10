@@ -18,3 +18,8 @@ To run Unity Editor tests from command line:
 
 - Unity Version: 6000.3.1f1
 - Platform: macOS
+
+
+## TIPS
+
+请你用中文输出

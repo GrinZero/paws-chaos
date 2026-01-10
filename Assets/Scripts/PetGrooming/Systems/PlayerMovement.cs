@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using PetGrooming.Core;
 
 namespace PetGrooming.Systems
@@ -38,6 +39,8 @@ namespace PetGrooming.Systems
         private Vector3 _velocity;
         private Vector3 _moveDirection;
         private bool _isGrounded;
+        private Vector2 _mobileInput;
+        private bool _useMobileInput;
 
         #endregion
 
@@ -125,9 +128,47 @@ namespace PetGrooming.Systems
 
         private void HandleMovementInput()
         {
-            // Get input from both WASD and Arrow keys
-            float horizontal = Input.GetAxisRaw("Horizontal"); // A/D or Left/Right
-            float vertical = Input.GetAxisRaw("Vertical");     // W/S or Up/Down
+            float horizontal;
+            float vertical;
+            
+            // Check for mobile input first
+            // Requirement 1.8: Mobile joystick input equivalent to keyboard/gamepad
+            if (_useMobileInput && _mobileInput.sqrMagnitude > 0.01f)
+            {
+                horizontal = _mobileInput.x;
+                vertical = _mobileInput.y;
+            }
+            else
+            {
+                // Use new Input System for keyboard input
+                var keyboard = Keyboard.current;
+                if (keyboard != null)
+                {
+                    horizontal = 0f;
+                    vertical = 0f;
+                    
+                    // WASD
+                    if (keyboard.aKey.isPressed) horizontal -= 1f;
+                    if (keyboard.dKey.isPressed) horizontal += 1f;
+                    if (keyboard.wKey.isPressed) vertical += 1f;
+                    if (keyboard.sKey.isPressed) vertical -= 1f;
+                    
+                    // Arrow keys
+                    if (keyboard.leftArrowKey.isPressed) horizontal -= 1f;
+                    if (keyboard.rightArrowKey.isPressed) horizontal += 1f;
+                    if (keyboard.upArrowKey.isPressed) vertical += 1f;
+                    if (keyboard.downArrowKey.isPressed) vertical -= 1f;
+                    
+                    // Clamp to -1, 1
+                    horizontal = Mathf.Clamp(horizontal, -1f, 1f);
+                    vertical = Mathf.Clamp(vertical, -1f, 1f);
+                }
+                else
+                {
+                    horizontal = 0f;
+                    vertical = 0f;
+                }
+            }
 
             // Calculate input direction
             Vector3 inputDirection = new Vector3(horizontal, 0f, vertical).normalized;
@@ -216,6 +257,26 @@ namespace PetGrooming.Systems
         public void ApplyKnockback(Vector3 force)
         {
             _velocity += force;
+        }
+        
+        /// <summary>
+        /// Sets mobile input from virtual joystick.
+        /// Requirement 1.8: Mobile joystick input equivalent to keyboard/gamepad.
+        /// </summary>
+        /// <param name="input">Normalized input vector from joystick (-1 to 1 on both axes)</param>
+        public void SetMobileInput(Vector2 input)
+        {
+            _mobileInput = input;
+            _useMobileInput = input.sqrMagnitude > 0.01f;
+        }
+        
+        /// <summary>
+        /// Clears mobile input.
+        /// </summary>
+        public void ClearMobileInput()
+        {
+            _mobileInput = Vector2.zero;
+            _useMobileInput = false;
         }
 
         #endregion

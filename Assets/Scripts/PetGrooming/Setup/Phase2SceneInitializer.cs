@@ -5,6 +5,7 @@ using PetGrooming.Systems;
 using PetGrooming.Systems.Skills;
 using PetGrooming.AI;
 using PetGrooming.UI;
+using PetGrooming.UI.MobileUI;
 
 namespace PetGrooming.Setup
 {
@@ -24,9 +25,17 @@ namespace PetGrooming.Setup
         [SerializeField] private bool _autoSetupCamera = true;
         [SerializeField] private bool _autoSetupGameSystems = true;
         [SerializeField] private bool _autoSetupUI = true;
+        [SerializeField] private bool _autoSetupMobileHUD = true;
 
         [Header("Groomer Settings")]
         [SerializeField] private Vector3 _groomerSpawnPosition = new Vector3(0f, 0f, 5f);
+
+        [Header("Mobile HUD Settings")]
+        [Tooltip("Mobile HUD prefab to instantiate")]
+        [SerializeField] private GameObject _mobileHUDPrefab;
+        
+        [Tooltip("Mobile HUD settings asset")]
+        [SerializeField] private MobileHUDSettings _mobileHUDSettings;
 
         private void Awake()
         {
@@ -67,6 +76,11 @@ namespace PetGrooming.Setup
             if (_autoSetupUI)
             {
                 SetupUI();
+            }
+
+            if (_autoSetupMobileHUD)
+            {
+                SetupMobileHUD();
             }
 
             // Start the game automatically
@@ -323,6 +337,141 @@ namespace PetGrooming.Setup
             }
 
             Debug.Log("[Phase2SceneInitializer] UI setup complete.");
+        }
+
+        /// <summary>
+        /// Sets up the Mobile HUD for touch-enabled devices.
+        /// Requirement 5.1: Enable Mobile_HUD on touch device.
+        /// Requirement 1.8: Connect joystick input to character movement.
+        /// </summary>
+        private void SetupMobileHUD()
+        {
+            // Check if MobileHUDManager already exists
+            MobileHUDManager existingManager = FindObjectOfType<MobileHUDManager>();
+            if (existingManager != null)
+            {
+                Debug.Log("[Phase2SceneInitializer] MobileHUDManager already exists, connecting references...");
+                ConnectMobileHUDReferences(existingManager);
+                return;
+            }
+
+            // Find or create Canvas for Mobile HUD
+            Canvas canvas = FindObjectOfType<Canvas>();
+            if (canvas == null)
+            {
+                Debug.LogWarning("[Phase2SceneInitializer] No Canvas found for Mobile HUD!");
+                return;
+            }
+
+            // Try to instantiate from prefab
+            if (_mobileHUDPrefab != null)
+            {
+                Debug.Log("[Phase2SceneInitializer] Instantiating MobileHUD from prefab...");
+                GameObject mobileHUDObj = Instantiate(_mobileHUDPrefab, canvas.transform);
+                mobileHUDObj.name = "MobileHUD";
+                
+                MobileHUDManager manager = mobileHUDObj.GetComponent<MobileHUDManager>();
+                if (manager != null)
+                {
+                    ConnectMobileHUDReferences(manager);
+                    
+                    // Apply settings if available
+                    if (_mobileHUDSettings != null)
+                    {
+                        manager.SetSettings(_mobileHUDSettings);
+                    }
+                }
+            }
+            else
+            {
+                // Create MobileHUD programmatically
+                Debug.Log("[Phase2SceneInitializer] Creating MobileHUD programmatically...");
+                CreateMobileHUDProgrammatically(canvas.transform);
+            }
+
+            Debug.Log("[Phase2SceneInitializer] Mobile HUD setup complete.");
+        }
+
+        /// <summary>
+        /// Connects MobileHUDManager to Groomer controller and movement components.
+        /// Requirement 1.8: Joystick input equivalent to keyboard/gamepad.
+        /// </summary>
+        private void ConnectMobileHUDReferences(MobileHUDManager manager)
+        {
+            // Find Groomer
+            GroomerController groomer = FindObjectOfType<GroomerController>();
+            if (groomer != null)
+            {
+                // Set groomer controller reference
+                manager.SetGroomerController(groomer);
+                
+                // Subscribe groomer to capture button events
+                // Requirement 2.4: Capture button triggers capture attempt
+                if (manager.SkillWheel != null)
+                {
+                    manager.SkillWheel.OnCapturePressed += groomer.OnCaptureButtonPressed;
+                    groomer.EnableMobileInput();
+                    Debug.Log("[Phase2SceneInitializer] Bound GroomerController to MobileHUD capture button.");
+                }
+                
+                // Set player movement reference
+                PlayerMovement playerMovement = groomer.GetComponent<PlayerMovement>();
+                if (playerMovement != null)
+                {
+                    manager.SetPlayerMovement(playerMovement);
+                    Debug.Log("[Phase2SceneInitializer] Connected MobileHUD to PlayerMovement.");
+                }
+                
+                // Bind skill wheel to groomer skills
+                GroomerSkillManager skillManager = groomer.GetComponent<GroomerSkillManager>();
+                if (skillManager != null && manager.SkillWheel != null)
+                {
+                    manager.SkillWheel.BindToGroomerSkills(skillManager);
+                    Debug.Log("[Phase2SceneInitializer] Bound SkillWheel to GroomerSkillManager.");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[Phase2SceneInitializer] No GroomerController found for MobileHUD connection!");
+            }
+
+            // Find desktop UI (skill bar) to toggle visibility
+            SkillBarUI skillBar = FindObjectOfType<SkillBarUI>();
+            if (skillBar != null)
+            {
+                // The MobileHUDManager will handle visibility toggling
+                Debug.Log("[Phase2SceneInitializer] Found SkillBarUI for desktop/mobile toggle.");
+            }
+        }
+
+        /// <summary>
+        /// Creates MobileHUD components programmatically when no prefab is available.
+        /// </summary>
+        private void CreateMobileHUDProgrammatically(Transform canvasTransform)
+        {
+            // Create MobileHUD container
+            GameObject mobileHUDObj = new GameObject("MobileHUD");
+            mobileHUDObj.transform.SetParent(canvasTransform, false);
+            
+            RectTransform hudRect = mobileHUDObj.AddComponent<RectTransform>();
+            hudRect.anchorMin = Vector2.zero;
+            hudRect.anchorMax = Vector2.one;
+            hudRect.sizeDelta = Vector2.zero;
+            hudRect.anchoredPosition = Vector2.zero;
+            
+            // Add MobileHUDManager
+            MobileHUDManager manager = mobileHUDObj.AddComponent<MobileHUDManager>();
+            
+            // Apply settings if available
+            if (_mobileHUDSettings != null)
+            {
+                manager.SetSettings(_mobileHUDSettings);
+            }
+            
+            // Connect references
+            ConnectMobileHUDReferences(manager);
+            
+            Debug.Log("[Phase2SceneInitializer] Created MobileHUD programmatically.");
         }
 
         private void CreateSkillBarUI(Transform canvasTransform)

@@ -6,7 +6,8 @@
         "PetGrooming.Systems",
         "PetGrooming.AI",
         "PetGrooming.Setup",
-        "PetGrooming.UI"
+        "PetGrooming.UI",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [
         "Editor"

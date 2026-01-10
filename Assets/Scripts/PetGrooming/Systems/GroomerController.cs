@@ -37,6 +37,7 @@ namespace PetGrooming.Systems
         private float _baseSpeed;
         private PetAI _nearbyPet;
         private PetCage _nearbyCage;
+        private bool _useMobileInput;
         
         #endregion
 
@@ -85,6 +86,12 @@ namespace PetGrooming.Systems
         /// Reference to the game configuration.
         /// </summary>
         public GameConfig Config => _gameConfig;
+        
+        /// <summary>
+        /// Whether mobile input mode is enabled.
+        /// Requirement 1.8: Support mobile joystick input.
+        /// </summary>
+        public bool UseMobileInput => _useMobileInput;
         
         #endregion
 
@@ -375,6 +382,34 @@ namespace PetGrooming.Systems
         public Transform GetPetHoldPoint()
         {
             return _petHoldPoint;
+        }
+        
+        /// <summary>
+        /// Enables mobile input mode.
+        /// Requirement 1.8: Support mobile joystick input.
+        /// </summary>
+        public void EnableMobileInput()
+        {
+            _useMobileInput = true;
+            Debug.Log("[GroomerController] Mobile input enabled.");
+        }
+        
+        /// <summary>
+        /// Disables mobile input mode.
+        /// </summary>
+        public void DisableMobileInput()
+        {
+            _useMobileInput = false;
+            Debug.Log("[GroomerController] Mobile input disabled.");
+        }
+        
+        /// <summary>
+        /// Called when capture button is pressed from mobile UI.
+        /// Requirement 2.4: Capture button triggers capture attempt.
+        /// </summary>
+        public void OnCaptureButtonPressed()
+        {
+            TryCapturePet();
         }
         
         #endregion

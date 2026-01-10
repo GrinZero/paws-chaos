@@ -4,7 +4,8 @@
     "references": [
         "PetGrooming.Core",
         "PetGrooming.Systems",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

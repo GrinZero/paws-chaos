@@ -4281,6 +4281,60 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410036155}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &418400539
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 418400541}
+  - component: {fileID: 418400540}
+  m_Layer: 0
+  m_Name: SceneInitializer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &418400540
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 418400539}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2521b8d9457b9459aa1442802f87ffe4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PetGrooming.Setup::PetGrooming.Setup.Phase2SceneInitializer
+  _phase2Config: {fileID: 11400000, guid: 3722758016bcd416fb81094b2aa25de6, type: 2}
+  _gameConfig: {fileID: 11400000, guid: 2f74a0798dea74a8a93a5442f79945db, type: 2}
+  _autoSetupGroomer: 1
+  _autoSetupCamera: 1
+  _autoSetupGameSystems: 1
+  _autoSetupUI: 1
+  _autoSetupMobileHUD: 1
+  _groomerSpawnPosition: {x: 0, y: 0, z: 5}
+  _mobileHUDPrefab: {fileID: 2177595415965950392, guid: 40c945c50c488453eb532b80b22a330f, type: 3}
+  _mobileHUDSettings: {fileID: 0}
+--- !u!4 &418400541
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 418400539}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -4.26317, y: 0, z: -4.51828}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &420175105
 GameObject:
   m_ObjectHideFlags: 0
@@ -8424,7 +8478,7 @@ GameObject:
   m_Layer: 0
   m_Name: Phase2Initializer
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -8441,12 +8495,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: PetGrooming.Setup::PetGrooming.Setup.Phase2SceneInitializer
   _phase2Config: {fileID: 11400000, guid: 3722758016bcd416fb81094b2aa25de6, type: 2}
-  _gameConfig: {fileID: 0}
+  _gameConfig: {fileID: 11400000, guid: 2f74a0798dea74a8a93a5442f79945db, type: 2}
   _autoSetupGroomer: 0
   _autoSetupCamera: 1
   _autoSetupGameSystems: 1
   _autoSetupUI: 1
+  _autoSetupMobileHUD: 1
   _groomerSpawnPosition: {x: 0, y: 0, z: 5}
+  _mobileHUDPrefab: {fileID: 0}
+  _mobileHUDSettings: {fileID: 0}
 --- !u!4 &758203916
 Transform:
   m_ObjectHideFlags: 0
@@ -13167,6 +13224,10 @@ PrefabInstance:
     - target: {fileID: 1804703078109025515, guid: 332df604d1fc7fd46ae4013ce9b4a5d6, type: 3}
       propertyPath: m_Name
       value: PlayerRobot
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563429732134213952, guid: 332df604d1fc7fd46ae4013ce9b4a5d6, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3795091336040275115, guid: 332df604d1fc7fd46ae4013ce9b4a5d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -18824,3 +18885,4 @@ SceneRoots:
   - {fileID: 1256379981}
   - {fileID: 1174172165}
   - {fileID: 758203916}
+  - {fileID: 418400541}
