@@ -6,7 +6,8 @@
         "PetGrooming.Systems",
         "PetGrooming.AI",
         "PetGrooming.UI",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

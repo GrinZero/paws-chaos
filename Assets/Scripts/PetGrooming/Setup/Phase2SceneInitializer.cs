@@ -308,6 +308,16 @@ namespace PetGrooming.Setup
 
         private void SetupUI()
         {
+            // Find or create EventSystem (required for UI input)
+            if (FindObjectOfType<UnityEngine.EventSystems.EventSystem>() == null)
+            {
+                Debug.Log("[Phase2SceneInitializer] Creating EventSystem...");
+                GameObject eventSystemObj = new GameObject("EventSystem");
+                eventSystemObj.AddComponent<UnityEngine.EventSystems.EventSystem>();
+                // Use InputSystemUIInputModule for new Input System compatibility
+                eventSystemObj.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
+            }
+            
             // Find or create Canvas
             Canvas canvas = FindObjectOfType<Canvas>();
             if (canvas == null)
@@ -367,7 +377,8 @@ namespace PetGrooming.Setup
             if (_mobileHUDPrefab != null)
             {
                 Debug.Log("[Phase2SceneInitializer] Instantiating MobileHUD from prefab...");
-                GameObject mobileHUDObj = Instantiate(_mobileHUDPrefab, canvas.transform);
+                // MobileHUD prefab has its own Canvas, so instantiate at root level
+                GameObject mobileHUDObj = Instantiate(_mobileHUDPrefab);
                 mobileHUDObj.name = "MobileHUD";
                 
                 MobileHUDManager manager = mobileHUDObj.GetComponent<MobileHUDManager>();

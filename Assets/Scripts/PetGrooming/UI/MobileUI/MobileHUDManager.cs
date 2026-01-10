@@ -59,6 +59,9 @@ namespace PetGrooming.UI.MobileUI
         [Tooltip("Auto-detect touch device on start")]
         [SerializeField] private bool _autoDetectDevice = true;
         
+        [Tooltip("Force mobile mode in editor (for testing)")]
+        [SerializeField] private bool _forceMobileInEditor = true;
+        
         [Tooltip("PlayerPrefs key for UI mode preference")]
         [SerializeField] private string _uiModePrefsKey = "MobileUIMode";
         
@@ -699,6 +702,15 @@ namespace PetGrooming.UI.MobileUI
             {
                 return PlayerPrefs.GetInt(_uiModePrefsKey) == 1;
             }
+            
+            // Force mobile mode in editor for testing
+            #if UNITY_EDITOR
+            if (_forceMobileInEditor)
+            {
+                Debug.Log("[MobileHUDManager] Forcing mobile mode in editor for testing.");
+                return true;
+            }
+            #endif
             
             // Auto-detect if enabled
             // Requirement 5.1, 5.2: Auto-detect device type

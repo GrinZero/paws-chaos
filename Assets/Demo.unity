@@ -4297,7 +4297,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &418400540
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8496,13 +8496,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: PetGrooming.Setup::PetGrooming.Setup.Phase2SceneInitializer
   _phase2Config: {fileID: 11400000, guid: 3722758016bcd416fb81094b2aa25de6, type: 2}
   _gameConfig: {fileID: 11400000, guid: 2f74a0798dea74a8a93a5442f79945db, type: 2}
-  _autoSetupGroomer: 0
+  _autoSetupGroomer: 1
   _autoSetupCamera: 1
   _autoSetupGameSystems: 1
   _autoSetupUI: 1
   _autoSetupMobileHUD: 1
   _groomerSpawnPosition: {x: 0, y: 0, z: 5}
-  _mobileHUDPrefab: {fileID: 0}
+  _mobileHUDPrefab: {fileID: 2184835807467906957, guid: 40c945c50c488453eb532b80b22a330f, type: 3}
   _mobileHUDSettings: {fileID: 0}
 --- !u!4 &758203916
 Transform:
