@@ -5,39 +5,38 @@ using PetGrooming.Core;
 namespace PetGrooming.UI.MobileUI
 {
     /// <summary>
-    /// Screen adapter component that handles UI scaling and positioning
-    /// based on screen size and aspect ratio.
-    /// Ensures UI elements remain visible and properly positioned across different devices.
+    /// 屏幕适配组件，处理基于屏幕大小和宽高比的UI缩放和定位。
+    /// 确保UI元素在不同设备上保持可见和正确定位。
     /// 
-    /// Requirements: 3.6
-    /// Property 8: Screen Size Adaptation
+    /// 需求：3.6
+    /// 属性 8: 屏幕大小适配
     /// </summary>
     public class ScreenAdapter : MonoBehaviour
     {
         #region Constants
         
         /// <summary>
-        /// Reference screen width for UI design (1920x1080 baseline).
+        /// UI设计的参考屏幕宽度（1920x1080基准）。
         /// </summary>
         public const float ReferenceWidth = 1920f;
         
         /// <summary>
-        /// Reference screen height for UI design.
+        /// UI设计的参考屏幕高度。
         /// </summary>
         public const float ReferenceHeight = 1080f;
         
         /// <summary>
-        /// Minimum scale factor to prevent UI from becoming too small.
+        /// 最小缩放因子，防止UI变得太小。
         /// </summary>
         public const float MinScaleFactor = 0.5f;
         
         /// <summary>
-        /// Maximum scale factor to prevent UI from becoming too large.
+        /// 最大缩放因子，防止UI变得太大。
         /// </summary>
         public const float MaxScaleFactor = 1.5f;
         
         /// <summary>
-        /// Safe area margin in pixels (for notches, rounded corners).
+        /// 安全区域边距（像素）（用于缺口、圆角）。
         /// </summary>
         public const float SafeAreaMargin = 20f;
         
@@ -45,24 +44,24 @@ namespace PetGrooming.UI.MobileUI
 
         #region Serialized Fields
         
-        [Header("UI References")]
-        [Tooltip("RectTransform of the joystick container")]
+        [Header("UI引用")]
+        [Tooltip("摇杆容器的RectTransform")]
         [SerializeField] private RectTransform _joystickContainer;
         
-        [Tooltip("RectTransform of the skill wheel container")]
+        [Tooltip("技能轮容器的RectTransform")]
         [SerializeField] private RectTransform _skillWheelContainer;
         
-        [Tooltip("RectTransform of the struggle button container")]
+        [Tooltip("挣扎按钮容器的RectTransform")]
         [SerializeField] private RectTransform _struggleButtonContainer;
         
-        [Header("Settings")]
-        [Tooltip("Mobile HUD settings asset")]
+        [Header("设置")]
+        [Tooltip("移动HUD设置资源")]
         [SerializeField] private MobileHUDSettings _settings;
         
-        [Tooltip("Enable automatic adaptation on screen size change")]
+        [Tooltip("在屏幕大小变化时启用自动适配")]
         [SerializeField] private bool _autoAdapt = true;
         
-        [Tooltip("Use device safe area for positioning")]
+        [Tooltip("使用设备安全区域进行定位")]
         [SerializeField] private bool _useSafeArea = true;
         
         #endregion
@@ -80,17 +79,17 @@ namespace PetGrooming.UI.MobileUI
         #region Properties
         
         /// <summary>
-        /// Current scale factor applied to UI elements.
+        /// 应用到UI元素的当前缩放因子。
         /// </summary>
         public float CurrentScaleFactor => _currentScaleFactor;
         
         /// <summary>
-        /// Current safe area rect.
+        /// 当前安全区域矩形。
         /// </summary>
         public Rect CurrentSafeArea => _currentSafeArea;
         
         /// <summary>
-        /// Whether auto-adaptation is enabled.
+        /// 是否启用自动适配。
         /// </summary>
         public bool AutoAdapt
         {

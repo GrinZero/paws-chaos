@@ -4,8 +4,8 @@ using UnityEngine;
 namespace PetGrooming.Core
 {
     /// <summary>
-    /// Core game manager singleton that controls game flow, timing, and victory conditions.
-    /// Requirements: 6.1, 6.3, 6.4, 6.5
+    /// 控制游戏流程、计时和胜利条件的核心游戏管理器单例。
+    /// 需求：6.1, 6.3, 6.4, 6.5
     /// </summary>
     public class GameManager : MonoBehaviour
     {
@@ -34,7 +34,7 @@ namespace PetGrooming.Core
         #region Enums
         
         /// <summary>
-        /// Represents the current state of the game.
+        /// 表示游戏的当前状态。
         /// </summary>
         public enum GameState
         {
@@ -57,53 +57,53 @@ namespace PetGrooming.Core
         #region Properties
         
         /// <summary>
-        /// Current state of the game.
+        /// 游戏的当前状态。
         /// </summary>
         public GameState CurrentState { get; private set; } = GameState.NotStarted;
         
         /// <summary>
-        /// Remaining time in the match in seconds.
+        /// 比赛中剩余的时间（秒）。
         /// </summary>
         public float RemainingTime { get; private set; }
         
         /// <summary>
-        /// Duration of the match in seconds.
+        /// 比赛的持续时间（秒）。
         /// </summary>
         public float MatchDuration => _gameConfig != null ? _gameConfig.MatchDuration : 180f;
         
         /// <summary>
-        /// Mischief threshold for Pet victory.
+        /// 宠物胜利的恶作剧阈值。
         /// </summary>
         public int MischiefThreshold => _gameConfig != null ? _gameConfig.MischiefThreshold : 500;
         
         /// <summary>
-        /// Reference to the game configuration.
+        /// 对游戏配置的引用。
         /// </summary>
         public GameConfig Config => _gameConfig;
         
         /// <summary>
-        /// Whether the pet has been groomed (legacy single-pet support).
+        /// 宠物是否已被梳理（遗留的单宠物支持）。
         /// </summary>
         public bool IsPetGroomed { get; private set; }
         
         /// <summary>
-        /// Current mischief value (tracked for victory condition checks).
+        /// 当前恶作剧值（用于胜利条件检查）。
         /// </summary>
         public int CurrentMischiefValue { get; private set; }
         
         /// <summary>
-        /// Total number of pets in the match.
+        /// 比赛中宠物的总数。
         /// </summary>
         public int TotalPetCount { get; private set; }
         
         /// <summary>
-        /// Number of pets that have been groomed.
+        /// 已被梳理的宠物数量。
         /// </summary>
         public int GroomedPetCount { get; private set; }
         
         /// <summary>
-        /// Whether all pets have been groomed.
-        /// Requirement 1.7: Victory condition for multi-pet mode.
+        /// 是否所有宠物都已被梳理。
+        /// 需求 1.7：多宠物模式的胜利条件。
         /// </summary>
         public bool AllPetsGroomed => TotalPetCount > 0 && GroomedPetCount >= TotalPetCount;
         
@@ -112,22 +112,22 @@ namespace PetGrooming.Core
         #region Events
         
         /// <summary>
-        /// Fired when the game state changes.
+        /// 当游戏状态改变时触发。
         /// </summary>
         public event Action<GameState> OnGameStateChanged;
         
         /// <summary>
-        /// Fired when the remaining time is updated.
+        /// 当剩余时间更新时触发。
         /// </summary>
         public event Action<float> OnTimeUpdated;
         
         /// <summary>
-        /// Fired when the match starts.
+        /// 当比赛开始时触发。
         /// </summary>
         public event Action OnMatchStarted;
         
         /// <summary>
-        /// Fired when the match ends.
+        /// 当比赛结束时触发。
         /// </summary>
         public event Action<GameState> OnMatchEnded;
         
@@ -187,8 +187,8 @@ namespace PetGrooming.Core
         #region Public Methods
         
         /// <summary>
-        /// Starts a new match.
-        /// Requirement 6.1: Initialize a 3-minute countdown timer.
+        /// 开始新的比赛。
+        /// 需求 6.1：初始化 3 分钟倒计时器。
         /// </summary>
         public void StartMatch()
         {
@@ -215,9 +215,9 @@ namespace PetGrooming.Core
         }
         
         /// <summary>
-        /// Ends the match with the specified result.
+        /// 以指定的结果结束比赛。
         /// </summary>
-        /// <param name="result">The final game state (GroomerWin or PetWin).</param>
+        /// <param name="result">最终游戏状态（GroomerWin 或 PetWin）。</param>
         public void EndMatch(GameState result)
         {
             if (CurrentState == GameState.GroomerWin || CurrentState == GameState.PetWin)
@@ -239,7 +239,7 @@ namespace PetGrooming.Core
         }
         
         /// <summary>
-        /// Pauses the current match.
+        /// 暂停当前比赛。
         /// </summary>
         public void PauseMatch()
         {
@@ -256,7 +256,7 @@ namespace PetGrooming.Core
         }
         
         /// <summary>
-        /// Resumes a paused match.
+        /// 恢复暂停的比赛。
         /// </summary>
         public void ResumeMatch()
         {
@@ -273,9 +273,9 @@ namespace PetGrooming.Core
         }
         
         /// <summary>
-        /// Called when the pet grooming is completed.
-        /// Requirement 6.4: Groomer wins when pet is successfully groomed.
-        /// Requirement 1.7: Groomer wins when ALL pets are groomed (multi-pet mode).
+        /// 当宠物梳理完成时调用。
+        /// 需求 6.4：当宠物成功梳理时，Groomer 获胜。
+        /// 需求 1.7：当所有宠物都被梳理时，Groomer 获胜（多宠物模式）。
         /// </summary>
         public void OnPetGroomingComplete()
         {
@@ -305,10 +305,10 @@ namespace PetGrooming.Core
         }
         
         /// <summary>
-        /// Sets the total number of pets for the match.
-        /// Should be called after spawning pets.
+        /// 设置比赛中宠物的总数。
+        /// 应在生成宠物后调用。
         /// </summary>
-        /// <param name="count">Total number of pets</param>
+        /// <param name="count">宠物总数</param>
         public void SetTotalPetCount(int count)
         {
             TotalPetCount = count;
@@ -316,8 +316,8 @@ namespace PetGrooming.Core
         }
         
         /// <summary>
-        /// Registers a pet grooming completion.
-        /// Requirement 1.7: Track groomed pets for victory condition.
+        /// 注册宠物梳理完成。
+        /// 需求 1.7：跟踪已梳理的宠物以满足胜利条件。
         /// </summary>
         public void RegisterPetGroomed()
         {
@@ -335,9 +335,9 @@ namespace PetGrooming.Core
         }
         
         /// <summary>
-        /// Checks if all pets have been groomed and triggers victory if so.
-        /// Property 4: All Pets Groomed Victory Condition
-        /// Requirement 1.7: When all Pets are groomed, declare Groomer victory.
+        /// 检查是否所有宠物都已被梳理，如果是则触发胜利。
+        /// 属性 4：所有宠物梳理胜利条件
+        /// 需求 1.7：当所有宠物都被梳理时，宣布 Groomer 胜利。
         /// </summary>
         private void CheckAllPetsGroomedVictory()
         {
@@ -349,10 +349,10 @@ namespace PetGrooming.Core
         }
         
         /// <summary>
-        /// Called when mischief value changes.
-        /// Requirement 6.5: Pet wins when mischief threshold is reached.
+        /// 当恶作剧值改变时调用。
+        /// 需求 6.5：当恶作剧阈值达到时，宠物获胜。
         /// </summary>
-        /// <param name="newMischiefValue">The new mischief value.</param>
+        /// <param name="newMischiefValue">新的恶作剧值。</param>
         public void OnMischiefValueChanged(int newMischiefValue)
         {
             CurrentMischiefValue = newMischiefValue;
@@ -364,7 +364,7 @@ namespace PetGrooming.Core
         }
         
         /// <summary>
-        /// Resets the game to initial state for a new match.
+        /// 将游戏重置为初始状态以开始新的比赛。
         /// </summary>
         public void ResetGame()
         {
@@ -384,14 +384,14 @@ namespace PetGrooming.Core
         #region Victory Condition Methods (Testable)
         
         /// <summary>
-        /// Determines the game state based on current conditions.
-        /// This method is designed to be testable for property-based testing.
+        /// 根据当前条件确定游戏状态。
+        /// 此方法设计为可测试的，用于基于属性的测试。
         /// </summary>
-        /// <param name="mischiefValue">Current mischief value.</param>
-        /// <param name="mischiefThreshold">Threshold for pet victory.</param>
-        /// <param name="remainingTime">Remaining time in seconds.</param>
-        /// <param name="isPetGroomed">Whether the pet has been groomed (legacy single-pet).</param>
-        /// <returns>The determined game state.</returns>
+        /// <param name="mischiefValue">当前恶作剧值。</param>
+        /// <param name="mischiefThreshold">宠物胜利的阈值。</param>
+        /// <param name="remainingTime">剩余时间（秒）。</param>
+        /// <param name="isPetGroomed">宠物是否已被梳理（遗留的单宠物）。</param>
+        /// <returns>确定的游戏状态。</returns>
         public static GameState DetermineVictoryCondition(
             int mischiefValue, 
             int mischiefThreshold, 
@@ -425,16 +425,16 @@ namespace PetGrooming.Core
         }
         
         /// <summary>
-        /// Determines the game state based on multi-pet conditions.
-        /// Property 4: All Pets Groomed Victory Condition
-        /// Requirement 1.7: When all Pets are groomed, declare Groomer victory.
+        /// 根据多宠物条件确定游戏状态。
+        /// 属性 4：所有宠物梳理胜利条件
+        /// 需求 1.7：当所有宠物都被梳理时，宣布 Groomer 胜利。
         /// </summary>
-        /// <param name="mischiefValue">Current mischief value.</param>
-        /// <param name="mischiefThreshold">Threshold for pet victory.</param>
-        /// <param name="remainingTime">Remaining time in seconds.</param>
-        /// <param name="totalPets">Total number of pets in the match.</param>
-        /// <param name="groomedPets">Number of pets that have been groomed.</param>
-        /// <returns>The determined game state.</returns>
+        /// <param name="mischiefValue">当前恶作剧值。</param>
+        /// <param name="mischiefThreshold">宠物胜利的阈值。</param>
+        /// <param name="remainingTime">剩余时间（秒）。</param>
+        /// <param name="totalPets">比赛中宠物的总数。</param>
+        /// <param name="groomedPets">已被梳理的宠物数量。</param>
+        /// <returns>确定的游戏状态。</returns>
         public static GameState DetermineMultiPetVictoryCondition(
             int mischiefValue, 
             int mischiefThreshold, 
@@ -469,13 +469,13 @@ namespace PetGrooming.Core
         }
         
         /// <summary>
-        /// Checks if all pets are groomed based on counts.
-        /// Property 4: All Pets Groomed Victory Condition
-        /// Requirement 1.7
+        /// 根据计数检查是否所有宠物都已被梳理。
+        /// 属性 4：所有宠物梳理胜利条件
+        /// 需求 1.7
         /// </summary>
-        /// <param name="totalPets">Total number of pets</param>
-        /// <param name="groomedPets">Number of groomed pets</param>
-        /// <returns>True if all pets are groomed</returns>
+        /// <param name="totalPets">宠物总数</param>
+        /// <param name="groomedPets">已梳理的宠物数量</param>
+        /// <returns>如果所有宠物都已被梳理则返回 True</returns>
         public static bool AreAllPetsGroomed(int totalPets, int groomedPets)
         {
             return totalPets > 0 && groomedPets >= totalPets;
@@ -486,7 +486,7 @@ namespace PetGrooming.Core
         #region Private Methods
         
         /// <summary>
-        /// Updates the match timer.
+        /// 更新比赛计时器。
         /// </summary>
         private void UpdateTimer()
         {
@@ -502,8 +502,8 @@ namespace PetGrooming.Core
         }
         
         /// <summary>
-        /// Checks if timer expiry triggers Pet victory.
-        /// Requirement 6.3: When timer reaches 0 and Pet is not groomed, Pet wins.
+        /// 检查计时器到期是否触发宠物胜利。
+        /// 需求 6.3：当计时器达到 0 且宠物未被梳理时，宠物获胜。
         /// </summary>
         private void CheckTimerVictory()
         {
@@ -514,8 +514,8 @@ namespace PetGrooming.Core
         }
         
         /// <summary>
-        /// Checks if mischief threshold triggers Pet victory.
-        /// Requirement 6.5: When mischief value reaches threshold, Pet wins immediately.
+        /// 检查恶作剧阈值是否触发宠物胜利。
+        /// 需求 6.5：当恶作剧值达到阈值时，宠物立即获胜。
         /// </summary>
         private void CheckMischiefVictory()
         {
@@ -526,9 +526,9 @@ namespace PetGrooming.Core
         }
         
         /// <summary>
-        /// Sets the game state and fires the state changed event.
+        /// 设置游戏状态并触发状态改变事件。
         /// </summary>
-        /// <param name="newState">The new game state.</param>
+        /// <param name="newState">新的游戏状态。</param>
         private void SetGameState(GameState newState)
         {
             if (CurrentState == newState)
@@ -549,7 +549,7 @@ namespace PetGrooming.Core
         
 #if UNITY_EDITOR
         /// <summary>
-        /// Sets the game config for testing purposes.
+        /// 为测试目的设置游戏配置。
         /// </summary>
         public void SetConfigForTesting(GameConfig config)
         {
@@ -557,7 +557,7 @@ namespace PetGrooming.Core
         }
         
         /// <summary>
-        /// Sets the total pet count for testing purposes.
+        /// 为测试目的设置宠物总数。
         /// </summary>
         public void SetTotalPetCountForTesting(int count)
         {
@@ -565,7 +565,7 @@ namespace PetGrooming.Core
         }
         
         /// <summary>
-        /// Sets the groomed pet count for testing purposes.
+        /// 为测试目的设置已梳理的宠物数量。
         /// </summary>
         public void SetGroomedPetCountForTesting(int count)
         {
@@ -573,7 +573,7 @@ namespace PetGrooming.Core
         }
         
         /// <summary>
-        /// Sets the current state for testing purposes.
+        /// 为测试目的设置当前状态。
         /// </summary>
         public void SetStateForTesting(GameState state)
         {

@@ -6,10 +6,10 @@ using PetGrooming.Core;
 namespace PetGrooming.Systems
 {
     /// <summary>
-    /// Manages the alert state when mischief value approaches the threshold.
-    /// Requirements: 6.3, 6.4, 6.5
-    /// Property 16: Alert State Trigger Condition
-    /// Property 17: Alert State Speed Bonus
+    /// 当恶作剧值接近阈值时管理警戒状态的系统。
+    /// 需求：6.3, 6.4, 6.5
+    /// 属性 16：警戒状态触发条件
+    /// 属性 17：警戒状态速度加成
     /// </summary>
     public class AlertSystem : MonoBehaviour
     {
@@ -111,7 +111,7 @@ namespace PetGrooming.Systems
         
         private void Awake()
         {
-            // Singleton setup
+            // 单例初始化
             if (_instance != null && _instance != this)
             {
                 Debug.LogWarning("[AlertSystem] Duplicate AlertSystem detected, destroying this instance.");
@@ -129,19 +129,19 @@ namespace PetGrooming.Systems
         
         private void Start()
         {
-            // Subscribe to mischief value changes
+            // 订阅恶作剧值变化事件
             if (MischiefSystem.Instance != null)
             {
                 MischiefSystem.Instance.OnMischiefValueChanged += OnMischiefValueChanged;
             }
             
-            // Initialize lights to off state
+            // 初始化为关闭灯光状态
             SetLightsState(false);
         }
         
         private void OnDestroy()
         {
-            // Unsubscribe from events
+            // 取消事件订阅
             if (MischiefSystem.Instance != null)
             {
                 MischiefSystem.Instance.OnMischiefValueChanged -= OnMischiefValueChanged;
@@ -158,9 +158,9 @@ namespace PetGrooming.Systems
         #region Public Methods
         
         /// <summary>
-        /// Starts the alert state.
-        /// Requirement 6.4: Display flashing lights and play alert sound.
-        /// Requirement 6.5: Groomer receives 10% speed bonus.
+        /// 开启警戒状态。
+        /// 需求 6.4：显示闪烁警示灯并播放警报音效。
+        /// 需求 6.5：Groomer 获得 10% 移动速度加成。
         /// </summary>
         public void StartAlert()
         {
@@ -172,14 +172,14 @@ namespace PetGrooming.Systems
             
             IsAlertActive = true;
             
-            // Start light flashing
+            // 开始切换警报灯闪烁协程
             if (_flashCoroutine != null)
             {
                 StopCoroutine(_flashCoroutine);
             }
             _flashCoroutine = StartCoroutine(FlashLightsCoroutine());
             
-            // Play alert sound
+            // 播放警报音效
             PlayAlertSound();
             
             OnAlertStarted?.Invoke();
@@ -188,7 +188,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Stops the alert state.
+        /// 关闭警戒状态。
         /// </summary>
         public void StopAlert()
         {
@@ -200,17 +200,17 @@ namespace PetGrooming.Systems
             
             IsAlertActive = false;
             
-            // Stop light flashing
+            // 停止灯光闪烁
             if (_flashCoroutine != null)
             {
                 StopCoroutine(_flashCoroutine);
                 _flashCoroutine = null;
             }
             
-            // Reset lights to normal
+            // 将灯光恢复为正常状态
             SetLightsState(false);
             
-            // Stop alert sound
+            // 停止警报音效
             StopAlertSound();
             
             OnAlertEnded?.Invoke();
@@ -219,11 +219,11 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Checks if alert should be triggered based on current mischief value.
-        /// Property 16: Alert State Trigger Condition
-        /// Requirement 6.3: Alert triggers at (threshold - 100)
+        /// 根据当前恶作剧值检查是否应进入警戒状态。
+        /// 属性 16：警戒状态触发条件。
+        /// 需求 6.3：在（阈值 - 100）时触发警戒。
         /// </summary>
-        /// <param name="currentMischief">Current mischief value</param>
+        /// <param name="currentMischief">当前恶作剧值。</param>
         public void CheckAlertCondition(int currentMischief)
         {
             if (MischiefSystem.Instance == null)
@@ -240,15 +240,15 @@ namespace PetGrooming.Systems
             {
                 StartAlert();
             }
-            // Note: Alert doesn't stop once triggered (per design - it continues until game ends)
+            // 设计说明：一旦进入警戒状态不会自动结束，将持续到游戏结束
         }
         
         /// <summary>
-        /// Gets the effective speed multiplier for the Groomer.
-        /// Property 17: Alert State Speed Bonus
-        /// Requirement 6.5: 10% movement speed bonus during alert.
+        /// 获取 Groomer 在当前警戒状态下的速度倍率。
+        /// 属性 17：警戒状态速度加成。
+        /// 需求 6.5：警戒状态下移动速度提升 10%。
         /// </summary>
-        /// <returns>Speed multiplier (1.0 if not alert, 1.1 if alert)</returns>
+        /// <returns>速度倍率（非警戒为 1.0，警戒为 1.1）。</returns>
         public float GetGroomerSpeedMultiplier()
         {
             return CalculateGroomerSpeedMultiplier(IsAlertActive, GroomerSpeedBonus);
@@ -267,7 +267,7 @@ namespace PetGrooming.Systems
         {
             while (IsAlertActive)
             {
-                // Toggle lights
+                // 切换灯光开关状态
                 _lightsOn = !_lightsOn;
                 SetLightsState(_lightsOn);
                 
@@ -314,39 +314,39 @@ namespace PetGrooming.Systems
         #region Static Calculation Methods (Testable)
         
         /// <summary>
-        /// Calculates the alert trigger threshold.
-        /// Property 16: Alert State Trigger Condition
-        /// Requirement 6.3: Alert triggers at (threshold - 100)
+        /// 计算警戒状态的触发阈值。
+        /// 属性 16：警戒状态触发条件。
+        /// 需求 6.3：在（恶作剧阈值 - 100）时触发警戒。
         /// </summary>
-        /// <param name="mischiefThreshold">The mischief threshold for pet victory</param>
-        /// <param name="alertOffset">The offset from threshold (default 100)</param>
-        /// <returns>The mischief value at which alert triggers</returns>
+        /// <param name="mischiefThreshold">宠物获胜所需的恶作剧阈值。</param>
+        /// <param name="alertOffset">距离阈值的偏移量（默认 100）。</param>
+        /// <returns>警戒触发时的恶作剧值。</returns>
         public static int GetAlertTriggerThreshold(int mischiefThreshold, int alertOffset = 100)
         {
             return mischiefThreshold - alertOffset;
         }
         
         /// <summary>
-        /// Determines if alert should be triggered based on mischief value.
-        /// Property 16: Alert State Trigger Condition
-        /// Requirement 6.3: Alert triggers when mischief reaches (threshold - 100)
+        /// 根据恶作剧值判断是否应触发警戒。
+        /// 属性 16：警戒状态触发条件。
+        /// 需求 6.3：当恶作剧值达到（阈值 - 100）时进入警戒状态。
         /// </summary>
-        /// <param name="currentMischief">Current mischief value</param>
-        /// <param name="alertTriggerThreshold">The threshold at which alert triggers</param>
-        /// <returns>True if alert should be active</returns>
+        /// <param name="currentMischief">当前恶作剧值。</param>
+        /// <param name="alertTriggerThreshold">警戒触发阈值。</param>
+        /// <returns>应处于警戒状态时返回 true。</returns>
         public static bool ShouldTriggerAlert(int currentMischief, int alertTriggerThreshold)
         {
             return currentMischief >= alertTriggerThreshold;
         }
         
         /// <summary>
-        /// Calculates the Groomer's speed multiplier during alert state.
-        /// Property 17: Alert State Speed Bonus
-        /// Requirement 6.5: 10% movement speed bonus during alert.
+        /// 计算警戒状态下 Groomer 的速度倍率。
+        /// 属性 17：警戒状态速度加成。
+        /// 需求 6.5：警戒状态下移动速度提高 10%。
         /// </summary>
-        /// <param name="isAlertActive">Whether alert state is active</param>
-        /// <param name="speedBonus">The speed bonus percentage (0.1 = 10%)</param>
-        /// <returns>Speed multiplier (1.0 + bonus if alert, 1.0 otherwise)</returns>
+        /// <param name="isAlertActive">当前是否处于警戒状态。</param>
+        /// <param name="speedBonus">速度加成比例（0.1 表示 10%）。</param>
+        /// <returns>速度倍率（警戒时为 1.0 + 加成，否则为 1.0）。</returns>
         public static float CalculateGroomerSpeedMultiplier(bool isAlertActive, float speedBonus)
         {
             if (isAlertActive)
@@ -357,15 +357,15 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Validates the alert trigger condition.
-        /// Property 16: Alert State Trigger Condition
-        /// Requirement 6.3: When mischief value reaches (threshold - 100), alert state shall be active.
+        /// 校验警戒状态触发条件是否满足。
+        /// 属性 16：警戒状态触发条件。
+        /// 需求 6.3：当恶作剧值达到（阈值 - 100）时应处于警戒状态。
         /// </summary>
-        /// <param name="mischiefValue">Current mischief value</param>
-        /// <param name="mischiefThreshold">Mischief threshold for pet victory</param>
-        /// <param name="alertOffset">Offset from threshold for alert trigger</param>
-        /// <param name="isAlertActive">Whether alert is currently active</param>
-        /// <returns>True if the alert state is correct for the given mischief value</returns>
+        /// <param name="mischiefValue">当前恶作剧值。</param>
+        /// <param name="mischiefThreshold">宠物获胜所需的恶作剧阈值。</param>
+        /// <param name="alertOffset">距离阈值的偏移量。</param>
+        /// <param name="isAlertActive">当前是否处于警戒状态。</param>
+        /// <returns>在给定恶作剧值下，警戒状态是否合理。</returns>
         public static bool ValidateAlertTriggerCondition(
             int mischiefValue, 
             int mischiefThreshold, 
@@ -387,14 +387,14 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Validates the alert speed bonus.
-        /// Property 17: Alert State Speed Bonus
-        /// Requirement 6.5: Groomer receives 10% speed bonus during alert.
+        /// 校验警戒状态下的速度加成是否正确。
+        /// 属性 17：警戒状态速度加成。
+        /// 需求 6.5：警戒状态下 Groomer 获得 10% 速度加成。
         /// </summary>
-        /// <param name="isAlertActive">Whether alert is active</param>
-        /// <param name="expectedBonus">Expected speed bonus (0.1 = 10%)</param>
-        /// <param name="actualMultiplier">Actual speed multiplier applied</param>
-        /// <returns>True if the speed bonus is correctly applied</returns>
+        /// <param name="isAlertActive">当前是否处于警戒状态。</param>
+        /// <param name="expectedBonus">期望的速度加成（0.1 表示 10%）。</param>
+        /// <param name="actualMultiplier">实际应用的速度倍率。</param>
+        /// <returns>如果加成正确应用则返回 true。</returns>
         public static bool ValidateAlertSpeedBonus(
             bool isAlertActive, 
             float expectedBonus, 
@@ -410,7 +410,7 @@ namespace PetGrooming.Systems
         
 #if UNITY_EDITOR
         /// <summary>
-        /// Sets the Phase 2 config for testing purposes.
+        /// 设置 Phase2GameConfig（测试用）。
         /// </summary>
         public void SetPhase2ConfigForTesting(Phase2GameConfig config)
         {
@@ -418,7 +418,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Sets the alert state directly for testing purposes.
+        /// 直接设置警戒状态（测试用）。
         /// </summary>
         public void SetAlertStateForTesting(bool isActive)
         {
@@ -426,7 +426,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Gets the alert lights for testing purposes.
+        /// 获取警报灯数组（测试用）。
         /// </summary>
         public Light[] GetAlertLightsForTesting()
         {
@@ -434,7 +434,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Sets the alert lights for testing purposes.
+        /// 设置警报灯数组（测试用）。
         /// </summary>
         public void SetAlertLightsForTesting(Light[] lights)
         {
@@ -442,7 +442,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Gets the alert sound for testing purposes.
+        /// 获取警报音效 AudioSource（测试用）。
         /// </summary>
         public AudioSource GetAlertSoundForTesting()
         {
@@ -450,7 +450,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Sets the alert sound for testing purposes.
+        /// 设置警报音效 AudioSource（测试用）。
         /// </summary>
         public void SetAlertSoundForTesting(AudioSource sound)
         {

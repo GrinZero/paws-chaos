@@ -3,286 +3,286 @@ using UnityEngine;
 namespace PetGrooming.Core
 {
     /// <summary>
-    /// ScriptableObject containing Phase 2 game configuration parameters.
-    /// Extends the base game with multi-pet support, skill systems, pet cage, and camera settings.
-    /// Requirements: 1.1, 1.2, 3.2-3.8, 4.2-4.4, 5.2-5.5, 6.1, 6.2
+    /// 包含第二阶段游戏配置参数的 ScriptableObject。
+    /// 通过多宠物支持、技能系统、宠物笼和相机设置扩展基础游戏。
+    /// 需求：1.1, 1.2, 3.2-3.8, 4.2-4.4, 5.2-5.5, 6.1, 6.2
     /// </summary>
     [CreateAssetMenu(fileName = "Phase2GameConfig", menuName = "PetGrooming/Phase2GameConfig")]
     public class Phase2GameConfig : ScriptableObject
     {
         #region Match Settings
         [Header("Match Settings")]
-        [Tooltip("Duration of a match in seconds (5 minutes for Phase 2)")]
+        [Tooltip("比赛持续时间（秒）（第二阶段为 5 分钟）")]
         public float MatchDuration = 300f;
         
-        [Tooltip("Mischief threshold for 2-pet mode")]
+        [Tooltip("2 宠物模式的恶作剧阈值")]
         public int TwoPetMischiefThreshold = 800;
         
-        [Tooltip("Mischief threshold for 3-pet mode")]
+        [Tooltip("3 宠物模式的恶作剧阈值")]
         public int ThreePetMischiefThreshold = 1000;
         
-        [Tooltip("Points below threshold to trigger alert state")]
+        [Tooltip("触发警戒状态的阈值以下点数")]
         public int AlertThresholdOffset = 100;
         #endregion
 
         #region Pet Cage Settings
         [Header("Pet Cage Settings")]
-        [Tooltip("Maximum time a pet can be stored in cage (seconds)")]
+        [Tooltip("宠物可在笼中存放的最长时间（秒）")]
         public float CageStorageTime = 60f;
         
-        [Tooltip("Time remaining when warning indicator appears (seconds)")]
+        [Tooltip("警告指示器出现时的剩余时间（秒）")]
         public float CageWarningTime = 10f;
         
-        [Tooltip("Invulnerability duration after pet is released from cage (seconds)")]
+        [Tooltip("宠物从笼中释放后的无敌持续时间（秒）")]
         public float ReleaseInvulnerabilityTime = 3f;
         #endregion
 
         #region Groomer Skill Cooldowns
         [Header("Groomer Skill Cooldowns")]
-        [Tooltip("Cooldown for Capture Net skill (seconds)")]
+        [Tooltip("捕获网技能的冷却时间（秒）")]
         public float CaptureNetCooldown = 8f;
         
-        [Tooltip("Cooldown for Leash skill (seconds)")]
+        [Tooltip("牵引绳技能的冷却时间（秒）")]
         public float LeashCooldown = 12f;
         
-        [Tooltip("Cooldown for Calming Spray skill (seconds)")]
+        [Tooltip("镇静喷雾技能的冷却时间（秒）")]
         public float CalmingSprayCooldown = 13f;
         #endregion
 
         #region Cat Skill Cooldowns
         [Header("Cat Skill Cooldowns")]
-        [Tooltip("Cooldown for Agile Jump skill (seconds)")]
+        [Tooltip("敏捷跳跃技能的冷却时间（秒）")]
         public float AgileJumpCooldown = 6f;
         
-        [Tooltip("Cooldown for Fur Distraction skill (seconds)")]
+        [Tooltip("毛发干扰技能的冷却时间（秒）")]
         public float FurDistractionCooldown = 10f;
         
-        [Tooltip("Cooldown for Hide In Gap skill (seconds)")]
+        [Tooltip("躲在缝隙中技能的冷却时间（秒）")]
         public float HideInGapCooldown = 14f;
         #endregion
 
         #region Dog Skill Cooldowns
         [Header("Dog Skill Cooldowns")]
-        [Tooltip("Cooldown for Power Charge skill (seconds)")]
+        [Tooltip("强力冲锋技能的冷却时间（秒）")]
         public float PowerChargeCooldown = 8f;
         
-        [Tooltip("Cooldown for Intimidating Bark skill (seconds)")]
+        [Tooltip("恐吓 bark 技能的冷却时间（秒）")]
         public float IntimidatingBarkCooldown = 12f;
         
-        [Tooltip("Cooldown for Steal Tool skill (seconds)")]
+        [Tooltip("偷工具技能的冷却时间（秒）")]
         public float StealToolCooldown = 12f;
         #endregion
 
 
         #region Capture Net Skill Effects
         [Header("Capture Net Skill Effects")]
-        [Tooltip("Movement speed reduction when hit by Capture Net (0.5 = 50% reduction)")]
+        [Tooltip("被捕获网击中时的移动速度减少量（0.5 = 减少 50%）")]
         [Range(0f, 1f)]
         public float CaptureNetSlowAmount = 0.5f;
         
-        [Tooltip("Duration of Capture Net slow effect (seconds)")]
+        [Tooltip("捕获网减速效果的持续时间（秒）")]
         public float CaptureNetSlowDuration = 3f;
         
-        [Tooltip("Projectile speed for Capture Net")]
+        [Tooltip("捕获网的投射物速度")]
         public float CaptureNetProjectileSpeed = 15f;
         #endregion
 
         #region Leash Skill Effects
         [Header("Leash Skill Effects")]
-        [Tooltip("Maximum range for Leash skill")]
+        [Tooltip("牵引绳技能的最大范围")]
         public float LeashMaxRange = 10f;
         
-        [Tooltip("Pull speed when Leash connects")]
+        [Tooltip("牵引绳连接时的拉动速度")]
         public float LeashPullSpeed = 8f;
         
-        [Tooltip("Chance for Cat to break free from Leash (0.6 = 60%)")]
+        [Tooltip("猫从牵引绳中挣脱的几率（0.6 = 60%）")]
         [Range(0f, 1f)]
         public float LeashCatBreakFreeChance = 0.6f;
         
-        [Tooltip("Chance for Dog to break free from Leash (0.4 = 40%)")]
+        [Tooltip("狗从牵引绳中挣脱的几率（0.4 = 40%）")]
         [Range(0f, 1f)]
         public float LeashDogBreakFreeChance = 0.4f;
         #endregion
 
         #region Calming Spray Skill Effects
         [Header("Calming Spray Skill Effects")]
-        [Tooltip("Effect radius for Calming Spray")]
+        [Tooltip("镇静喷雾的效果半径")]
         public float CalmingSprayRadius = 3f;
         
-        [Tooltip("Stun duration when hit by Calming Spray (seconds)")]
+        [Tooltip("被镇静喷雾击中时的眩晕持续时间（秒）")]
         public float CalmingSprayStunDuration = 1f;
         #endregion
 
         #region Fur Distraction Skill Effects
         [Header("Fur Distraction Skill Effects")]
-        [Tooltip("Duration of vision block from Fur Distraction (seconds)")]
+        [Tooltip("毛发干扰导致视野阻挡的持续时间（秒）")]
         public float FurDistractionDuration = 2f;
         #endregion
 
         #region Hide In Gap Skill Effects
         [Header("Hide In Gap Skill Effects")]
-        [Tooltip("Duration of invisibility from Hide In Gap (seconds)")]
+        [Tooltip("躲在缝隙中导致隐身的持续时间（秒）")]
         public float HideInGapDuration = 3f;
         
-        [Tooltip("Opacity when moving while using Hide In Gap (0.5 = 50%)")]
+        [Tooltip("使用躲在缝隙中移动时的不透明度（0.5 = 50%）")]
         [Range(0f, 1f)]
         public float HideInGapMovingOpacity = 0.5f;
         #endregion
 
         #region Power Charge Skill Effects
         [Header("Power Charge Skill Effects")]
-        [Tooltip("Dash distance for Power Charge")]
+        [Tooltip("强力冲锋的冲刺距离")]
         public float PowerChargeDashDistance = 5f;
         
-        [Tooltip("Knockback force applied by Power Charge")]
+        [Tooltip("强力冲锋施加的击退力")]
         public float PowerChargeKnockbackForce = 10f;
         #endregion
 
         #region Intimidating Bark Skill Effects
         [Header("Intimidating Bark Skill Effects")]
-        [Tooltip("Effect radius for Intimidating Bark")]
+        [Tooltip("恐吓 bark 的效果半径")]
         public float IntimidatingBarkRadius = 4f;
         
-        [Tooltip("Movement speed reduction from Intimidating Bark (0.2 = 20% reduction)")]
+        [Tooltip("恐吓 bark 导致的移动速度减少量（0.2 = 减少 20%）")]
         [Range(0f, 1f)]
         public float IntimidatingBarkSlowAmount = 0.2f;
         
-        [Tooltip("Duration of Intimidating Bark slow effect (seconds)")]
+        [Tooltip("恐吓 bark 减速效果的持续时间（秒）")]
         public float IntimidatingBarkDuration = 3f;
         #endregion
 
         #region Steal Tool Skill Effects
         [Header("Steal Tool Skill Effects")]
-        [Tooltip("Range to detect nearest Grooming Station for Steal Tool")]
+        [Tooltip("偷工具技能检测最近的梳理站的范围")]
         public float StealToolRange = 5f;
         
-        [Tooltip("Additional grooming steps added when tool is stolen")]
+        [Tooltip("工具被偷时增加的额外梳理步骤")]
         public int StealToolExtraSteps = 1;
         #endregion
 
 
         #region Alert System Settings
         [Header("Alert System Settings")]
-        [Tooltip("Groomer speed bonus during alert state (0.1 = 10% increase)")]
+        [Tooltip("警戒状态下 Groomer 的速度加成（0.1 = 增加 10%）")]
         [Range(0f, 0.5f)]
         public float AlertGroomerSpeedBonus = 0.1f;
         
-        [Tooltip("Interval between alert light flashes (seconds)")]
+        [Tooltip("警戒灯闪烁的间隔（秒）")]
         public float AlertFlashInterval = 0.5f;
         
-        [Tooltip("Mischief points added when pet skill hits Groomer")]
+        [Tooltip("宠物技能击中 Groomer 时增加的恶作剧点数")]
         public int PetSkillHitMischief = 30;
         #endregion
 
         #region Camera Settings
         [Header("Camera Settings")]
-        [Tooltip("Camera follow interpolation speed")]
+        [Tooltip("相机跟随插值速度")]
         public float CameraFollowSpeed = 5f;
         
-        [Tooltip("Default camera offset from target")]
+        [Tooltip("相机与目标的默认偏移量")]
         public Vector3 CameraDefaultOffset = new Vector3(0, 8, -6);
         
-        [Tooltip("Default camera field of view")]
+        [Tooltip("相机默认视野")]
         public float CameraDefaultFOV = 60f;
         
-        [Tooltip("Zoom multiplier when Groomer captures a pet")]
+        [Tooltip("Groomer 捕获宠物时的缩放倍数")]
         public float CameraCaptureZoomMultiplier = 1.2f;
         
-        [Tooltip("Camera zoom interpolation speed")]
+        [Tooltip("相机缩放插值速度")]
         public float CameraZoomSpeed = 2f;
         
-        [Tooltip("Minimum distance camera can be from target (collision avoidance)")]
+        [Tooltip("相机与目标的最小距离（碰撞避免）")]
         public float CameraMinDistance = 2f;
         
-        [Tooltip("Screen shake intensity during alert state")]
+        [Tooltip("警戒状态下的屏幕抖动强度")]
         public float AlertShakeIntensity = 0.1f;
         
-        [Tooltip("Screen shake duration during alert state")]
+        [Tooltip("警戒状态下的屏幕抖动持续时间")]
         public float AlertShakeDuration = 0.5f;
         #endregion
 
         #region Pet Type Settings
         [Header("Pet Type Settings")]
-        [Tooltip("Collision radius for Cat pets")]
+        [Tooltip("猫宠物的碰撞半径")]
         public float CatCollisionRadius = 0.5f;
         
-        [Tooltip("Collision radius for Dog pets")]
+        [Tooltip("狗宠物的碰撞半径")]
         public float DogCollisionRadius = 1.0f;
         
-        [Tooltip("Base escape chance for Cat pets")]
+        [Tooltip("猫宠物的基础逃脱几率")]
         [Range(0f, 1f)]
         public float CatBaseEscapeChance = 0.4f;
         
-        [Tooltip("Base escape chance for Dog pets")]
+        [Tooltip("狗宠物的基础逃脱几率")]
         [Range(0f, 1f)]
         public float DogBaseEscapeChance = 0.3f;
         
-        [Tooltip("Knockback force for Cat collisions")]
+        [Tooltip("猫碰撞的击退力")]
         public float CatKnockbackForce = 5f;
         
-        [Tooltip("Knockback force for Dog collisions")]
+        [Tooltip("狗碰撞的击退力")]
         public float DogKnockbackForce = 10f;
         
-        [Tooltip("Base movement speed for Dog pets (same as Groomer)")]
+        [Tooltip("狗宠物的基础移动速度（与 Groomer 相同）")]
         public float DogMoveSpeed = 5f;
         #endregion
 
         #region Helper Methods
         /// <summary>
-        /// Gets the mischief threshold based on game mode.
+        /// 根据游戏模式获取恶作剧阈值。
         /// </summary>
-        /// <param name="petCount">Number of pets in the match (2 or 3)</param>
-        /// <returns>The mischief threshold for the given pet count</returns>
+        /// <param name="petCount">比赛中的宠物数量（2 或 3）</param>
+        /// <returns>给定宠物数量的恶作剧阈值</returns>
         public int GetMischiefThreshold(int petCount)
         {
             return petCount >= 3 ? ThreePetMischiefThreshold : TwoPetMischiefThreshold;
         }
 
         /// <summary>
-        /// Gets the alert trigger threshold based on game mode.
+        /// 根据游戏模式获取警戒触发阈值。
         /// </summary>
-        /// <param name="petCount">Number of pets in the match (2 or 3)</param>
-        /// <returns>The mischief value at which alert state triggers</returns>
+        /// <param name="petCount">比赛中的宠物数量（2 或 3）</param>
+        /// <returns>触发警戒状态的恶作剧值</returns>
         public int GetAlertThreshold(int petCount)
         {
             return GetMischiefThreshold(petCount) - AlertThresholdOffset;
         }
 
         /// <summary>
-        /// Gets the break free chance for Leash skill based on pet type.
+        /// 根据宠物类型获取牵引绳技能的挣脱几率。
         /// </summary>
-        /// <param name="isCat">True if the pet is a Cat, false if Dog</param>
-        /// <returns>The break free chance (0-1)</returns>
+        /// <param name="isCat">如果宠物是猫则为 True，如果是狗则为 False</param>
+        /// <returns>挣脱几率（0-1）</returns>
         public float GetLeashBreakFreeChance(bool isCat)
         {
             return isCat ? LeashCatBreakFreeChance : LeashDogBreakFreeChance;
         }
 
         /// <summary>
-        /// Gets the collision radius based on pet type.
+        /// 根据宠物类型获取碰撞半径。
         /// </summary>
-        /// <param name="isCat">True if the pet is a Cat, false if Dog</param>
-        /// <returns>The collision radius</returns>
+        /// <param name="isCat">如果宠物是猫则为 True，如果是狗则为 False</param>
+        /// <returns>碰撞半径</returns>
         public float GetCollisionRadius(bool isCat)
         {
             return isCat ? CatCollisionRadius : DogCollisionRadius;
         }
 
         /// <summary>
-        /// Gets the base escape chance based on pet type.
+        /// 根据宠物类型获取基础逃脱几率。
         /// </summary>
-        /// <param name="isCat">True if the pet is a Cat, false if Dog</param>
-        /// <returns>The base escape chance (0-1)</returns>
+        /// <param name="isCat">如果宠物是猫则为 True，如果是狗则为 False</param>
+        /// <returns>基础逃脱几率（0-1）</returns>
         public float GetBaseEscapeChance(bool isCat)
         {
             return isCat ? CatBaseEscapeChance : DogBaseEscapeChance;
         }
 
         /// <summary>
-        /// Gets the knockback force based on pet type.
+        /// 根据宠物类型获取击退力。
         /// </summary>
-        /// <param name="isCat">True if the pet is a Cat, false if Dog</param>
-        /// <returns>The knockback force</returns>
+        /// <param name="isCat">如果宠物是猫则为 True，如果是狗则为 False</param>
+        /// <returns>击退力</returns>
         public float GetKnockbackForce(bool isCat)
         {
             return isCat ? CatKnockbackForce : DogKnockbackForce;

@@ -6,8 +6,8 @@ using PetGrooming.Core;
 namespace PetGrooming.Systems
 {
     /// <summary>
-    /// Handles player movement input and character controller movement.
-    /// Supports both WASD and Arrow keys, with camera-relative movement.
+    /// 处理玩家移动输入以及 CharacterController 的移动。
+    /// 同时支持 WASD 和方向键，并使用相机朝向进行相对移动。
     /// </summary>
     /// <remarks>
     /// [已废弃] 此组件已被 Unity Starter Assets 的 ThirdPersonController 替代。
@@ -75,12 +75,12 @@ namespace PetGrooming.Systems
         #region Properties
 
         /// <summary>
-        /// Base movement speed from config or serialized field.
+        /// 来自配置或序列化字段的基础移动速度。
         /// </summary>
         public float BaseMoveSpeed => _gameConfig != null ? _gameConfig.GroomerMoveSpeed : _moveSpeed;
 
         /// <summary>
-        /// Current effective movement speed (accounting for carry state and alert).
+        /// 当前实际移动速度（考虑抱宠减速与警戒加速）。
         /// </summary>
         public float CurrentMoveSpeed
         {
@@ -95,12 +95,12 @@ namespace PetGrooming.Systems
         }
 
         /// <summary>
-        /// Whether the player is currently grounded.
+        /// 玩家当前是否在地面上。
         /// </summary>
         public bool IsGrounded => _isGrounded;
 
         /// <summary>
-        /// Current movement direction (normalized).
+        /// 当前的移动方向（归一化向量）。
         /// </summary>
         public Vector3 MoveDirection => _moveDirection;
 
@@ -134,8 +134,8 @@ namespace PetGrooming.Systems
 
         private void Update()
         {
-            // Allow movement even if game hasn't started (for testing)
-            // Only block if game is paused or ended
+            // 即使游戏尚未开始也允许移动（便于测试）
+            // 仅在游戏暂停或结束时才阻止移动
             if (GameManager.Instance != null)
             {
                 var state = GameManager.Instance.CurrentState;
@@ -163,7 +163,7 @@ namespace PetGrooming.Systems
 
             if (_isGrounded && _velocity.y < 0)
             {
-                _velocity.y = -2f; // Small downward force to keep grounded
+                _velocity.y = -2f; // 施加一个很小的向下力以保持在地面上
             }
         }
 
@@ -172,8 +172,8 @@ namespace PetGrooming.Systems
             float horizontal;
             float vertical;
             
-            // Check for mobile input first
-            // Requirement 1.8: Mobile joystick input equivalent to keyboard/gamepad
+            // 优先检查移动端输入
+            // 需求 1.8：虚拟摇杆输入等价于键盘/手柄
             if (_useMobileInput && _mobileInput.sqrMagnitude > 0.01f)
             {
                 horizontal = _mobileInput.x;
@@ -181,26 +181,26 @@ namespace PetGrooming.Systems
             }
             else
             {
-                // Use new Input System for keyboard input
+                // 使用新输入系统处理键盘输入
                 var keyboard = Keyboard.current;
                 if (keyboard != null)
                 {
                     horizontal = 0f;
                     vertical = 0f;
                     
-                    // WASD
+                    // WASD 键
                     if (keyboard.aKey.isPressed) horizontal -= 1f;
                     if (keyboard.dKey.isPressed) horizontal += 1f;
                     if (keyboard.wKey.isPressed) vertical += 1f;
                     if (keyboard.sKey.isPressed) vertical -= 1f;
                     
-                    // Arrow keys
+                    // 方向键
                     if (keyboard.leftArrowKey.isPressed) horizontal -= 1f;
                     if (keyboard.rightArrowKey.isPressed) horizontal += 1f;
                     if (keyboard.upArrowKey.isPressed) vertical += 1f;
                     if (keyboard.downArrowKey.isPressed) vertical -= 1f;
                     
-                    // Clamp to -1, 1
+                    // 将输入限制在 -1 到 1 之间
                     horizontal = Mathf.Clamp(horizontal, -1f, 1f);
                     vertical = Mathf.Clamp(vertical, -1f, 1f);
                 }
@@ -211,15 +211,15 @@ namespace PetGrooming.Systems
                 }
             }
 
-            // Calculate input direction
+            // 计算输入方向
             Vector3 inputDirection = new Vector3(horizontal, 0f, vertical).normalized;
 
             if (inputDirection.magnitude >= 0.1f)
             {
-                // Convert to camera-relative direction
+                // 转换为相机朝向相关的世界方向
                 _moveDirection = GetCameraRelativeDirection(inputDirection);
 
-                // Rotate character to face movement direction
+                // 旋转角色朝向移动方向
                 RotateTowardsMovement(_moveDirection);
             }
             else
@@ -235,7 +235,7 @@ namespace PetGrooming.Systems
                 return inputDirection;
             }
 
-            // Get camera forward and right vectors (flattened to horizontal plane)
+            // 获取相机的前向与右向向量（投影到水平面）
             Vector3 cameraForward = _cameraTransform.forward;
             Vector3 cameraRight = _cameraTransform.right;
 
@@ -244,7 +244,7 @@ namespace PetGrooming.Systems
             cameraForward.Normalize();
             cameraRight.Normalize();
 
-            // Calculate world-space movement direction relative to camera
+            // 按照相机方向计算世界空间中的移动向量
             Vector3 worldDirection = cameraForward * inputDirection.z + cameraRight * inputDirection.x;
             return worldDirection.normalized;
         }
@@ -257,7 +257,7 @@ namespace PetGrooming.Systems
             }
 
             // 使用 SmoothDampAngle 实现平滑旋转（参考 ThirdPersonController）
-            // 计算目标旋转角度（基于相机方向已在 GetCameraRelativeDirection 中处理）
+            // 计算目标旋转角度（相机方向已在 GetCameraRelativeDirection 中处理）
             _targetRotation = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
             
             // 使用平滑阻尼插值，避免方向突变时的抖动
@@ -278,16 +278,16 @@ namespace PetGrooming.Systems
 
         private void ApplyMovement()
         {
-            // Calculate horizontal movement
+            // 计算水平方向的位移
             Vector3 horizontalMovement = _moveDirection * CurrentMoveSpeed * Time.deltaTime;
 
-            // Combine with vertical velocity (gravity)
+            // 与竖直方向（重力）的位移合并
             Vector3 finalMovement = horizontalMovement + new Vector3(0f, _velocity.y * Time.deltaTime, 0f);
 
-            // Apply movement through CharacterController
+            // 通过 CharacterController 应用移动
             _characterController.Move(finalMovement);
             
-            // 更新动画
+            // 更新动画参数
             UpdateAnimation();
         }
         
@@ -295,7 +295,7 @@ namespace PetGrooming.Systems
         {
             if (_animator == null) return;
             
-            // 计算目标速度（基于移动方向的大小）
+            // 计算目标速度（基于移动方向的模长）
             float targetSpeed = _moveDirection.magnitude > 0.1f ? CurrentMoveSpeed : 0f;
             
             // 平滑过渡动画混合值
@@ -312,7 +312,7 @@ namespace PetGrooming.Systems
         #region Public Methods
 
         /// <summary>
-        /// Sets the camera transform for camera-relative movement.
+        /// 设置用于相对移动计算的相机 Transform。
         /// </summary>
         public void SetCameraTransform(Transform cameraTransform)
         {
@@ -320,7 +320,7 @@ namespace PetGrooming.Systems
         }
 
         /// <summary>
-        /// Applies an external force/knockback to the player.
+        /// 对玩家施加外力/击退效果。
         /// </summary>
         public void ApplyKnockback(Vector3 force)
         {
@@ -328,10 +328,10 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Sets mobile input from virtual joystick.
-        /// Requirement 1.8: Mobile joystick input equivalent to keyboard/gamepad.
+        /// 设置来自虚拟摇杆的移动端输入。
+        /// 需求 1.8：移动端摇杆输入等价于键盘/手柄。
         /// </summary>
-        /// <param name="input">Normalized input vector from joystick (-1 to 1 on both axes)</param>
+        /// <param name="input">摇杆归一化输入向量（两个分量范围均为 -1 到 1）。</param>
         public void SetMobileInput(Vector2 input)
         {
             _mobileInput = input;
@@ -339,7 +339,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Clears mobile input.
+        /// 清除移动端输入。
         /// </summary>
         public void ClearMobileInput()
         {

@@ -3,53 +3,53 @@ using UnityEngine;
 namespace PetGrooming.Core
 {
     /// <summary>
-    /// ScriptableObject containing all game configuration parameters.
-    /// Requirements: 1.1, 2.5, 3.1, 5.5, 6.1
+    /// 包含所有游戏配置参数的 ScriptableObject。
+    /// 需求：1.1, 2.5, 3.1, 5.5, 6.1
     /// </summary>
     [CreateAssetMenu(fileName = "GameConfig", menuName = "PetGrooming/GameConfig")]
     public class GameConfig : ScriptableObject
     {
         [Header("Match Settings")]
-        [Tooltip("Duration of a match in seconds (3 minutes for MVP)")]
+        [Tooltip("比赛持续时间（秒）（MVP 为 3 分钟）")]
         public float MatchDuration = 180f;
         
-        [Tooltip("Mischief value threshold for Pet victory")]
+        [Tooltip("宠物胜利的恶作剧值阈值")]
         public int MischiefThreshold = 500;
 
         [Header("Groomer Settings")]
-        [Tooltip("Base movement speed of the Groomer in units per second")]
+        [Tooltip("Groomer 的基础移动速度（单位/秒）")]
         public float GroomerMoveSpeed = 5f;
         
-        [Tooltip("Distance within which capture can be initiated")]
+        [Tooltip("可以启动捕获的距离")]
         public float CaptureRange = 1.5f;
         
-        [Tooltip("Speed multiplier when carrying a pet (15% reduction = 0.85)")]
+        [Tooltip("携带宠物时的速度倍数（减少 15% = 0.85）")]
         public float CarrySpeedMultiplier = 0.85f;
 
         [Header("Pet Settings")]
-        [Tooltip("Base movement speed of the Pet in units per second")]
+        [Tooltip("宠物的基础移动速度（单位/秒）")]
         public float PetMoveSpeed = 6f;
         
-        [Tooltip("Distance at which Pet detects Groomer and enters flee state")]
+        [Tooltip("宠物检测到 Groomer 并进入逃离状态的距离")]
         public float FleeDetectionRange = 8f;
         
-        [Tooltip("Base chance for Pet to escape when captured (40%)")]
+        [Tooltip("宠物被捕获时的基础逃脱几率（40%）")]
         public float BaseEscapeChance = 0.4f;
         
-        [Tooltip("Distance Pet teleports away upon successful escape")]
+        [Tooltip("宠物成功逃脱时 teleport 离开的距离")]
         public float EscapeTeleportDistance = 3f;
         
-        [Tooltip("Reduction in escape chance per completed grooming step")]
+        [Tooltip("每完成一个梳理步骤，逃脱几率的减少量")]
         public float EscapeChanceReductionPerStep = 0.1f;
         
-        [Tooltip("Interval between struggle attempts in seconds")]
+        [Tooltip("挣扎尝试之间的间隔（秒）")]
         public float StruggleInterval = 1f;
 
         [Header("Mischief Values")]
-        [Tooltip("Mischief points added when Pet knocks over a shelf item")]
+        [Tooltip("宠物撞倒货架物品时增加的恶作剧点数")]
         public int ShelfItemMischief = 50;
         
-        [Tooltip("Mischief points added when Pet knocks over a cleaning cart")]
+        [Tooltip("宠物撞倒清洁车时增加的恶作剧点数")]
         public int CleaningCartMischief = 80;
     }
 }

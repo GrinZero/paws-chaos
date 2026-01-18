@@ -4,8 +4,8 @@ using PetGrooming.AI;
 namespace PetGrooming.Systems.Skills
 {
     /// <summary>
-    /// Projectile component for the Capture Net skill.
-    /// Handles movement and collision detection with pets.
+    /// 捕获网技能的投射物组件。
+    /// 处理移动以及与宠物的碰撞检测。
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     public class CaptureNetProjectile : MonoBehaviour
@@ -36,7 +36,7 @@ namespace PetGrooming.Systems.Skills
         {
             if (_hasHit) return;
             
-            // Check if exceeded max range
+            // 检查是否超过了最大范围
             float distanceTraveled = Vector3.Distance(_startPosition, transform.position);
             if (distanceTraveled >= _maxRange)
             {
@@ -61,12 +61,12 @@ namespace PetGrooming.Systems.Skills
 
         #region Public Methods
         /// <summary>
-        /// Initializes the projectile with movement parameters.
+        /// 使用移动参数初始化投射物。
         /// </summary>
-        /// <param name="ownerSkill">The skill that created this projectile</param>
-        /// <param name="direction">Direction of travel</param>
-        /// <param name="speed">Speed of the projectile</param>
-        /// <param name="maxRange">Maximum travel distance</param>
+        /// <param name="ownerSkill">创建该投射物的技能</param>
+        /// <param name="direction">飞行方向</param>
+        /// <param name="speed">投射物速度</param>
+        /// <param name="maxRange">最大飞行距离</param>
         public void Initialize(CaptureNetSkill ownerSkill, Vector3 direction, float speed, float maxRange)
         {
             _ownerSkill = ownerSkill;
@@ -76,7 +76,7 @@ namespace PetGrooming.Systems.Skills
             _startPosition = transform.position;
             _hasHit = false;
             
-            // Set velocity
+            // 设置速度
             if (_rigidbody != null)
             {
                 _rigidbody.linearVelocity = _direction * _speed;
@@ -87,7 +87,7 @@ namespace PetGrooming.Systems.Skills
         #region Private Methods
         private void HandleCollision(GameObject hitObject)
         {
-            // Try to find PetAI on the hit object
+            // 尝试在撞击物体上寻找 PetAI
             PetAI pet = hitObject.GetComponent<PetAI>();
             if (pet == null)
             {
@@ -98,7 +98,7 @@ namespace PetGrooming.Systems.Skills
             {
                 _hasHit = true;
                 
-                // Notify the skill of the hit
+                // 通知技能发生了撞击
                 if (_ownerSkill != null)
                 {
                     _ownerSkill.OnProjectileHit(pet);
@@ -108,14 +108,14 @@ namespace PetGrooming.Systems.Skills
             }
             else
             {
-                // Hit something else (wall, obstacle) - destroy projectile
+                // 撞击到了其他物体（墙壁、障碍物） - 销毁投射物
                 DestroyProjectile();
             }
         }
 
         private void DestroyProjectile()
         {
-            // Could add visual effects here before destroying
+            // 在销毁前可以添加视觉效果
             Destroy(gameObject);
         }
         #endregion

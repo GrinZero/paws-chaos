@@ -6,33 +6,33 @@ using PetGrooming.AI;
 namespace PetGrooming.Systems.Skills
 {
     /// <summary>
-    /// Calming Spray skill for the Groomer.
-    /// Creates an area effect that stuns pets for 1 second.
-    /// Requirements: 3.7, 3.8
+    /// 美容师的镇静喷雾技能。
+    /// 创建一个区域效果，使宠物眩晕 1 秒。
+    /// 需求：3.7, 3.8
     /// </summary>
     public class CalmingSpraySkill : SkillBase
     {
         #region Serialized Fields
-        [Header("Calming Spray Settings")]
-        [Tooltip("Radius of the spray effect")]
+        [Header("镇静喷雾设置")]
+        [Tooltip("喷雾效果的半径")]
         public float EffectRadius = 3f;
         
-        [Tooltip("Duration of the stun effect in seconds")]
+        [Tooltip("眩晕效果的持续时间（秒）")]
         public float StunDuration = 1f;
         
-        [Header("Visual")]
-        [Tooltip("Particle system for spray effect")]
+        [Header("视觉效果")]
+        [Tooltip("喷雾效果的粒子系统")]
         public ParticleSystem SprayEffect;
         
-        [Tooltip("Duration of the spray visual")]
+        [Tooltip("喷雾视觉效果的持续时间")]
         public float SprayVisualDuration = 0.5f;
         
-        [Header("Configuration")]
-        [Tooltip("Phase 2 game configuration")]
+        [Header("配置")]
+        [Tooltip("第二阶段游戏配置")]
         public Phase2GameConfig GameConfig;
         
-        [Header("Layer Settings")]
-        [Tooltip("Layer mask for pet detection")]
+        [Header("层级设置")]
+        [Tooltip("宠物检测的层级掩码")]
         public LayerMask PetLayerMask = -1;
         #endregion
 
@@ -42,12 +42,12 @@ namespace PetGrooming.Systems.Skills
 
         #region Events
         /// <summary>
-        /// Fired when the spray is activated.
+        /// 当喷雾激活时触发。
         /// </summary>
         public event Action OnSprayActivated;
         
         /// <summary>
-        /// Fired when a pet is stunned by the spray.
+        /// 当宠物被喷雾眩晕时触发。
         /// </summary>
         public event Action<PetAI> OnPetStunned;
         #endregion
@@ -57,7 +57,7 @@ namespace PetGrooming.Systems.Skills
         {
             base.Awake();
             
-            SkillName = "Calming Spray";
+            SkillName = "镇静喷雾";
             
             // Apply config values if available
             if (GameConfig != null)
@@ -78,7 +78,7 @@ namespace PetGrooming.Systems.Skills
 
         #region Public Methods
         /// <summary>
-        /// Sets the owner transform for effect origin.
+        /// 设置效果原点的所有者变换组件。
         /// </summary>
         public void SetOwner(Transform owner)
         {
@@ -86,8 +86,8 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Activates the Calming Spray skill.
-        /// Requirement 3.7: Creates an area effect that stuns pets for 1 second.
+        /// 激活镇静喷雾技能。
+        /// 需求 3.7：创建一个区域效果，使宠物眩晕 1 秒。
         /// </summary>
         public override void Activate()
         {
@@ -96,9 +96,9 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Gets all pets within the effect radius.
+        /// 获取效果半径内的所有宠物。
         /// </summary>
-        /// <returns>Array of pets in range</returns>
+        /// <returns>范围内的宠物数组</returns>
         public PetAI[] GetPetsInRange()
         {
             Vector3 center = _ownerTransform != null ? _ownerTransform.position : transform.position;
@@ -124,7 +124,7 @@ namespace PetGrooming.Systems.Skills
             PetAI[] petsInRange = FindPetsInRadius(center, EffectRadius, PetLayerMask);
             ApplyStunToAllPets(petsInRange, StunDuration);
             
-            Debug.Log($"[CalmingSpraySkill] Spray released, stunned {petsInRange.Length} pets for {StunDuration}s");
+            Debug.Log($"[镇静喷雾] 喷雾释放，使 {petsInRange.Length} 只宠物眩晕 {StunDuration} 秒");
         }
 
         private void ApplyStunToAllPets(PetAI[] pets, float duration)
@@ -142,17 +142,17 @@ namespace PetGrooming.Systems.Skills
 
         #region Static Methods (Testable)
         /// <summary>
-        /// Finds all pets within a radius.
+        /// 查找半径范围内的所有宠物。
         /// </summary>
-        /// <param name="center">Center of the search area</param>
-        /// <param name="radius">Search radius</param>
-        /// <param name="layerMask">Layer mask for filtering</param>
-        /// <returns>Array of pets found</returns>
+        /// <param name="center">搜索区域的中心</param>
+        /// <param name="radius">搜索半径</param>
+        /// <param name="layerMask">用于过滤的层级掩码</param>
+        /// <returns>找到的宠物数组</returns>
         public static PetAI[] FindPetsInRadius(Vector3 center, float radius, LayerMask layerMask)
         {
             Collider[] colliders = Physics.OverlapSphere(center, radius, layerMask);
             
-            // Count pets first
+            // 先统计宠物数量
             int petCount = 0;
             foreach (Collider col in colliders)
             {
@@ -167,7 +167,7 @@ namespace PetGrooming.Systems.Skills
                 }
             }
             
-            // Create array and populate
+            // 创建数组并填充
             PetAI[] pets = new PetAI[petCount];
             int index = 0;
             foreach (Collider col in colliders)
@@ -179,7 +179,7 @@ namespace PetGrooming.Systems.Skills
                 }
                 if (pet != null && index < pets.Length)
                 {
-                    // Avoid duplicates
+                    // 避免重复
                     bool isDuplicate = false;
                     for (int i = 0; i < index; i++)
                     {
@@ -197,7 +197,7 @@ namespace PetGrooming.Systems.Skills
                 }
             }
             
-            // Resize if we had duplicates
+            // 如果有重复，调整数组大小
             if (index < pets.Length)
             {
                 PetAI[] resized = new PetAI[index];
@@ -209,20 +209,20 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Applies stun effect to a pet.
-        /// Property 10: Calming Spray Stun Effect
-        /// Requirement 3.7: Stuns pets for 1 second.
+        /// 对宠物应用眩晕效果。
+        /// 属性 10: 镇静喷雾眩晕效果
+        /// 需求 3.7: 使宠物眩晕 1 秒。
         /// </summary>
-        /// <param name="pet">The pet to stun</param>
-        /// <param name="duration">Stun duration in seconds</param>
+        /// <param name="pet">要眩晕的宠物</param>
+        /// <param name="duration">眩晕持续时间（秒）</param>
         public static void ApplyStunEffect(PetAI pet, float duration)
         {
             if (pet == null) return;
             
-            // Create stun effect data
-            SkillEffectData stunEffect = SkillEffectData.CreateStun(duration, "Calming Spray");
+            // 创建眩晕效果数据
+            SkillEffectData stunEffect = SkillEffectData.CreateStun(duration, "镇静喷雾");
             
-            // Apply to pet
+            // 应用到宠物
             IEffectReceiver effectReceiver = pet.GetComponent<IEffectReceiver>();
             if (effectReceiver != null)
             {
@@ -230,17 +230,17 @@ namespace PetGrooming.Systems.Skills
             }
             else
             {
-                Debug.Log($"[CalmingSpraySkill] Applied stun effect for {duration}s");
+                Debug.Log($"[镇静喷雾] 应用了眩晕效果，持续 {duration} 秒");
             }
         }
 
         /// <summary>
-        /// Checks if a position is within the effect radius.
+        /// 检查位置是否在效果半径内。
         /// </summary>
-        /// <param name="center">Center of the effect</param>
-        /// <param name="targetPosition">Position to check</param>
-        /// <param name="radius">Effect radius</param>
-        /// <returns>True if within radius</returns>
+        /// <param name="center">效果中心</param>
+        /// <param name="targetPosition">要检查的位置</param>
+        /// <param name="radius">效果半径</param>
+        /// <returns>如果在半径内则为 True</returns>
         public static bool IsInEffectRadius(Vector3 center, Vector3 targetPosition, float radius)
         {
             float distance = Vector3.Distance(center, targetPosition);
@@ -248,14 +248,14 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Validates if the stun effect parameters are correct per requirements.
-        /// Property 10: Calming Spray Stun Effect
+        /// 验证眩晕效果参数是否符合要求。
+        /// 属性 10: 镇静喷雾眩晕效果
         /// </summary>
-        /// <param name="stunDuration">The stun duration to validate</param>
-        /// <returns>True if parameters match requirements</returns>
+        /// <param name="stunDuration">要验证的眩晕持续时间</param>
+        /// <returns>如果参数符合要求则为 True</returns>
         public static bool ValidateStunEffectParameters(float stunDuration)
         {
-            // Requirement 3.7: Stuns pets for 1 second
+            // 需求 3.7: 使宠物眩晕 1 秒
             const float RequiredDuration = 1f;
             const float Tolerance = 0.001f;
             
@@ -263,12 +263,12 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Calculates the number of pets that would be affected.
+        /// 计算会受到影响的宠物数量。
         /// </summary>
-        /// <param name="petPositions">Array of pet positions</param>
-        /// <param name="center">Center of the effect</param>
-        /// <param name="radius">Effect radius</param>
-        /// <returns>Number of pets in range</returns>
+        /// <param name="petPositions">宠物位置数组</param>
+        /// <param name="center">效果中心</param>
+        /// <param name="radius">效果半径</param>
+        /// <returns>范围内的宠物数量</returns>
         public static int CalculateAffectedPetCount(Vector3[] petPositions, Vector3 center, float radius)
         {
             int count = 0;
@@ -286,7 +286,7 @@ namespace PetGrooming.Systems.Skills
         #region Editor Support
 #if UNITY_EDITOR
         /// <summary>
-        /// Sets config for testing purposes.
+        /// 设置用于测试的配置。
         /// </summary>
         public void SetConfigForTesting(Phase2GameConfig config)
         {
@@ -300,7 +300,7 @@ namespace PetGrooming.Systems.Skills
         }
         
         /// <summary>
-        /// Sets effect parameters for testing.
+        /// 设置用于测试的效果参数。
         /// </summary>
         public void SetEffectParametersForTesting(float radius, float duration)
         {

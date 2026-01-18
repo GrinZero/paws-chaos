@@ -1,32 +1,32 @@
 namespace PetGrooming.Core
 {
     /// <summary>
-    /// Interface for objects that can receive skill effects.
-    /// Implemented by PetAI and GroomerController to handle effects like slow, stun, etc.
+    /// 可以接收技能效果的对象接口。
+    /// 由 PetAI 和 GroomerController 实现，用于处理减速、眩晕等效果。
     /// </summary>
     public interface IEffectReceiver
     {
         /// <summary>
-        /// Applies a skill effect to this receiver.
+        /// 向此接收者应用技能效果。
         /// </summary>
-        /// <param name="effect">The effect data to apply</param>
+        /// <param name="effect">要应用的效果数据</param>
         void ApplyEffect(SkillEffectData effect);
         
         /// <summary>
-        /// Removes a specific effect type from this receiver.
+        /// 从此接收者移除特定类型的效果。
         /// </summary>
-        /// <param name="effectType">The type of effect to remove</param>
+        /// <param name="effectType">要移除的效果类型</param>
         void RemoveEffect(SkillEffectType effectType);
         
         /// <summary>
-        /// Checks if this receiver currently has a specific effect type.
+        /// 检查此接收者当前是否有特定类型的效果。
         /// </summary>
-        /// <param name="effectType">The type of effect to check</param>
-        /// <returns>True if the effect is active</returns>
+        /// <param name="effectType">要检查的效果类型</param>
+        /// <returns>如果效果处于活动状态则返回 True</returns>
         bool HasEffect(SkillEffectType effectType);
         
         /// <summary>
-        /// Clears all active effects from this receiver.
+        /// 清除此接收者的所有活动效果。
         /// </summary>
         void ClearAllEffects();
     }

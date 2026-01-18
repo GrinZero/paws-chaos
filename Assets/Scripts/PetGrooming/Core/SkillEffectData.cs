@@ -4,92 +4,92 @@ using UnityEngine;
 namespace PetGrooming.Core
 {
     /// <summary>
-    /// Enum defining all possible skill effect types.
-    /// Requirements: 3.2, 3.7, 4.4, 5.4
+    /// 定义所有可能的技能效果类型的枚举。
+    /// 需求：3.2, 3.7, 4.4, 5.4
     /// </summary>
     public enum SkillEffectType
     {
         /// <summary>
-        /// Reduces movement speed by a percentage.
-        /// Used by: Capture Net (50%), Intimidating Bark (20%)
+        /// 按百分比减少移动速度。
+        /// 使用技能：捕获网（50%），恐吓 bark（20%）
         /// </summary>
         Slow,
         
         /// <summary>
-        /// Completely prevents movement and actions.
-        /// Used by: Calming Spray (1 second)
+        /// 完全阻止移动和行动。
+        /// 使用技能：镇静喷雾（1 秒）
         /// </summary>
         Stun,
         
         /// <summary>
-        /// Makes the target invisible or semi-transparent.
-        /// Used by: Hide In Gap (Cat skill)
+        /// 使目标不可见或半透明。
+        /// 使用技能：躲在缝隙中（猫技能）
         /// </summary>
         Invisible,
         
         /// <summary>
-        /// Increases movement speed by a percentage.
-        /// Used by: Alert state (Groomer 10% bonus)
+        /// 按百分比增加移动速度。
+        /// 使用技能：警戒状态（Groomer 10% 加成）
         /// </summary>
         SpeedBoost,
         
         /// <summary>
-        /// Prevents the target from being captured or affected by skills.
-        /// Used by: Pet Cage release (3 seconds)
+        /// 防止目标被捕获或受到技能影响。
+        /// 使用技能：宠物笼释放（3 秒）
         /// </summary>
         Invulnerable
     }
 
     /// <summary>
-    /// Data structure representing an active skill effect on a character.
-    /// Tracks effect type, value, and remaining duration.
-    /// Requirements: 3.2, 3.7, 4.4, 5.4
+    /// 表示角色身上活动技能效果的数据结构。
+    /// 跟踪效果类型、值和剩余持续时间。
+    /// 需求：3.2, 3.7, 4.4, 5.4
     /// </summary>
     [Serializable]
     public class SkillEffectData
     {
         #region Fields
         /// <summary>
-        /// The type of effect being applied.
+        /// 正在应用的效果类型。
         /// </summary>
         public SkillEffectType Type;
         
         /// <summary>
-        /// The magnitude of the effect (e.g., 0.5 for 50% slow).
+        /// 效果的强度（例如，0.5 表示 50% 减速）。
         /// </summary>
         public float Value;
         
         /// <summary>
-        /// Total duration of the effect in seconds.
+        /// 效果的总持续时间（秒）。
         /// </summary>
         public float Duration;
         
         /// <summary>
-        /// Remaining time for the effect in seconds.
+        /// 效果的剩余时间（秒）。
         /// </summary>
         public float RemainingTime;
         
         /// <summary>
-        /// Optional source identifier for tracking which skill applied this effect.
+        /// 可选的源标识符，用于跟踪哪个技能应用了此效果。
         /// </summary>
         public string SourceSkillName;
         #endregion
 
         #region Properties
         /// <summary>
-        /// Whether the effect has expired.
+        /// 效果是否已过期。
         /// </summary>
         public bool IsExpired => RemainingTime <= 0f;
         
         /// <summary>
-        /// Normalized progress of the effect (0 = just started, 1 = expired).
+        /// 效果的标准化进度（0 = 刚刚开始，1 = 已过期）。
         /// </summary>
         public float Progress => Duration > 0f ? 1f - (RemainingTime / Duration) : 1f;
         #endregion
 
         #region Constructors
         /// <summary>
-        /// Default constructor for serialization.
+        /// 用于序列化的默认构造函数。
         /// </summary>
         public SkillEffectData()
         {
@@ -101,12 +101,12 @@ namespace PetGrooming.Core
         }
 
         /// <summary>
-        /// Creates a new skill effect with the specified parameters.
+        /// 使用指定的参数创建新的技能效果。
         /// </summary>
-        /// <param name="type">The type of effect</param>
-        /// <param name="value">The magnitude of the effect</param>
-        /// <param name="duration">Duration in seconds</param>
-        /// <param name="sourceSkillName">Optional name of the skill that created this effect</param>
+        /// <param name="type">效果的类型</param>
+        /// <param name="value">效果的强度</param>
+        /// <param name="duration">持续时间（秒）</param>
+        /// <param name="sourceSkillName">创建此效果的技能的可选名称</param>
         public SkillEffectData(SkillEffectType type, float value, float duration, string sourceSkillName = "")
         {
             Type = type;
@@ -119,10 +119,10 @@ namespace PetGrooming.Core
 
         #region Public Methods
         /// <summary>
-        /// Updates the remaining time by subtracting delta time.
+        /// 通过减去增量时间来更新剩余时间。
         /// </summary>
-        /// <param name="deltaTime">Time elapsed since last update</param>
-        /// <returns>True if the effect is still active, false if expired</returns>
+        /// <param name="deltaTime">自上次更新以来经过的时间</param>
+        /// <returns>如果效果仍然活动则返回 True，如果过期则返回 False</returns>
         public bool UpdateTime(float deltaTime)
         {
             RemainingTime -= deltaTime;
@@ -136,7 +136,7 @@ namespace PetGrooming.Core
         }
 
         /// <summary>
-        /// Resets the effect duration to its original value.
+        /// 将效果持续时间重置为其原始值。
         /// </summary>
         public void ResetDuration()
         {
@@ -144,9 +144,9 @@ namespace PetGrooming.Core
         }
 
         /// <summary>
-        /// Extends the effect duration by the specified amount.
+        /// 将效果持续时间延长指定的量。
         /// </summary>
-        /// <param name="additionalTime">Time to add in seconds</param>
+        /// <param name="additionalTime">要添加的时间（秒）</param>
         public void ExtendDuration(float additionalTime)
         {
             RemainingTime += additionalTime;
@@ -154,9 +154,9 @@ namespace PetGrooming.Core
         }
 
         /// <summary>
-        /// Creates a copy of this effect data.
+        /// 创建此效果数据的副本。
         /// </summary>
-        /// <returns>A new SkillEffectData with the same values</returns>
+        /// <returns>具有相同值的新 SkillEffectData</returns>
         public SkillEffectData Clone()
         {
             return new SkillEffectData
@@ -172,53 +172,53 @@ namespace PetGrooming.Core
 
         #region Static Factory Methods
         /// <summary>
-        /// Creates a slow effect.
+        /// 创建减速效果。
         /// </summary>
-        /// <param name="slowAmount">Speed reduction (0.5 = 50% slower)</param>
-        /// <param name="duration">Duration in seconds</param>
-        /// <param name="sourceName">Name of the source skill</param>
+        /// <param name="slowAmount">速度减少量（0.5 = 慢 50%）</param>
+        /// <param name="duration">持续时间（秒）</param>
+        /// <param name="sourceName">源技能的名称</param>
         public static SkillEffectData CreateSlow(float slowAmount, float duration, string sourceName = "")
         {
             return new SkillEffectData(SkillEffectType.Slow, slowAmount, duration, sourceName);
         }
 
         /// <summary>
-        /// Creates a stun effect.
+        /// 创建眩晕效果。
         /// </summary>
-        /// <param name="duration">Duration in seconds</param>
-        /// <param name="sourceName">Name of the source skill</param>
+        /// <param name="duration">持续时间（秒）</param>
+        /// <param name="sourceName">源技能的名称</param>
         public static SkillEffectData CreateStun(float duration, string sourceName = "")
         {
             return new SkillEffectData(SkillEffectType.Stun, 1f, duration, sourceName);
         }
 
         /// <summary>
-        /// Creates an invisibility effect.
+        /// 创建隐身效果。
         /// </summary>
-        /// <param name="opacity">Opacity level (0 = fully invisible, 1 = fully visible)</param>
-        /// <param name="duration">Duration in seconds</param>
-        /// <param name="sourceName">Name of the source skill</param>
+        /// <param name="opacity">不透明度级别（0 = 完全不可见，1 = 完全可见）</param>
+        /// <param name="duration">持续时间（秒）</param>
+        /// <param name="sourceName">源技能的名称</param>
         public static SkillEffectData CreateInvisible(float opacity, float duration, string sourceName = "")
         {
             return new SkillEffectData(SkillEffectType.Invisible, opacity, duration, sourceName);
         }
 
         /// <summary>
-        /// Creates a speed boost effect.
+        /// 创建速度提升效果。
         /// </summary>
-        /// <param name="boostAmount">Speed increase (0.1 = 10% faster)</param>
-        /// <param name="duration">Duration in seconds</param>
-        /// <param name="sourceName">Name of the source skill</param>
+        /// <param name="boostAmount">速度提升量（0.1 = 快 10%）</param>
+        /// <param name="duration">持续时间（秒）</param>
+        /// <param name="sourceName">源技能的名称</param>
         public static SkillEffectData CreateSpeedBoost(float boostAmount, float duration, string sourceName = "")
         {
             return new SkillEffectData(SkillEffectType.SpeedBoost, boostAmount, duration, sourceName);
         }
 
         /// <summary>
-        /// Creates an invulnerability effect.
+        /// 创建无敌效果。
         /// </summary>
-        /// <param name="duration">Duration in seconds</param>
-        /// <param name="sourceName">Name of the source skill</param>
+        /// <param name="duration">持续时间（秒）</param>
+        /// <param name="sourceName">源技能的名称</param>
         public static SkillEffectData CreateInvulnerable(float duration, string sourceName = "")
         {
             return new SkillEffectData(SkillEffectType.Invulnerable, 1f, duration, sourceName);

@@ -6,28 +6,28 @@ using PetGrooming.AI;
 namespace PetGrooming.Systems.Skills
 {
     /// <summary>
-    /// Agile Jump skill for Cat pets.
-    /// Performs a double jump to cross obstacles.
-    /// Requirement 4.2: Double jump with 6 second cooldown.
+    /// 猫咪宠物的敏捷跳跃技能。
+    /// 执行双跳以越过障碍物。
+    /// 需求 4.2: 6 秒冷却时间的双跳。
     /// </summary>
     public class AgileJumpSkill : SkillBase
     {
         #region Serialized Fields
-        [Header("Agile Jump Settings")]
-        [Tooltip("Height of the first jump")]
+        [Header("敏捷跳跃设置")]
+        [Tooltip("第一次跳跃的高度")]
         public float FirstJumpHeight = 2f;
         
-        [Tooltip("Height of the second jump")]
+        [Tooltip("第二次跳跃的高度")]
         public float SecondJumpHeight = 1.5f;
         
-        [Tooltip("Forward distance covered during jump")]
+        [Tooltip("跳跃期间覆盖的向前距离")]
         public float JumpForwardDistance = 3f;
         
-        [Tooltip("Duration of the jump animation")]
+        [Tooltip("跳跃动画的持续时间")]
         public float JumpDuration = 0.5f;
         
-        [Header("Configuration")]
-        [Tooltip("Phase 2 game configuration")]
+        [Header("配置")]
+        [Tooltip("第二阶段游戏配置")]
         public Phase2GameConfig GameConfig;
         #endregion
 
@@ -44,29 +44,29 @@ namespace PetGrooming.Systems.Skills
 
         #region Properties
         /// <summary>
-        /// Whether the cat is currently in a jump.
+        /// 猫咪当前是否正在跳跃。
         /// </summary>
         public bool IsJumping => _isJumping;
         
         /// <summary>
-        /// Whether the second jump has been used.
+        /// 第二次跳跃是否已使用。
         /// </summary>
         public bool HasUsedSecondJump => _hasUsedSecondJump;
         #endregion
 
         #region Events
         /// <summary>
-        /// Fired when the first jump starts.
+        /// 当第一次跳跃开始时触发。
         /// </summary>
         public event Action OnFirstJumpStarted;
         
         /// <summary>
-        /// Fired when the second jump starts.
+        /// 当第二次跳跃开始时触发。
         /// </summary>
         public event Action OnSecondJumpStarted;
         
         /// <summary>
-        /// Fired when the jump sequence completes.
+        /// 当跳跃序列完成时触发。
         /// </summary>
         public event Action OnJumpCompleted;
         #endregion
@@ -76,7 +76,7 @@ namespace PetGrooming.Systems.Skills
         {
             base.Awake();
             
-            SkillName = "Agile Jump";
+            SkillName = "敏捷跳跃";
             
             // Apply config values if available
             if (GameConfig != null)
@@ -105,7 +105,7 @@ namespace PetGrooming.Systems.Skills
 
         #region Public Methods
         /// <summary>
-        /// Sets the owner pet for this skill.
+        /// 为该技能设置所有者宠物。
         /// </summary>
         public void SetOwner(PetAI pet)
         {
@@ -114,17 +114,17 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Checks if the skill can be activated.
+        /// 检查技能是否可以激活。
         /// </summary>
         public override bool CanActivate()
         {
-            // Can activate if ready and not currently jumping
+            // 如果准备就绪且当前未在跳跃，则可以激活
             return base.CanActivate() && !_isJumping;
         }
 
         /// <summary>
-        /// Activates the Agile Jump skill.
-        /// Requirement 4.2: Performs a double jump to cross obstacles.
+        /// 激活敏捷跳跃技能。
+        /// 需求 4.2: 执行双跳以越过障碍物。
         /// </summary>
         public override void Activate()
         {
@@ -133,7 +133,7 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Triggers the second jump if available.
+        /// 如果可用则触发第二次跳跃。
         /// </summary>
         public void TriggerSecondJump()
         {
@@ -144,7 +144,7 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Cancels the current jump.
+        /// 取消当前跳跃。
         /// </summary>
         public void CancelJump()
         {
@@ -172,7 +172,7 @@ namespace PetGrooming.Systems.Skills
             
             OnFirstJumpStarted?.Invoke();
             
-            Debug.Log("[AgileJumpSkill] First jump started");
+            Debug.Log("[敏捷跳跃] 第一次跳跃开始");
         }
 
         private void StartSecondJump()
@@ -188,7 +188,7 @@ namespace PetGrooming.Systems.Skills
             
             OnSecondJumpStarted?.Invoke();
             
-            Debug.Log("[AgileJumpSkill] Second jump started");
+            Debug.Log("[敏捷跳跃] 第二次跳跃开始");
         }
 
         private void UpdateJump()
@@ -229,7 +229,7 @@ namespace PetGrooming.Systems.Skills
             
             OnJumpCompleted?.Invoke();
             
-            Debug.Log("[AgileJumpSkill] Jump sequence completed");
+            Debug.Log("[敏捷跳跃] 跳跃序列完成");
         }
         #endregion
 
@@ -294,7 +294,7 @@ namespace PetGrooming.Systems.Skills
         #region Editor Support
 #if UNITY_EDITOR
         /// <summary>
-        /// Sets config for testing purposes.
+        /// 设置用于测试的配置。
         /// </summary>
         public void SetConfigForTesting(Phase2GameConfig config)
         {
@@ -306,7 +306,7 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Sets the jumping state for testing.
+        /// 设置用于测试的跳跃状态。
         /// </summary>
         public void SetJumpingStateForTesting(bool isJumping, bool hasUsedSecondJump = false)
         {

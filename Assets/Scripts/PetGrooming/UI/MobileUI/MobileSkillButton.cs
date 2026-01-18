@@ -10,10 +10,10 @@ using PetGrooming.Systems.Skills;
 namespace PetGrooming.UI.MobileUI
 {
     /// <summary>
-    /// Mobile skill button component for touch interaction.
-    /// Handles touch input, cooldown display, and visual feedback animations.
+    /// 移动技能按钮组件，用于触摸交互。
+    /// 处理触摸输入、冷却显示和视觉反馈动画。
     /// 
-    /// Requirements: 2.5, 2.6, 2.7, 2.8, 4.1, 4.2, 4.3, 4.4
+    /// 需求：2.5, 2.6, 2.7, 2.8, 4.1, 4.2, 4.3, 4.4
     /// </summary>
     /// <remarks>
     /// [已废弃] 此组件已被 Unity 官方 OnScreenButton + SkillButtonVisual 组合替代。
@@ -26,33 +26,33 @@ namespace PetGrooming.UI.MobileUI
     {
         #region Serialized Fields
         
-        [Header("UI References")]
-        [Tooltip("Background image of the button")]
+        [Header("UI引用")]
+        [Tooltip("按钮的背景图像")]
         [SerializeField] private Image _background;
         
-        [Tooltip("Skill icon image")]
+        [Tooltip("技能图标图像")]
         [SerializeField] private Image _iconImage;
         
-        [Tooltip("Cooldown overlay image (radial fill)")]
+        [Tooltip("冷却遮罩图像（径向填充）")]
         [SerializeField] private Image _cooldownOverlay;
         
-        [Tooltip("Cooldown time text")]
+        [Tooltip("冷却时间文本")]
         [SerializeField] private TextMeshProUGUI _cooldownText;
         
-        [Tooltip("Glow effect image for ready animation")]
+        [Tooltip("就绪动画的发光效果图像")]
         [SerializeField] private Image _glowEffect;
         
-        [Header("Settings")]
-        [Tooltip("Mobile HUD settings asset")]
+        [Header("设置")]
+        [Tooltip("移动HUD设置资源")]
         [SerializeField] private MobileHUDSettings _settings;
         
-        [Tooltip("Button size in pixels")]
+        [Tooltip("按钮大小（像素）")]
         [SerializeField] private float _buttonSize = 100f;
         
-        [Tooltip("Color when skill is ready")]
+        [Tooltip("技能就绪时的颜色")]
         [SerializeField] private Color _readyColor = Color.white;
         
-        [Tooltip("Color when skill is on cooldown (desaturated)")]
+        [Tooltip("技能冷却中时的颜色（去饱和）")]
         [SerializeField] private Color _cooldownColor = new Color(0.5f, 0.5f, 0.5f, 1f);
         
         #endregion
@@ -74,22 +74,22 @@ namespace PetGrooming.UI.MobileUI
         #region Properties
         
         /// <summary>
-        /// Whether the skill is currently on cooldown.
+        /// 技能当前是否在冷却中。
         /// </summary>
         public bool IsOnCooldown => _boundSkill != null && !_boundSkill.IsReady;
         
         /// <summary>
-        /// Remaining cooldown time in seconds.
+        /// 剩余冷却时间（秒）。
         /// </summary>
         public float RemainingCooldown => _boundSkill != null ? _boundSkill.RemainingCooldown : 0f;
         
         /// <summary>
-        /// The bound skill reference.
+        /// 绑定的技能引用。
         /// </summary>
         public SkillBase BoundSkill => _boundSkill;
         
         /// <summary>
-        /// Current button size.
+        /// 当前按钮大小。
         /// </summary>
         public float ButtonSize => _buttonSize;
         
@@ -98,17 +98,17 @@ namespace PetGrooming.UI.MobileUI
         #region Events
         
         /// <summary>
-        /// Fired when the button is pressed.
+        /// 当按钮被按下时触发。
         /// </summary>
         public event Action OnButtonPressed;
         
         /// <summary>
-        /// Fired when the button is released.
+        /// 当按钮被释放时触发。
         /// </summary>
         public event Action OnButtonReleased;
         
         /// <summary>
-        /// Fired when skill activation fails (on cooldown).
+        /// 当技能激活失败时触发（冷却中）。
         /// </summary>
         public event Action OnActivationFailed;
         
@@ -148,8 +148,8 @@ namespace PetGrooming.UI.MobileUI
         #region IPointerDownHandler
         
         /// <summary>
-        /// Called when pointer is pressed on the button.
-        /// Requirement 4.1: Button scales down as press feedback.
+        /// 当指针在按钮上按下时调用。
+        /// 需求 4.1: 按钮按下时缩小作为反馈。
         /// </summary>
         public void OnPointerDown(PointerEventData eventData)
         {
@@ -179,8 +179,8 @@ namespace PetGrooming.UI.MobileUI
         #region IPointerUpHandler
         
         /// <summary>
-        /// Called when pointer is released.
-        /// Requirement 4.2: Button returns to normal scale with bounce.
+        /// 当指针被释放时调用。
+        /// 需求 4.2: 按钮返回正常大小并带有弹跳效果。
         /// </summary>
         public void OnPointerUp(PointerEventData eventData)
         {
@@ -200,7 +200,7 @@ namespace PetGrooming.UI.MobileUI
         #region Public Methods
         
         /// <summary>
-        /// Binds this button to a skill.
+        /// 将此按钮绑定到技能。
         /// </summary>
         public void SetSkill(SkillBase skill)
         {
@@ -224,7 +224,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Sets the skill icon sprite.
+        /// 设置技能图标精灵。
         /// </summary>
         public void SetIcon(Sprite icon)
         {
@@ -236,7 +236,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Sets the icon from SkillIconData entry.
+        /// 从SkillIconData条目设置图标。
         /// </summary>
         public void SetIconFromData(SkillIconData.SkillIconEntry iconEntry)
         {
@@ -259,9 +259,9 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Updates the cooldown display.
-        /// Requirement 2.6: Radial cooldown overlay.
-        /// Requirement 2.7: Cooldown time text.
+        /// 更新冷却显示。
+        /// 需求 2.6: 径向冷却遮罩。
+        /// 需求 2.7: 冷却时间文本。
         /// </summary>
         public void UpdateCooldown(float remaining, float total)
         {
@@ -269,8 +269,8 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Plays the ready animation when skill becomes available.
-        /// Requirement 2.8: Glow/pulse animation when ready.
+        /// 当技能可用时播放就绪动画。
+        /// 需求 2.8: 就绪时播放发光/脉冲动画。
         /// </summary>
         public void PlayReadyAnimation()
         {
@@ -283,8 +283,8 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Plays the press scale animation.
-        /// Requirement 4.1: Scale down to 95%.
+        /// 播放按下缩放动画。
+        /// 需求 4.1: 缩小到95%。
         /// </summary>
         public void PlayPressAnimation()
         {
@@ -297,8 +297,8 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Plays the release animation with bounce.
-        /// Requirement 4.2: Return to normal with bounce.
+        /// 播放释放动画，带有弹跳效果。
+        /// 需求 4.2: 返回正常大小并带有弹跳效果。
         /// </summary>
         public void PlayReleaseAnimation()
         {
@@ -311,8 +311,8 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Plays the fail animation when activation fails.
-        /// Requirement 4.4: Shake and show "冷却中" text.
+        /// 当激活失败时播放失败动画。
+        /// 需求 4.4: 抖动并显示"冷却中"文本。
         /// </summary>
         public void PlayFailAnimation()
         {
@@ -325,7 +325,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Applies settings from MobileHUDSettings asset.
+        /// 应用来自MobileHUDSettings资源的设置。
         /// </summary>
         public void ApplySettings()
         {
@@ -355,7 +355,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Sets the settings asset and applies it.
+        /// 设置设置资源并应用它。
         /// </summary>
         public void SetSettings(MobileHUDSettings settings)
         {
@@ -364,7 +364,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Sets the button size.
+        /// 设置按钮大小。
         /// </summary>
         public void SetButtonSize(float size)
         {
@@ -381,13 +381,13 @@ namespace PetGrooming.UI.MobileUI
         #region Static Methods (for testing)
         
         /// <summary>
-        /// Calculates the cooldown display state.
-        /// Used for property-based testing.
-        /// Requirement 2.6, 2.7: Cooldown overlay and text visibility.
+        /// 计算冷却显示状态。
+        /// 用于基于属性的测试。
+        /// 需求 2.6, 2.7: 冷却遮罩和文本可见性。
         /// </summary>
-        /// <param name="remainingCooldown">Remaining cooldown time</param>
-        /// <param name="totalCooldown">Total cooldown duration</param>
-        /// <returns>Tuple of (overlayVisible, textVisible, displayText, fillAmount)</returns>
+        /// <param name="remainingCooldown">剩余冷却时间</param>
+        /// <param name="totalCooldown">总冷却持续时间</param>
+        /// <returns>(overlayVisible, textVisible, displayText, fillAmount)的元组</returns>
         public static (bool overlayVisible, bool textVisible, string displayText, float fillAmount) 
             CalculateCooldownDisplayState(float remainingCooldown, float totalCooldown)
         {
@@ -409,21 +409,21 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Calculates the press scale value.
-        /// Used for property-based testing.
-        /// Requirement 4.1: Scale to 95% on press.
+        /// 计算按下缩放值。
+        /// 用于基于属性的测试。
+        /// 需求 4.1: 按下时缩放到95%。
         /// </summary>
-        /// <param name="originalScale">Original scale of the button</param>
-        /// <param name="pressScaleMultiplier">Scale multiplier (default 0.95)</param>
-        /// <returns>The pressed scale value</returns>
+        /// <param name="originalScale">按钮的原始缩放</param>
+        /// <param name="pressScaleMultiplier">缩放乘数（默认0.95）</param>
+        /// <returns>按下时的缩放值</returns>
         public static Vector3 CalculatePressScale(Vector3 originalScale, float pressScaleMultiplier = 0.95f)
         {
             return originalScale * pressScaleMultiplier;
         }
         
         /// <summary>
-        /// Determines if cooldown overlay should be visible.
-        /// Used for property-based testing.
+        /// 判断是否应显示冷却遮罩。
+        /// 用于基于属性的测试。
         /// </summary>
         public static bool ShouldShowCooldownOverlay(float remainingCooldown)
         {
@@ -431,8 +431,8 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Calculates the cooldown text to display.
-        /// Used for property-based testing.
+        /// 计算要显示的冷却文本。
+        /// 用于基于属性的测试。
         /// </summary>
         public static string CalculateCooldownText(float remainingCooldown)
         {
@@ -835,7 +835,7 @@ namespace PetGrooming.UI.MobileUI
         #region Editor Support
 #if UNITY_EDITOR
         /// <summary>
-        /// Sets references for testing purposes.
+        /// 为测试目的设置引用。
         /// </summary>
         public void SetReferencesForTesting(Image background, Image icon, Image cooldownOverlay, 
             TextMeshProUGUI cooldownText, Image glowEffect)
@@ -848,7 +848,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Gets the current scale for testing.
+        /// 获取当前缩放（测试用）。
         /// </summary>
         public Vector3 GetCurrentScaleForTesting()
         {
@@ -856,7 +856,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Gets the original scale for testing.
+        /// 获取原始缩放（测试用）。
         /// </summary>
         public Vector3 GetOriginalScaleForTesting()
         {
@@ -864,7 +864,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Sets the original scale for testing.
+        /// 设置原始缩放（测试用）。
         /// </summary>
         public void SetOriginalScaleForTesting(Vector3 scale)
         {

@@ -8,35 +8,35 @@ using StarterAssets;
 namespace PetGrooming.Systems.Skills
 {
     /// <summary>
-    /// Manages all skills for the Groomer character.
-    /// Integrates Capture Net, Leash, and Calming Spray skills.
-    /// Requirement: 3.1
+    /// 管理美容师角色的所有技能。
+    /// 集成捕获网、牵引绳和镇静喷雾技能。
+    /// 需求：3.1
     /// </summary>
     public class GroomerSkillManager : MonoBehaviour
     {
         #region Serialized Fields
         [Header("Skills")]
-        [Tooltip("Capture Net skill component")]
+        [Tooltip("捕获网技能组件")]
         public CaptureNetSkill CaptureNet;
         
-        [Tooltip("Leash skill component")]
+        [Tooltip("牵引绳技能组件")]
         public LeashSkill Leash;
         
-        [Tooltip("Calming Spray skill component")]
+        [Tooltip("镇静喷雾技能组件")]
         public CalmingSpraySkill CalmingSpray;
         
         [Header("Input Settings")]
-        [Tooltip("Key to activate Capture Net (Skill 1)")]
+        [Tooltip("激活捕获网的按键（技能 1）")]
         public KeyCode Skill1Key = KeyCode.Alpha1;
         
-        [Tooltip("Key to activate Leash (Skill 2)")]
+        [Tooltip("激活牵引绳的按键（技能 2）")]
         public KeyCode Skill2Key = KeyCode.Alpha2;
         
-        [Tooltip("Key to activate Calming Spray (Skill 3)")]
+        [Tooltip("激活镇静喷雾的按键（技能 3）")]
         public KeyCode Skill3Key = KeyCode.Alpha3;
         
         [Header("Configuration")]
-        [Tooltip("Phase 2 game configuration")]
+        [Tooltip("阶段 2 游戏配置")]
         public Phase2GameConfig GameConfig;
         #endregion
 
@@ -48,7 +48,7 @@ namespace PetGrooming.Systems.Skills
 
         #region Properties
         /// <summary>
-        /// Array of all skills managed by this manager.
+        /// 由此管理器管理的所有技能的数组。
         /// </summary>
         public SkillBase[] AllSkills
         {
@@ -63,19 +63,19 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Number of skills available.
+        /// 可用技能的数量。
         /// </summary>
         public int SkillCount => 3;
         #endregion
 
         #region Events
         /// <summary>
-        /// Fired when any skill is activated.
+        /// 当任何技能激活时触发。
         /// </summary>
         public event Action<int, SkillBase> OnSkillActivated;
         
         /// <summary>
-        /// Fired when a skill activation fails (on cooldown).
+        /// 当技能激活失败（冷却中）时触发。
         /// </summary>
         public event Action<int, SkillBase> OnSkillActivationFailed;
         #endregion
@@ -106,10 +106,10 @@ namespace PetGrooming.Systems.Skills
 
         #region Public Methods
         /// <summary>
-        /// Attempts to activate a skill by index.
+        /// 尝试按索引激活技能。
         /// </summary>
-        /// <param name="skillIndex">Index of the skill (0-2)</param>
-        /// <returns>True if activation was successful</returns>
+        /// <param name="skillIndex">技能索引 (0-2)</param>
+        /// <returns>如果激活成功则为 True</returns>
         public bool TryActivateSkill(int skillIndex)
         {
             SkillBase skill = GetSkill(skillIndex);
@@ -134,10 +134,10 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Gets a skill by index.
+        /// 按索引获取技能。
         /// </summary>
-        /// <param name="index">Index of the skill (0-2)</param>
-        /// <returns>The skill at the given index, or null if invalid</returns>
+        /// <param name="index">技能索引 (0-2)</param>
+        /// <returns>给定索引处的技能，如果无效则为 null</returns>
         public SkillBase GetSkill(int index)
         {
             switch (index)
@@ -150,10 +150,10 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Gets the index of a skill.
+        /// 获取技能的索引。
         /// </summary>
-        /// <param name="skill">The skill to find</param>
-        /// <returns>Index of the skill, or -1 if not found</returns>
+        /// <param name="skill">要查找的技能</param>
+        /// <returns>技能索引，如果未找到则为 -1</returns>
         public int GetSkillIndex(SkillBase skill)
         {
             if (skill == CaptureNet) return 0;
@@ -163,10 +163,10 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Checks if a skill is ready by index.
+        /// 按索引检查技能是否就绪。
         /// </summary>
-        /// <param name="skillIndex">Index of the skill</param>
-        /// <returns>True if the skill is ready</returns>
+        /// <param name="skillIndex">技能索引</param>
+        /// <returns>如果技能就绪则为 True</returns>
         public bool IsSkillReady(int skillIndex)
         {
             SkillBase skill = GetSkill(skillIndex);
@@ -174,10 +174,10 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Gets the remaining cooldown for a skill.
+        /// 获取技能的剩余冷却时间。
         /// </summary>
-        /// <param name="skillIndex">Index of the skill</param>
-        /// <returns>Remaining cooldown in seconds</returns>
+        /// <param name="skillIndex">技能索引</param>
+        /// <returns>剩余冷却时间（秒）</returns>
         public float GetSkillCooldown(int skillIndex)
         {
             SkillBase skill = GetSkill(skillIndex);
@@ -185,7 +185,7 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Resets all skill cooldowns.
+        /// 重置所有技能冷却时间。
         /// </summary>
         public void ResetAllCooldowns()
         {
@@ -199,9 +199,9 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Sets the owner transform for all skills.
+        /// 设置所有技能的所有者变换组件。
         /// </summary>
-        /// <param name="owner">The owner transform</param>
+        /// <param name="owner">所有者变换组件</param>
         public void SetOwner(Transform owner)
         {
             _ownerTransform = owner;
@@ -212,7 +212,7 @@ namespace PetGrooming.Systems.Skills
         #region Private Methods
         private void InitializeSkills()
         {
-            // Create skill components if not assigned
+            // 如果未分配则创建技能组件
             if (CaptureNet == null)
             {
                 CaptureNet = GetComponentInChildren<CaptureNetSkill>();
@@ -240,13 +240,13 @@ namespace PetGrooming.Systems.Skills
                 }
             }
             
-            // Apply config if available
+            // 如果可用则应用配置
             if (GameConfig != null)
             {
                 ApplyConfig();
             }
             
-            // Rebuild skills array
+            // 重建技能数组
             _allSkills = new SkillBase[] { CaptureNet, Leash, CalmingSpray };
         }
 
@@ -341,13 +341,13 @@ namespace PetGrooming.Systems.Skills
             if (groomerController != null)
             {
                 groomerController.TryCapturePet();
-                Debug.Log("[GroomerSkillManager] 触发捕获");
+                Debug.Log("[美容师技能管理] 触发捕获");
             }
         }
 
         private void HandleSkillInput()
         {
-            // Check for game state if GameManager exists
+            // 如果 GameManager 存在，检查游戏状态
             if (GameManager.Instance != null && 
                 GameManager.Instance.CurrentState != GameManager.GameState.Playing)
             {
@@ -369,7 +369,7 @@ namespace PetGrooming.Systems.Skills
         }
         
         /// <summary>
-        /// Checks if a key was pressed this frame using the new Input System.
+        /// 使用新输入系统检查本帧是否按下了某个键。
         /// </summary>
         private bool WasKeyPressedThisFrame(KeyCode keyCode)
         {
@@ -381,7 +381,7 @@ namespace PetGrooming.Systems.Skills
         }
         
         /// <summary>
-        /// Converts legacy KeyCode to new Input System Key.
+        /// 将旧版 KeyCode 转换为新输入系统 Key。
         /// </summary>
         private static Key KeyCodeToKey(KeyCode keyCode)
         {
@@ -402,22 +402,22 @@ namespace PetGrooming.Systems.Skills
 
         #region Static Methods (Testable)
         /// <summary>
-        /// Validates that all required skills are present.
+        /// 验证所有必需的技能是否存在。
         /// </summary>
-        /// <param name="captureNet">Capture Net skill</param>
-        /// <param name="leash">Leash skill</param>
-        /// <param name="calmingSpray">Calming Spray skill</param>
-        /// <returns>True if all skills are present</returns>
+        /// <param name="captureNet">捕获网技能</param>
+        /// <param name="leash">牵引绳技能</param>
+        /// <param name="calmingSpray">镇静喷雾技能</param>
+        /// <returns>如果所有技能都存在则为 True</returns>
         public static bool ValidateSkillsPresent(SkillBase captureNet, SkillBase leash, SkillBase calmingSpray)
         {
             return captureNet != null && leash != null && calmingSpray != null;
         }
 
         /// <summary>
-        /// Gets the expected skill count for the Groomer.
-        /// Requirement 3.1: Groomer has 3 skills.
+        /// 获取美容师的预期技能数量。
+        /// 需求 3.1: 美容师有 3 个技能。
         /// </summary>
-        /// <returns>Expected skill count (3)</returns>
+        /// <returns>预期技能数量 (3)</returns>
         public static int GetExpectedSkillCount()
         {
             return 3;
@@ -427,7 +427,7 @@ namespace PetGrooming.Systems.Skills
         #region Editor Support
 #if UNITY_EDITOR
         /// <summary>
-        /// Sets config for testing purposes.
+        /// 设置用于测试的配置。
         /// </summary>
         public void SetConfigForTesting(Phase2GameConfig config)
         {
@@ -436,7 +436,7 @@ namespace PetGrooming.Systems.Skills
         }
         
         /// <summary>
-        /// Sets skills for testing purposes.
+        /// 设置用于测试的技能。
         /// </summary>
         public void SetSkillsForTesting(CaptureNetSkill captureNet, LeashSkill leash, CalmingSpraySkill calmingSpray)
         {

@@ -6,36 +6,36 @@ using PetGrooming.AI;
 namespace PetGrooming.Systems.Skills
 {
     /// <summary>
-    /// Capture Net skill for the Groomer.
-    /// Throws a projectile that slows hit pets by 50% for 3 seconds.
-    /// Requirements: 3.2, 3.3
+    /// 美容师的捕获网技能。
+    /// 投掷一个投射物，使被击中的宠物减速 50%，持续 3 秒。
+    /// 需求：3.2, 3.3
     /// </summary>
     public class CaptureNetSkill : SkillBase
     {
         #region Serialized Fields
-        [Header("Capture Net Settings")]
-        [Tooltip("Speed of the net projectile")]
+        [Header("捕获网设置")]
+        [Tooltip("网投射物的速度")]
         public float ProjectileSpeed = 15f;
         
-        [Tooltip("Movement speed reduction when hit (0.5 = 50% reduction)")]
+        [Tooltip("被击中时的移动速度降低量 (0.5 = 降低 50%)")]
         [Range(0f, 1f)]
         public float SlowAmount = 0.5f;
         
-        [Tooltip("Duration of the slow effect in seconds")]
+        [Tooltip("减速效果持续时间（秒）")]
         public float SlowDuration = 3f;
         
-        [Tooltip("Maximum range of the projectile")]
+        [Tooltip("投射物的最大范围")]
         public float MaxRange = 15f;
         
-        [Tooltip("Prefab for the net projectile")]
+        [Tooltip("网投射物的预制体")]
         public GameObject NetProjectilePrefab;
         
-        [Header("References")]
-        [Tooltip("Transform from which the projectile is launched")]
+        [Header("引用")]
+        [Tooltip("投射物发射的变换点")]
         public Transform LaunchPoint;
         
-        [Header("Configuration")]
-        [Tooltip("Phase 2 game configuration")]
+        [Header("配置")]
+        [Tooltip("第二阶段游戏配置")]
         public Phase2GameConfig GameConfig;
         #endregion
 
@@ -45,7 +45,7 @@ namespace PetGrooming.Systems.Skills
 
         #region Events
         /// <summary>
-        /// Fired when the net hits a pet.
+        /// 当网击中宠物时触发。
         /// </summary>
         public event Action<PetAI> OnNetHit;
         #endregion
@@ -55,7 +55,7 @@ namespace PetGrooming.Systems.Skills
         {
             base.Awake();
             
-            SkillName = "Capture Net";
+            SkillName = "捕获网";
             
             // Apply config values if available
             if (GameConfig != null)
@@ -86,7 +86,7 @@ namespace PetGrooming.Systems.Skills
 
         #region Public Methods
         /// <summary>
-        /// Sets the owner transform for projectile direction calculation.
+        /// 设置投射物方向计算的所有者变换组件。
         /// </summary>
         public void SetOwner(Transform owner)
         {
@@ -98,8 +98,8 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Activates the Capture Net skill, launching a projectile.
-        /// Requirement 3.2: Throws a projectile that slows hit pet by 50% for 3 seconds.
+        /// 激活捕获网技能，发射一个投射物。
+        /// 需求 3.2: 投掷一个投射物，使被击中的宠物减速 50%，持续 3 秒。
         /// </summary>
         public override void Activate()
         {
@@ -108,10 +108,10 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Called when the net projectile hits a pet.
-        /// Applies slow effect to the pet.
+        /// 当网投射物击中宠物时调用。
+        /// 对宠物应用减速效果。
         /// </summary>
-        /// <param name="pet">The pet that was hit</param>
+        /// <param name="pet">被击中的宠物</param>
         public void OnProjectileHit(PetAI pet)
         {
             if (pet == null) return;
@@ -119,7 +119,7 @@ namespace PetGrooming.Systems.Skills
             ApplySlowEffect(pet, SlowAmount, SlowDuration);
             OnNetHit?.Invoke(pet);
             
-            Debug.Log($"[CaptureNetSkill] Hit pet, applying {SlowAmount * 100}% slow for {SlowDuration}s");
+            Debug.Log($"[捕获网] 击中宠物，应用 {SlowAmount * 100}% 减速效果，持续 {SlowDuration} 秒");
         }
         #endregion
 
@@ -158,7 +158,7 @@ namespace PetGrooming.Systems.Skills
                 PerformRaycastHit(launchPosition, launchDirection);
             }
             
-            Debug.Log("[CaptureNetSkill] Projectile launched");
+            Debug.Log("[捕获网] 投射物发射");
         }
 
         private void PerformRaycastHit(Vector3 origin, Vector3 direction)
@@ -182,21 +182,21 @@ namespace PetGrooming.Systems.Skills
 
         #region Static Methods (Testable)
         /// <summary>
-        /// Applies slow effect to a pet.
-        /// Property 8: Capture Net Slow Effect
-        /// Requirement 3.2: Slows hit pet by 50% for 3 seconds.
+        /// 对宠物应用减速效果。
+        /// 属性 8: 捕获网减速效果
+        /// 需求 3.2: 使被击中的宠物减速 50%，持续 3 秒。
         /// </summary>
-        /// <param name="pet">The pet to slow</param>
-        /// <param name="slowAmount">Speed reduction (0.5 = 50%)</param>
-        /// <param name="duration">Duration in seconds</param>
+        /// <param name="pet">要减速的宠物</param>
+        /// <param name="slowAmount">速度降低量 (0.5 = 50%)</param>
+        /// <param name="duration">持续时间（秒）</param>
         public static void ApplySlowEffect(PetAI pet, float slowAmount, float duration)
         {
             if (pet == null) return;
             
-            // Create slow effect data
-            SkillEffectData slowEffect = SkillEffectData.CreateSlow(slowAmount, duration, "Capture Net");
+            // 创建减速效果数据
+            SkillEffectData slowEffect = SkillEffectData.CreateSlow(slowAmount, duration, "捕获网");
             
-            // Apply to pet (pet needs to have effect handling)
+            // 应用到宠物（宠物需要有效果处理）
             IEffectReceiver effectReceiver = pet.GetComponent<IEffectReceiver>();
             if (effectReceiver != null)
             {
@@ -204,33 +204,33 @@ namespace PetGrooming.Systems.Skills
             }
             else
             {
-                // Fallback: Direct speed modification if pet supports it
-                Debug.Log($"[CaptureNetSkill] Applied slow effect: {slowAmount * 100}% for {duration}s");
+                // 备选方案：如果宠物支持，直接修改速度
+                Debug.Log($"[捕获网] 应用了减速效果：{slowAmount * 100}% 持续 {duration} 秒");
             }
         }
 
         /// <summary>
-        /// Calculates the slow effect parameters.
+        /// 计算减速效果参数。
         /// </summary>
-        /// <param name="baseSlowAmount">Base slow amount from config</param>
-        /// <param name="baseDuration">Base duration from config</param>
-        /// <returns>Tuple of (slowAmount, duration)</returns>
+        /// <param name="baseSlowAmount">配置中的基础减速量</param>
+        /// <param name="baseDuration">配置中的基础持续时间</param>
+        /// <returns>(slowAmount, duration) 的元组</returns>
         public static (float slowAmount, float duration) CalculateSlowEffect(float baseSlowAmount, float baseDuration)
         {
-            // Currently no modifiers, but this allows for future expansion
+            // 目前没有修改器，但这允许未来扩展
             return (baseSlowAmount, baseDuration);
         }
 
         /// <summary>
-        /// Validates if the slow effect parameters are correct per requirements.
-        /// Property 8: Capture Net Slow Effect
+        /// 根据要求验证减速效果参数是否正确。
+        /// 属性 8: 捕获网减速效果
         /// </summary>
-        /// <param name="slowAmount">The slow amount to validate</param>
-        /// <param name="duration">The duration to validate</param>
-        /// <returns>True if parameters match requirements</returns>
+        /// <param name="slowAmount">要验证的减速量</param>
+        /// <param name="duration">要验证的持续时间</param>
+        /// <returns>如果参数符合要求则为 True</returns>
         public static bool ValidateSlowEffectParameters(float slowAmount, float duration)
         {
-            // Requirement 3.2: 50% slow for 3 seconds
+            // 需求 3.2: 50% 减速，持续 3 秒
             const float RequiredSlowAmount = 0.5f;
             const float RequiredDuration = 3f;
             const float Tolerance = 0.001f;
@@ -243,7 +243,7 @@ namespace PetGrooming.Systems.Skills
         #region Editor Support
 #if UNITY_EDITOR
         /// <summary>
-        /// Sets config for testing purposes.
+        /// 设置用于测试的配置。
         /// </summary>
         public void SetConfigForTesting(Phase2GameConfig config)
         {

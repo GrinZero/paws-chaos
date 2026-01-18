@@ -8,35 +8,35 @@ using PetGrooming.Core;
 namespace PetGrooming.UI
 {
     /// <summary>
-    /// Manages the game result screen displaying victory/defeat and replay option.
-    /// Requirement 8.6: Display victory/defeat screen with final stats.
+    /// 管理显示胜利/失败和重玩选项的游戏结果屏幕。
+    /// 需求 8.6：显示带有最终统计数据的胜利/失败屏幕。
     /// </summary>
     public class ResultScreen : MonoBehaviour
     {
         #region Serialized Fields
         
         [Header("Result Panel")]
-        [Tooltip("Main result panel container")]
+        [Tooltip("主要结果面板容器")]
         [SerializeField] private GameObject _resultPanel;
         
-        [Header("Result Display")]
-        [Tooltip("Text for result title (Victory/Defeat)")]
+        [Header("结果显示")]
+        [Tooltip("结果标题文本（胜利/失败）")]
         [SerializeField] private TextMeshProUGUI _resultTitleText;
-        [Tooltip("Text for result description")]
+        [Tooltip("结果描述文本")]
         [SerializeField] private TextMeshProUGUI _resultDescriptionText;
-        [Tooltip("Image for result icon")]
+        [Tooltip("结果图标图像")]
         [SerializeField] private Image _resultIcon;
         
-        [Header("Stats Display")]
-        [Tooltip("Text for final time")]
+        [Header("统计显示")]
+        [Tooltip("最终时间文本")]
         [SerializeField] private TextMeshProUGUI _finalTimeText;
-        [Tooltip("Text for final mischief value")]
+        [Tooltip("最终恶作剧值文本")]
         [SerializeField] private TextMeshProUGUI _finalMischiefText;
         
-        [Header("Buttons")]
-        [Tooltip("Button to replay the game")]
+        [Header("按钮")]
+        [Tooltip("重新游戏的按钮")]
         [SerializeField] private Button _replayButton;
-        [Tooltip("Button to quit to main menu")]
+        [Tooltip("退出到主菜单的按钮")]
         [SerializeField] private Button _quitButton;
         
         [Header("Visual Settings")]
@@ -80,10 +80,10 @@ namespace PetGrooming.UI
         #region Public Methods
         
         /// <summary>
-        /// Shows the result screen with the specified outcome.
-        /// Requirement 8.6: Display victory/defeat screen with final stats.
+        /// 显示带有指定结果的结果屏幕。
+        /// 需求 8.6：显示带有最终统计数据的胜利/失败屏幕。
         /// </summary>
-        /// <param name="groomerWin">True if groomer won, false if pet won.</param>
+        /// <param name="groomerWin">如果 groomer 获胜则为 True，如果宠物获胜则为 False。</param>
         public void ShowResult(bool groomerWin)
         {
             if (_resultPanel == null) return;
@@ -106,9 +106,9 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Shows the result screen based on game state.
+        /// 根据游戏状态显示结果屏幕。
         /// </summary>
-        /// <param name="result">The final game state.</param>
+        /// <param name="result">最终游戏状态。</param>
         public void ShowResult(GameManager.GameState result)
         {
             _lastResult = result;
@@ -116,7 +116,7 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Hides the result screen.
+        /// 隐藏结果屏幕。
         /// </summary>
         public void HideResult()
         {
@@ -127,7 +127,7 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Replays the current game.
+        /// 重新开始当前游戏。
         /// </summary>
         public void OnReplayClicked()
         {
@@ -146,7 +146,7 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Quits to main menu or reloads scene.
+        /// 退出到主菜单或重新加载场景。
         /// </summary>
         public void OnQuitClicked()
         {

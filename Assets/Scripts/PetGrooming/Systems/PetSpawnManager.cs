@@ -8,8 +8,8 @@ using PetGrooming.AI;
 namespace PetGrooming.Systems
 {
     /// <summary>
-    /// Manages multi-pet spawning and tracking for Phase 2.
-    /// Requirements: 1.1, 1.2
+    /// 第二阶段中负责多只宠物的生成与管理。
+    /// 需求：1.1, 1.2
     /// </summary>
     public class PetSpawnManager : MonoBehaviour
     {
@@ -38,8 +38,8 @@ namespace PetGrooming.Systems
         #region Enums
         
         /// <summary>
-        /// Game mode determining the number of pets to spawn.
-        /// Requirements: 1.1, 1.2
+        /// 用于决定要生成多少只宠物的游戏模式。
+        /// 需求：1.1, 1.2
         /// </summary>
         public enum GameMode
         {
@@ -83,48 +83,48 @@ namespace PetGrooming.Systems
         #region Properties
         
         /// <summary>
-        /// Current game mode.
+        /// 当前游戏模式。
         /// </summary>
         public GameMode CurrentMode => _currentMode;
         
         /// <summary>
-        /// List of all active pets in the scene.
+        /// 场景中所有激活宠物的列表。
         /// </summary>
         public List<PetAI> ActivePets => _activePets;
         
         /// <summary>
-        /// Number of pets that have not been groomed yet.
+        /// 尚未被美容的宠物数量。
         /// </summary>
         public int RemainingPets => _activePets.Count(p => p != null && !p.IsGroomed);
         
         /// <summary>
-        /// Total number of pets spawned.
+        /// 已生成宠物的总数。
         /// </summary>
         public int TotalPets => _activePets.Count;
         
         /// <summary>
-        /// Number of pets that have been groomed.
+        /// 已经被美容过的宠物数量。
         /// </summary>
         public int GroomedPets => _activePets.Count(p => p != null && p.IsGroomed);
         
         /// <summary>
-        /// Whether all pets have been groomed.
-        /// Requirement 1.7: Victory condition check.
+        /// 是否所有宠物都已经被美容。
+        /// 需求 1.7：胜利条件检查。
         /// </summary>
         public bool AllPetsGroomed => _activePets.Count > 0 && _activePets.All(p => p != null && p.IsGroomed);
         
         /// <summary>
-        /// Reference to the Phase 2 configuration.
+        /// 第二阶段配置引用。
         /// </summary>
         public Phase2GameConfig Phase2Config => _phase2Config;
         
         /// <summary>
-        /// Play area minimum bounds.
+        /// 游玩区域的最小边界。
         /// </summary>
         public Vector3 PlayAreaMin => _playAreaMin;
         
         /// <summary>
-        /// Play area maximum bounds.
+        /// 游玩区域的最大边界。
         /// </summary>
         public Vector3 PlayAreaMax => _playAreaMax;
         
@@ -133,18 +133,18 @@ namespace PetGrooming.Systems
         #region Events
         
         /// <summary>
-        /// Fired when a pet is spawned.
+        /// 当一只宠物被生成时触发。
         /// </summary>
         public event Action<PetAI> OnPetSpawned;
         
         /// <summary>
-        /// Fired when a pet completes grooming.
+        /// 当一只宠物完成美容时触发。
         /// </summary>
         public event Action<PetAI> OnPetGroomed;
         
         /// <summary>
-        /// Fired when all pets have been groomed.
-        /// Requirement 1.7: Victory condition.
+        /// 当所有宠物都被美容时触发。
+        /// 需求 1.7：胜利条件。
         /// </summary>
         public event Action OnAllPetsGroomed;
         
@@ -154,7 +154,7 @@ namespace PetGrooming.Systems
         
         private void Awake()
         {
-            // Singleton setup
+            // 单例初始化
             if (_instance != null && _instance != this)
             {
                 Debug.LogWarning("[PetSpawnManager] Duplicate PetSpawnManager detected, destroying this instance.");
@@ -183,21 +183,21 @@ namespace PetGrooming.Systems
         #region Public Methods
         
         /// <summary>
-        /// Spawns pets based on the current game mode.
-        /// Requirements: 1.1, 1.2
+        /// 根据当前游戏模式生成宠物。
+        /// 需求：1.1, 1.2
         /// </summary>
         public void SpawnPets()
         {
-            // Clear any existing pets
+            // 清除场景中已有的宠物
             ClearPets();
             
             int petCount = GetPetCountForMode(_currentMode);
             
             Debug.Log($"[PetSpawnManager] Spawning {petCount} pets for {_currentMode} mode");
             
-            // Set dynamic mischief threshold based on game mode
-            // Property 15: Mischief Threshold Matches Game Mode
-            // Requirements 6.1, 6.2: 2-pet mode = 800, 3-pet mode = 1000
+            // 根据游戏模式设置动态恶作剧阈值
+            // 属性 15：恶作剧阈值与游戏模式匹配
+            // 需求 6.1, 6.2：2 宠模式 800，3 宠模式 1000
             if (MischiefSystem.Instance != null)
             {
                 MischiefSystem.Instance.SetDynamicThreshold(_currentMode);
@@ -208,7 +208,7 @@ namespace PetGrooming.Systems
                 SpawnPet(i);
             }
             
-            // Set total pet count in GameManager
+            // 在 GameManager 中记录总宠物数量
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.SetTotalPetCount(petCount);
@@ -216,10 +216,10 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Sets the game mode and optionally respawns pets.
+        /// 设置游戏模式，并可选择是否立即重新生成宠物。
         /// </summary>
-        /// <param name="mode">The new game mode</param>
-        /// <param name="respawn">Whether to respawn pets immediately</param>
+        /// <param name="mode">新的游戏模式。</param>
+        /// <param name="respawn">是否立刻重新生成宠物。</param>
         public void SetGameMode(GameMode mode, bool respawn = false)
         {
             _currentMode = mode;
@@ -233,10 +233,10 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Called when a pet completes grooming.
-        /// Requirement 1.7: Check for all pets groomed victory condition.
+        /// 当一只宠物完成美容时调用。
+        /// 需求 1.7：检查“所有宠物已被美容”胜利条件。
         /// </summary>
-        /// <param name="pet">The pet that completed grooming</param>
+        /// <param name="pet">完成美容的那只宠物。</param>
         public void OnPetGroomingComplete(PetAI pet)
         {
             if (pet == null) return;
@@ -246,7 +246,7 @@ namespace PetGrooming.Systems
             
             Debug.Log($"[PetSpawnManager] Pet groomed. Remaining: {RemainingPets}/{TotalPets}");
             
-            // Check victory condition
+            // 检查胜利条件
             if (AllPetsGroomed)
             {
                 Debug.Log("[PetSpawnManager] All pets groomed! Triggering victory.");
@@ -255,10 +255,10 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Gets the nearest pet to a position that is not groomed or captured.
+        /// 获取距离指定位置最近且未被美容、未被捕获的宠物。
         /// </summary>
-        /// <param name="position">Position to check from</param>
-        /// <returns>The nearest available pet, or null if none found</returns>
+        /// <param name="position">用来计算距离的参考位置。</param>
+        /// <returns>最近的可用宠物，如没有则返回 null。</returns>
         public PetAI GetNearestPet(Vector3 position)
         {
             PetAI nearest = null;
@@ -282,16 +282,16 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Gets all pets that are not groomed.
+        /// 获取所有尚未被美容的宠物。
         /// </summary>
-        /// <returns>List of ungroomed pets</returns>
+        /// <returns>未美容宠物的列表。</returns>
         public List<PetAI> GetUngroomedPets()
         {
             return _activePets.Where(p => p != null && !p.IsGroomed).ToList();
         }
         
         /// <summary>
-        /// Clears all spawned pets.
+        /// 清除所有已生成的宠物。
         /// </summary>
         public void ClearPets()
         {
@@ -310,11 +310,11 @@ namespace PetGrooming.Systems
         #region Private Methods
         
         /// <summary>
-        /// Spawns a single pet at the specified index.
+        /// 在指定索引位置生成一只宠物。
         /// </summary>
         private void SpawnPet(int index)
         {
-            // Determine pet type (alternate between cats and dogs)
+            // 决定宠物类型（猫狗交替生成）
             bool isCat = index % 2 == 0;
             GameObject prefab = isCat ? _catPrefab : _dogPrefab;
             
@@ -324,10 +324,10 @@ namespace PetGrooming.Systems
                 return;
             }
             
-            // Get spawn position
+            // 获取生成位置
             Vector3 spawnPosition = GetSpawnPosition(index);
             
-            // Instantiate pet
+            // 实例化宠物对象
             GameObject petObj = Instantiate(prefab, spawnPosition, Quaternion.identity);
             petObj.name = $"Pet_{(isCat ? "Cat" : "Dog")}_{index}";
             
@@ -336,7 +336,7 @@ namespace PetGrooming.Systems
             {
                 _activePets.Add(petAI);
                 
-                // Subscribe to grooming complete event
+                // 订阅宠物完成美容事件
                 petAI.OnGroomingComplete += () => OnPetGroomingComplete(petAI);
                 
                 OnPetSpawned?.Invoke(petAI);
@@ -351,11 +351,11 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Gets the spawn position for a pet at the specified index.
+        /// 获取指定索引宠物的生成位置。
         /// </summary>
         private Vector3 GetSpawnPosition(int index)
         {
-            // Use spawn points if available
+            // 如果有预设出生点则优先使用
             if (_spawnPoints != null && _spawnPoints.Length > 0)
             {
                 int spawnIndex = index % _spawnPoints.Length;
@@ -365,12 +365,12 @@ namespace PetGrooming.Systems
                 }
             }
             
-            // Generate random position within bounds
+            // 否则在边界内随机生成一个位置
             return GenerateRandomSpawnPosition();
         }
         
         /// <summary>
-        /// Generates a random spawn position within the play area bounds.
+        /// 在游玩区域边界内生成一个随机出生位置。
         /// </summary>
         private Vector3 GenerateRandomSpawnPosition()
         {
@@ -382,23 +382,23 @@ namespace PetGrooming.Systems
         #region Static Methods (Testable)
         
         /// <summary>
-        /// Gets the number of pets for a given game mode.
-        /// Property 1: Pet Spawn Count Matches Game Mode
-        /// Requirements: 1.1, 1.2
+        /// 获取指定游戏模式下需要生成的宠物数量。
+        /// 属性 1：生成宠物数量与游戏模式匹配。
+        /// 需求：1.1, 1.2
         /// </summary>
-        /// <param name="mode">The game mode</param>
-        /// <returns>Number of pets to spawn</returns>
+        /// <param name="mode">游戏模式。</param>
+        /// <returns>要生成的宠物数量。</returns>
         public static int GetPetCountForMode(GameMode mode)
         {
             return (int)mode;
         }
         
         /// <summary>
-        /// Generates a random position within the specified bounds.
+        /// 在指定的边界范围内生成一个随机位置。
         /// </summary>
-        /// <param name="min">Minimum bounds</param>
-        /// <param name="max">Maximum bounds</param>
-        /// <returns>Random position within bounds</returns>
+        /// <param name="min">最小边界。</param>
+        /// <param name="max">最大边界。</param>
+        /// <returns>边界内的随机位置。</returns>
         public static Vector3 GenerateRandomPositionInBounds(Vector3 min, Vector3 max)
         {
             return new Vector3(
@@ -409,12 +409,12 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Checks if a position is within the specified bounds.
+        /// 检查一个位置是否在指定边界内。
         /// </summary>
-        /// <param name="position">Position to check</param>
-        /// <param name="min">Minimum bounds</param>
-        /// <param name="max">Maximum bounds</param>
-        /// <returns>True if position is within bounds</returns>
+        /// <param name="position">要检查的位置。</param>
+        /// <param name="min">最小边界。</param>
+        /// <param name="max">最大边界。</param>
+        /// <returns>在边界内返回 true。</returns>
         public static bool IsPositionInBounds(Vector3 position, Vector3 min, Vector3 max)
         {
             return position.x >= min.x && position.x <= max.x &&
@@ -422,12 +422,12 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Checks if all pets in a list are groomed.
-        /// Property 4: All Pets Groomed Victory Condition
-        /// Requirement 1.7
+        /// 检查列表中的所有宠物是否都已被美容。
+        /// 属性 4：所有宠物被美容的胜利条件。
+        /// 需求 1.7。
         /// </summary>
-        /// <param name="pets">List of pets to check</param>
-        /// <returns>True if all pets are groomed</returns>
+        /// <param name="pets">要检查的宠物列表。</param>
+        /// <returns>如果全部已被美容则返回 true。</returns>
         public static bool AreAllPetsGroomed(IEnumerable<PetAI> pets)
         {
             if (pets == null) return false;
@@ -444,7 +444,7 @@ namespace PetGrooming.Systems
         
 #if UNITY_EDITOR
         /// <summary>
-        /// Sets the game mode for testing purposes.
+        /// 设置游戏模式（测试用）。
         /// </summary>
         public void SetGameModeForTesting(GameMode mode)
         {
@@ -452,7 +452,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Sets the Phase 2 config for testing purposes.
+        /// 设置 Phase2GameConfig（测试用）。
         /// </summary>
         public void SetPhase2ConfigForTesting(Phase2GameConfig config)
         {
@@ -460,7 +460,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Sets the play area bounds for testing.
+        /// 设置游玩区域边界（测试用）。
         /// </summary>
         public void SetPlayAreaBoundsForTesting(Vector3 min, Vector3 max)
         {
@@ -469,7 +469,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Adds a pet to the active pets list for testing.
+        /// 向激活宠物列表中添加一只宠物（测试用）。
         /// </summary>
         public void AddPetForTesting(PetAI pet)
         {
@@ -480,7 +480,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Clears active pets for testing.
+        /// 清空激活宠物列表（测试用）。
         /// </summary>
         public void ClearPetsForTesting()
         {
@@ -490,13 +490,13 @@ namespace PetGrooming.Systems
         
         private void OnDrawGizmosSelected()
         {
-            // Draw play area bounds
+            // 绘制游玩区域边界
             Gizmos.color = Color.cyan;
             Vector3 center = (_playAreaMin + _playAreaMax) / 2f;
             Vector3 size = _playAreaMax - _playAreaMin;
             Gizmos.DrawWireCube(center, size);
             
-            // Draw spawn points
+            // 绘制出生点
             if (_spawnPoints != null)
             {
                 Gizmos.color = Color.green;

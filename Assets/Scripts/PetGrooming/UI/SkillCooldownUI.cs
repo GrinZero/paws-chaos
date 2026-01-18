@@ -7,70 +7,70 @@ using PetGrooming.Systems.Skills;
 namespace PetGrooming.UI
 {
     /// <summary>
-    /// UI component for displaying a single skill's cooldown state.
-    /// Displays skill icon, cooldown overlay with radial fill, and remaining time text.
-    /// Requirements: 7.1, 7.2, 7.3, 7.4
+    /// 用于显示单个技能冷却状态的 UI 组件。
+    /// 显示技能图标、带径向填充的冷却覆盖层和剩余时间文本。
+    /// 需求：7.1, 7.2, 7.3, 7.4
     /// </summary>
     public class SkillCooldownUI : MonoBehaviour
     {
         #region Serialized Fields
         
         [Header("UI Elements")]
-        [Tooltip("Image component for displaying the skill icon")]
+        [Tooltip("用于显示技能图标的 Image 组件")]
         [SerializeField] private Image _skillIcon;
         
-        [Tooltip("Image component for cooldown overlay (uses radial fill)")]
+        [Tooltip("用于冷却覆盖层的 Image 组件（使用径向填充）")]
         [SerializeField] private Image _cooldownOverlay;
         
-        [Tooltip("Text component for displaying remaining cooldown seconds")]
+        [Tooltip("用于显示剩余冷却秒数的 Text 组件")]
         [SerializeField] private TextMeshProUGUI _cooldownText;
         
-        [Tooltip("Animator for ready indicator animation")]
+        [Tooltip("就绪指示器动画的 Animator")]
         [SerializeField] private Animator _readyAnimator;
         
-        [Header("Visual Settings")]
-        [Tooltip("Color of the skill icon when ready")]
+        [Header("视觉设置")]
+        [Tooltip("技能就绪时的图标颜色")]
         [SerializeField] private Color _readyColor = Color.white;
         
-        [Tooltip("Color of the skill icon when on cooldown")]
+        [Tooltip("技能冷却时的图标颜色")]
         [SerializeField] private Color _cooldownColor = new Color(0.5f, 0.5f, 0.5f, 1f);
         
-        [Tooltip("Color of the cooldown overlay")]
+        [Tooltip("冷却覆盖层的颜色")]
         [SerializeField] private Color _overlayColor = new Color(0f, 0f, 0f, 0.7f);
         
-        [Header("Animation Settings")]
-        [Tooltip("Animation trigger name for ready state")]
+        [Header("动画设置")]
+        [Tooltip("就绪状态的动画触发器名称")]
         [SerializeField] private string _readyTrigger = "Ready";
         
-        [Tooltip("Animation trigger name for activated state")]
+        [Tooltip("激活状态的动画触发器名称")]
         [SerializeField] private string _activatedTrigger = "Activated";
         
-        [Tooltip("Enable pulse animation when skill becomes ready")]
+        [Tooltip("技能就绪时启用脉冲动画")]
         [SerializeField] private bool _enableReadyPulse = true;
         
-        [Tooltip("Duration of the ready pulse animation")]
+        [Tooltip("就绪脉冲动画的持续时间")]
         [SerializeField] private float _readyPulseDuration = 0.3f;
         
-        [Tooltip("Scale multiplier for ready pulse")]
+        [Tooltip("就绪脉冲的缩放倍数")]
         [SerializeField] private float _readyPulseScale = 1.2f;
         
-        [Header("Ready Glow Effect")]
-        [Tooltip("Image component for glow effect when ready")]
+        [Header("就绪发光效果")]
+        [Tooltip("就绪时发光效果的 Image 组件")]
         [SerializeField] private Image _glowImage;
         
-        [Tooltip("Enable glow effect when skill is ready")]
+        [Tooltip("技能就绪时启用发光效果")]
         [SerializeField] private bool _enableReadyGlow = true;
         
-        [Tooltip("Glow color when skill is ready")]
+        [Tooltip("技能就绪时的发光颜色")]
         [SerializeField] private Color _glowColor = new Color(1f, 0.9f, 0.5f, 0.8f);
         
-        [Tooltip("Glow pulse speed")]
+        [Tooltip("发光脉冲速度")]
         [SerializeField] private float _glowPulseSpeed = 2f;
         
-        [Tooltip("Minimum glow alpha")]
+        [Tooltip("最小发光透明度")]
         [SerializeField] private float _glowMinAlpha = 0.3f;
         
-        [Tooltip("Maximum glow alpha")]
+        [Tooltip("最大发光透明度")]
         [SerializeField] private float _glowMaxAlpha = 0.8f;
         
         #endregion
@@ -90,12 +90,12 @@ namespace PetGrooming.UI
         #region Properties
         
         /// <summary>
-        /// The skill being displayed by this UI component.
+        /// 此 UI 组件显示的技能。
         /// </summary>
         public SkillBase Skill => _skill;
         
         /// <summary>
-        /// Whether the skill is currently ready.
+        /// 技能当前是否就绪。
         /// </summary>
         public bool IsReady => _skill != null && _skill.IsReady;
         
@@ -104,7 +104,7 @@ namespace PetGrooming.UI
         #region Events
         
         /// <summary>
-        /// Fired when the skill becomes ready.
+        /// 当技能就绪时触发。
         /// </summary>
         public event Action OnSkillReady;
         
@@ -140,10 +140,10 @@ namespace PetGrooming.UI
         #region Public Methods
         
         /// <summary>
-        /// Sets the skill to display.
-        /// Requirement 7.1: Display each skill as an icon with cooldown overlay.
+        /// 设置要显示的技能。
+        /// 需求 7.1：将每个技能显示为带有冷却覆盖层的图标。
         /// </summary>
-        /// <param name="skill">The skill to display</param>
+        /// <param name="skill">要显示的技能</param>
         public void SetSkill(SkillBase skill)
         {
             UnsubscribeFromSkill();
@@ -163,12 +163,12 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Updates the cooldown display.
-        /// Requirement 7.2: Show radial fill animation indicating remaining time.
-        /// Requirement 7.3: Display remaining seconds as text.
+        /// 更新冷却显示。
+        /// 需求 7.2：显示指示剩余时间的径向填充动画。
+        /// 需求 7.3：将剩余秒数显示为文本。
         /// </summary>
-        /// <param name="remaining">Remaining cooldown time in seconds</param>
-        /// <param name="total">Total cooldown duration in seconds</param>
+        /// <param name="remaining">剩余冷却时间（秒）</param>
+        /// <param name="total">总冷却持续时间（秒）</param>
         public void UpdateCooldown(float remaining, float total)
         {
             bool isOnCooldown = remaining > 0f;
@@ -202,8 +202,8 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Shows the ready indicator animation.
-        /// Requirement 7.4: Play ready indicator animation when skill becomes available.
+        /// 显示就绪指示器动画。
+        /// 需求 7.4：当技能可用时播放就绪指示器动画。
         /// </summary>
         public void ShowReady()
         {
@@ -229,7 +229,7 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Shows the activated indicator.
+        /// 显示激活指示器。
         /// </summary>
         public void ShowActivated()
         {
@@ -243,7 +243,7 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Clears the display (no skill assigned).
+        /// 清除显示（未分配技能）。
         /// </summary>
         public void ClearDisplay()
         {
@@ -418,11 +418,11 @@ namespace PetGrooming.UI
         #region Static Helper Methods
         
         /// <summary>
-        /// Formats cooldown time for display.
-        /// Shows decimal for times under 1 second, whole numbers otherwise.
+        /// 格式化冷却时间以显示。
+        /// 1秒以下显示小数，否则显示整数。
         /// </summary>
-        /// <param name="seconds">Time in seconds</param>
-        /// <returns>Formatted time string</returns>
+        /// <param name="seconds">时间（秒）</param>
+        /// <returns>格式化的时间字符串</returns>
         public static string FormatCooldownTime(float seconds)
         {
             if (seconds <= 0f)
@@ -439,11 +439,11 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Calculates the fill amount for a cooldown overlay.
+        /// 计算冷却覆盖层的填充量。
         /// </summary>
-        /// <param name="remaining">Remaining cooldown time</param>
-        /// <param name="total">Total cooldown duration</param>
-        /// <returns>Fill amount (0-1)</returns>
+        /// <param name="remaining">剩余冷却时间</param>
+        /// <param name="total">总冷却持续时间</param>
+        /// <returns>填充量（0-1）</returns>
         public static float CalculateFillAmount(float remaining, float total)
         {
             if (total <= 0f) return 0f;
@@ -455,7 +455,7 @@ namespace PetGrooming.UI
         #region Editor Support
 #if UNITY_EDITOR
         /// <summary>
-        /// Sets references for testing purposes.
+        /// 为测试目的设置引用。
         /// </summary>
         public void SetReferencesForTesting(Image skillIcon, Image cooldownOverlay, TextMeshProUGUI cooldownText)
         {
@@ -466,7 +466,7 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Sets the animator for testing purposes.
+        /// 为测试目的设置动画器。
         /// </summary>
         public void SetAnimatorForTesting(Animator animator)
         {

@@ -8,11 +8,11 @@ using StarterAssets;
 namespace PetGrooming.UI.MobileUI
 {
     /// <summary>
-    /// Virtual joystick component for mobile touch input.
-    /// Implements touch handlers to process drag input and output normalized direction vectors.
-    /// Supports dynamic repositioning mode where joystick appears at touch location.
+    /// 虚拟摇杆组件，用于移动触摸输入。
+    /// 实现触摸处理器以处理拖动输入并输出归一化方向向量。
+    /// 支持动态重定位模式，其中摇杆出现在触摸位置。
     /// 
-    /// Requirements: 1.1, 1.3, 1.4, 1.5, 1.6, 1.7
+    /// 需求：1.1, 1.3, 1.4, 1.5, 1.6, 1.7
     /// </summary>
     /// <remarks>
     /// [已废弃] 此组件已被 Unity 官方 OnScreenStick 组件替代。
@@ -24,44 +24,44 @@ namespace PetGrooming.UI.MobileUI
     {
         #region Serialized Fields
         
-        [Header("UI References")]
-        [Tooltip("The outer circle background of the joystick")]
+        [Header("UI引用")]
+        [Tooltip("摇杆的外圈背景")]
         [SerializeField] private RectTransform _background;
         
-        [Tooltip("The inner draggable handle of the joystick")]
+        [Tooltip("摇杆的内圈可拖动手柄")]
         [SerializeField] private RectTransform _handle;
         
-        [Tooltip("Image component of the handle for opacity control")]
+        [Tooltip("手柄的Image组件，用于透明度控制")]
         [SerializeField] private Image _handleImage;
         
-        [Tooltip("Image component of the background for opacity control")]
+        [Tooltip("背景的Image组件，用于透明度控制")]
         [SerializeField] private Image _backgroundImage;
         
-        [Header("Settings")]
-        [Tooltip("Mobile HUD settings asset")]
+        [Header("设置")]
+        [Tooltip("移动HUD设置资源")]
         [SerializeField] private MobileHUDSettings _settings;
         
-        [Tooltip("Handle movement range as multiplier of background radius")]
+        [Tooltip("手柄移动范围，作为背景半径的倍数")]
         [SerializeField] private float _handleRange = 1f;
         
-        [Tooltip("Enable dynamic joystick positioning")]
+        [Tooltip("启用动态摇杆定位")]
         [SerializeField] private bool _dynamicPosition = true;
         
-        [Tooltip("Canvas for coordinate conversion")]
+        [Tooltip("用于坐标转换的Canvas")]
         [SerializeField] private Canvas _canvas;
         
-        [Header("Animation")]
-        [Tooltip("Duration for handle to return to center")]
+        [Header("动画")]
+        [Tooltip("手柄返回中心的持续时间")]
         [SerializeField] private float _returnDuration = 0.1f;
         
-        [Tooltip("Handle opacity when idle")]
+        [Tooltip("空闲时手柄的透明度")]
         [SerializeField] private float _idleOpacity = 0.6f;
         
-        [Tooltip("Handle opacity when active")]
+        [Tooltip("激活时手柄的透明度")]
         [SerializeField] private float _activeOpacity = 1f;
         
-        [Header("Player Reference")]
-        [Tooltip("Reference to StarterAssetsInputs for ThirdPersonController")]
+        [Header("玩家引用")]
+        [Tooltip("对ThirdPersonController的StarterAssetsInputs引用")]
         [SerializeField] private StarterAssetsInputs _starterAssetsInputs;
         
         #endregion
@@ -82,23 +82,23 @@ namespace PetGrooming.UI.MobileUI
         #region Properties
         
         /// <summary>
-        /// Normalized direction vector from joystick input.
-        /// X and Y components are in range [-1, 1].
+        /// 来自摇杆输入的归一化方向向量。
+        /// X和Y分量的范围为[-1, 1]。
         /// </summary>
         public Vector2 Direction => _direction;
         
         /// <summary>
-        /// Magnitude of the joystick input (0 to 1).
+        /// 摇杆输入的大小（0到1）。
         /// </summary>
         public float Magnitude => _magnitude;
         
         /// <summary>
-        /// Whether the joystick is currently being touched.
+        /// 摇杆当前是否被触摸。
         /// </summary>
         public bool IsActive => _isActive;
         
         /// <summary>
-        /// Combined input vector (Direction * Magnitude).
+        /// 组合输入向量（Direction * Magnitude）。
         /// </summary>
         public Vector2 InputVector => _direction * _magnitude;
         
@@ -107,12 +107,12 @@ namespace PetGrooming.UI.MobileUI
         #region Events
         
         /// <summary>
-        /// Fired when joystick direction changes.
+        /// 当摇杆方向改变时触发。
         /// </summary>
         public event Action<Vector2> OnJoystickMoved;
         
         /// <summary>
-        /// Fired when joystick is released.
+        /// 当摇杆被释放时触发。
         /// </summary>
         public event Action OnJoystickReleased;
         
@@ -151,9 +151,9 @@ namespace PetGrooming.UI.MobileUI
         #region IPointerDownHandler
         
         /// <summary>
-        /// Called when pointer is pressed down on the joystick.
-        /// Requirement 1.3: Touch within background moves handle to touch position.
-        /// Requirement 1.7: Dynamic repositioning support.
+        /// 当指针在摇杆上按下时调用。
+        /// 需求 1.3: 背景内的触摸将手柄移动到触摸位置。
+        /// 需求 1.7: 动态重定位支持。
         /// </summary>
         public void OnPointerDown(PointerEventData eventData)
         {
@@ -195,9 +195,9 @@ namespace PetGrooming.UI.MobileUI
         #region IDragHandler
         
         /// <summary>
-        /// Called when pointer is dragged.
-        /// Requirement 1.4: Output normalized direction vector.
-        /// Requirement 1.5: Clamp handle to background edge.
+        /// 当指针被拖动时调用。
+        /// 需求 1.4: 输出归一化方向向量。
+        /// 需求 1.5: 将手柄限制在背景边缘。
         /// </summary>
         public void OnDrag(PointerEventData eventData)
         {
@@ -247,8 +247,8 @@ namespace PetGrooming.UI.MobileUI
         #region IPointerUpHandler
         
         /// <summary>
-        /// Called when pointer is released.
-        /// Requirement 1.6: Handle returns to center with smooth animation.
+        /// 当指针被释放时调用。
+        /// 需求 1.6: 手柄以平滑动画返回中心。
         /// </summary>
         public void OnPointerUp(PointerEventData eventData)
         {
@@ -292,7 +292,7 @@ namespace PetGrooming.UI.MobileUI
         #region Public Methods
         
         /// <summary>
-        /// Resets the joystick to its initial state.
+        /// 将摇杆重置到初始状态。
         /// </summary>
         public void ResetJoystick()
         {
@@ -317,7 +317,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Applies settings from MobileHUDSettings asset.
+        /// 应用来自MobileHUDSettings资源的设置。
         /// </summary>
         public void ApplySettings()
         {
@@ -344,7 +344,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Sets the settings asset and applies it.
+        /// 设置设置资源并应用它。
         /// </summary>
         public void SetSettings(MobileHUDSettings settings)
         {
@@ -357,13 +357,13 @@ namespace PetGrooming.UI.MobileUI
         #region Static Methods (for testing)
         
         /// <summary>
-        /// Calculates the clamped handle position given an input offset.
-        /// Used for property-based testing.
-        /// Requirement 1.5: Handle clamped to background edge.
+        /// 计算给定输入偏移量的受限手柄位置。
+        /// 用于基于属性的测试。
+        /// 需求 1.5: 手柄限制在背景边缘。
         /// </summary>
-        /// <param name="inputOffset">Raw input offset from center</param>
-        /// <param name="maxRadius">Maximum radius (background radius * handle range)</param>
-        /// <returns>Clamped handle position</returns>
+        /// <param name="inputOffset">从中心的原始输入偏移</param>
+        /// <param name="maxRadius">最大半径（背景半径 * 手柄范围）</param>
+        /// <returns>受限的手柄位置</returns>
         public static Vector2 CalculateClampedHandlePosition(Vector2 inputOffset, float maxRadius)
         {
             if (maxRadius <= 0f) return Vector2.zero;
@@ -379,12 +379,12 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Calculates the normalized direction from a handle position.
-        /// Used for property-based testing.
-        /// Requirement 1.4: Output normalized direction vector.
+        /// 从手柄位置计算归一化方向。
+        /// 用于基于属性的测试。
+        /// 需求 1.4: 输出归一化方向向量。
         /// </summary>
-        /// <param name="handlePosition">Current handle position</param>
-        /// <returns>Normalized direction with components in [-1, 1]</returns>
+        /// <param name="handlePosition">当前手柄位置</param>
+        /// <returns>分量在[-1, 1]范围内的归一化方向</returns>
         public static Vector2 CalculateNormalizedDirection(Vector2 handlePosition)
         {
             if (handlePosition.sqrMagnitude < 0.0001f)
@@ -397,8 +397,8 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Clamps direction components to [-1, 1] range.
-        /// Requirement 1.4: Direction components in range [-1, 1].
+        /// 将方向分量限制在[-1, 1]范围内。
+        /// 需求 1.4: 方向分量在[-1, 1]范围内。
         /// </summary>
         public static Vector2 ClampDirection(Vector2 direction)
         {
@@ -409,12 +409,12 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Checks if a handle position is within the valid radius.
-        /// Used for property-based testing.
+        /// 检查手柄位置是否在有效半径内。
+        /// 用于基于属性的测试。
         /// </summary>
-        /// <param name="handlePosition">Handle position to check</param>
-        /// <param name="maxRadius">Maximum allowed radius</param>
-        /// <returns>True if position is within or at the radius</returns>
+        /// <param name="handlePosition">要检查的手柄位置</param>
+        /// <param name="maxRadius">最大允许半径</param>
+        /// <returns>如果位置在半径内或在半径上则为true</returns>
         public static bool IsHandleWithinRadius(Vector2 handlePosition, float maxRadius)
         {
             return handlePosition.magnitude <= maxRadius + 0.0001f; // Small epsilon for float comparison

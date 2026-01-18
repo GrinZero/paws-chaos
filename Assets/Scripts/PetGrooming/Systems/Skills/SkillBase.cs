@@ -4,54 +4,54 @@ using UnityEngine;
 namespace PetGrooming.Systems.Skills
 {
     /// <summary>
-    /// Abstract base class for all skills in the game.
-    /// Manages cooldown timing, ready state detection, and event callbacks.
-    /// Requirements: 3.3, 3.6, 3.8, 4.2, 4.3, 4.4, 5.2, 5.4, 5.5
+    /// 游戏中所有技能的抽象基类。
+    /// 管理冷却计时、就绪状态检测和事件回调。
+    /// 需求：3.3, 3.6, 3.8, 4.2, 4.3, 4.4, 5.2, 5.4, 5.5
     /// </summary>
     public abstract class SkillBase : MonoBehaviour
     {
         #region Serialized Fields
         [Header("Skill Settings")]
-        [Tooltip("Display name of the skill")]
+        [Tooltip("技能的显示名称")]
         public string SkillName;
         
-        [Tooltip("Cooldown duration in seconds")]
+        [Tooltip("冷却持续时间（秒）")]
         public float Cooldown;
         
-        [Tooltip("Icon sprite for UI display")]
+        [Tooltip("用于 UI 显示的图标精灵")]
         public Sprite Icon;
         #endregion
 
         #region Properties
         /// <summary>
-        /// Remaining cooldown time in seconds.
+        /// 剩余冷却时间（秒）。
         /// </summary>
         public float RemainingCooldown { get; protected set; }
         
         /// <summary>
-        /// Whether the skill is ready to be activated (cooldown complete).
+        /// 技能是否准备好激活（冷却完成）。
         /// </summary>
         public bool IsReady => RemainingCooldown <= 0f;
         
         /// <summary>
-        /// Normalized cooldown progress (0 = ready, 1 = just activated).
+        /// 归一化冷却进度（0 = 就绪，1 = 刚激活）。
         /// </summary>
         public float CooldownProgress => Cooldown > 0f ? RemainingCooldown / Cooldown : 0f;
         #endregion
 
         #region Events
         /// <summary>
-        /// Fired when cooldown value changes. Parameter is remaining cooldown time.
+        /// 当冷却值改变时触发。参数是剩余冷却时间。
         /// </summary>
         public event Action<float> OnCooldownChanged;
         
         /// <summary>
-        /// Fired when the skill is successfully activated.
+        /// 当技能成功激活时触发。
         /// </summary>
         public event Action OnSkillActivated;
         
         /// <summary>
-        /// Fired when the skill becomes ready after cooldown completes.
+        /// 当技能冷却完成变回就绪状态时触发。
         /// </summary>
         public event Action OnSkillReady;
         #endregion
@@ -63,7 +63,7 @@ namespace PetGrooming.Systems.Skills
         #region Unity Lifecycle
         protected virtual void Awake()
         {
-            // Start with skill ready
+            // 开始时技能处于就绪状态
             RemainingCooldown = 0f;
             _wasOnCooldown = false;
         }
@@ -76,19 +76,19 @@ namespace PetGrooming.Systems.Skills
 
         #region Public Methods
         /// <summary>
-        /// Checks if the skill can be activated.
-        /// Override in derived classes to add additional conditions.
+        /// 检查技能是否可以激活。
+        /// 在派生类中重写以添加额外条件。
         /// </summary>
-        /// <returns>True if the skill can be activated</returns>
+        /// <returns>如果技能可以激活则为 True</returns>
         public virtual bool CanActivate()
         {
             return IsReady;
         }
 
         /// <summary>
-        /// Attempts to activate the skill.
+        /// 尝试激活技能。
         /// </summary>
-        /// <returns>True if activation was successful</returns>
+        /// <returns>如果激活成功则为 True</returns>
         public bool TryActivate()
         {
             if (!CanActivate())
@@ -101,8 +101,8 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Activates the skill and starts cooldown.
-        /// Override in derived classes to implement skill-specific behavior.
+        /// 激活技能并开始冷却。
+        /// 在派生类中重写以实现特定于技能的行为。
         /// </summary>
         public virtual void Activate()
         {
@@ -111,7 +111,7 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Resets the cooldown to zero, making the skill immediately ready.
+        /// 将冷却时间重置为零，使技能立即就绪。
         /// </summary>
         public void ResetCooldown()
         {
@@ -128,9 +128,9 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Sets the cooldown to a specific value.
+        /// 将冷却时间设置为特定值。
         /// </summary>
-        /// <param name="cooldownTime">The cooldown time to set</param>
+        /// <param name="cooldownTime">要设置的冷却时间</param>
         public void SetCooldown(float cooldownTime)
         {
             RemainingCooldown = Mathf.Max(0f, cooldownTime);
@@ -141,7 +141,7 @@ namespace PetGrooming.Systems.Skills
 
         #region Protected Methods
         /// <summary>
-        /// Starts the cooldown timer.
+        /// 启动冷却计时器。
         /// </summary>
         protected void StartCooldown()
         {
@@ -151,7 +151,7 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Updates the cooldown timer each frame.
+        /// 每帧更新冷却计时器。
         /// </summary>
         protected virtual void UpdateCooldown()
         {

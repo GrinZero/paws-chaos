@@ -5,16 +5,16 @@ using PetGrooming.Core;
 namespace PetGrooming.Systems
 {
     /// <summary>
-    /// Manages the grooming process state machine and escape chance calculations.
-    /// Requirements: 4.1, 4.2, 4.4, 4.5, 4.6
+    /// 管理美容流程状态机以及宠物逃脱几率的计算。
+    /// 需求：4.1, 4.2, 4.4, 4.5, 4.6
     /// </summary>
     public class GroomingSystem : MonoBehaviour
     {
         #region Enums
         
         /// <summary>
-        /// Represents the current step in the grooming process.
-        /// Requirement 4.2: Grooming consists of 3 sequential steps: Brush, Clean, Dry
+        /// 当前美容流程所处的步骤。
+        /// 需求 4.2：美容包含 3 个连续步骤：梳理、清洗、吹干。
         /// </summary>
         public enum GroomingStep
         {
@@ -42,39 +42,39 @@ namespace PetGrooming.Systems
         #region Properties
         
         /// <summary>
-        /// Current step in the grooming process.
+        /// 当前美容步骤。
         /// </summary>
         public GroomingStep CurrentStep { get; private set; } = GroomingStep.None;
         
         /// <summary>
-        /// Number of completed grooming steps (0-3).
+        /// 已完成的美容步骤数量（0-3）。
         /// </summary>
         public int CompletedStepsCount { get; private set; }
         
         /// <summary>
-        /// Whether grooming is currently in progress.
+        /// 当前是否处于进行中的美容流程。
         /// </summary>
         public bool IsGrooming => CurrentStep != GroomingStep.None && CurrentStep != GroomingStep.Complete;
         
         /// <summary>
-        /// Base escape chance for the pet.
-        /// Requirement 4.5: 40% base escape chance.
+        /// 宠物的基础逃脱几率。
+        /// 需求 4.5：基础逃脱几率为 40%。
         /// </summary>
         public float BaseEscapeChance => _gameConfig != null ? _gameConfig.BaseEscapeChance : 0.4f;
         
         /// <summary>
-        /// Escape chance reduction per completed step.
-        /// Requirement 4.5: Reduced by 10% per completed step.
+        /// 每完成一个步骤降低的逃脱几率。
+        /// 需求 4.5：每完成一步降低 10%。
         /// </summary>
         public float EscapeChanceReductionPerStep => _gameConfig != null ? _gameConfig.EscapeChanceReductionPerStep : 0.1f;
         
         /// <summary>
-        /// Reference to the game configuration.
+        /// 游戏配置引用。
         /// </summary>
         public GameConfig Config => _gameConfig;
         
         /// <summary>
-        /// The key required for the current grooming step.
+        /// 当前美容步骤所需按下的按键。
         /// </summary>
         public KeyCode CurrentRequiredKey => GetRequiredKeyForStep(CurrentStep);
         
@@ -83,23 +83,23 @@ namespace PetGrooming.Systems
         #region Events
         
         /// <summary>
-        /// Fired when the grooming step changes.
+        /// 当美容步骤变化时触发。
         /// </summary>
         public event Action<GroomingStep> OnStepChanged;
         
         /// <summary>
-        /// Fired when grooming is complete.
-        /// Requirement 4.6: When all 3 steps are completed, Pet is marked as groomed.
+        /// 美容完成时触发。
+        /// 需求 4.6：三个步骤全部完成后，宠物被标记为已美容。
         /// </summary>
         public event Action OnGroomingComplete;
         
         /// <summary>
-        /// Fired when grooming is cancelled (e.g., pet escapes).
+        /// 美容被取消时触发（如宠物逃脱）。
         /// </summary>
         public event Action OnGroomingCancelled;
         
         /// <summary>
-        /// Fired when a step is successfully completed.
+        /// 某个美容步骤成功完成时触发。
         /// </summary>
         public event Action<GroomingStep> OnStepCompleted;
         
@@ -119,8 +119,8 @@ namespace PetGrooming.Systems
         {
             if (!IsGrooming) return;
             
-            // Check for correct key input
-            // Requirement 4.4: When player presses correct key, advance to next step
+            // 检查当前步骤要求的按键是否被按下
+            // 需求 4.4：按下正确按键后进入下一步
             if (Input.GetKeyDown(CurrentRequiredKey))
             {
                 AdvanceToNextStep();
@@ -132,8 +132,8 @@ namespace PetGrooming.Systems
         #region Public Methods
         
         /// <summary>
-        /// Starts the grooming process.
-        /// Requirement 4.1: Grooming begins when groomer brings captured pet to station.
+        /// 开始美容流程。
+        /// 需求 4.1：当 Groomer 把被捕获的宠物带到美容台时开始美容。
         /// </summary>
         public void StartGrooming()
         {
@@ -150,11 +150,11 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Attempts to advance to the next grooming step.
-        /// Requirement 4.4: When player presses correct key, advance to next step.
+        /// 尝试进入下一个美容步骤。
+        /// 需求 4.4：玩家按下正确按键时进入下一步。
         /// </summary>
-        /// <param name="inputKey">The key that was pressed.</param>
-        /// <returns>True if the step was advanced.</returns>
+        /// <param name="inputKey">本次按下的按键。</param>
+        /// <returns>如果成功进入下一步则返回 true。</returns>
         public bool TryAdvanceStep(KeyCode inputKey)
         {
             if (!IsGrooming)
@@ -172,7 +172,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Cancels the current grooming process.
+        /// 取消当前美容流程。
         /// </summary>
         public void CancelGrooming()
         {
@@ -191,17 +191,17 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Gets the current escape chance based on completed steps.
-        /// Requirement 4.5: Escape chance = base_chance - (completed_steps * 0.1)
+        /// 根据已完成步骤数获取当前逃脱几率。
+        /// 需求 4.5：逃脱几率 = 基础几率 - (完成步骤数 × 0.1)。
         /// </summary>
-        /// <returns>Current escape chance (0.0 to 1.0).</returns>
+        /// <returns>当前逃脱几率（0.0 到 1.0）。</returns>
         public float GetCurrentEscapeChance()
         {
             return CalculateEscapeChance(CompletedStepsCount, BaseEscapeChance, EscapeChanceReductionPerStep);
         }
         
         /// <summary>
-        /// Resets the grooming system to initial state.
+        /// 将美容系统重置为初始状态。
         /// </summary>
         public void Reset()
         {
@@ -230,7 +230,7 @@ namespace PetGrooming.Systems
             var completedStep = CurrentStep;
             var nextStep = GetNextStep(CurrentStep);
             
-            // Increment completed steps count
+            // 增加已完成步骤计数
             if (CurrentStep != GroomingStep.None && CurrentStep != GroomingStep.Complete)
             {
                 CompletedStepsCount++;
@@ -239,8 +239,8 @@ namespace PetGrooming.Systems
             SetStep(nextStep);
             OnStepCompleted?.Invoke(completedStep);
             
-            // Check for completion
-            // Requirement 4.6: When all 3 steps are completed, Pet is marked as groomed
+            // 检查是否已完成全部步骤
+            // 需求 4.6：三个步骤全部完成后，宠物被视为已美容
             if (nextStep == GroomingStep.Complete)
             {
                 OnGroomingComplete?.Invoke();
@@ -268,12 +268,12 @@ namespace PetGrooming.Systems
         #region Static Calculation Methods (Testable)
         
         /// <summary>
-        /// Gets the next step in the grooming sequence.
-        /// Property 8: Grooming Step Sequence
-        /// Requirement 4.2: Steps progress None → Brush → Clean → Dry → Complete
+        /// 获取美容流程中的下一个步骤。
+        /// 属性 8：美容步骤顺序。
+        /// 需求 4.2：步骤按 None → Brush → Clean → Dry → Complete 依次进行。
         /// </summary>
-        /// <param name="currentStep">The current grooming step.</param>
-        /// <returns>The next grooming step.</returns>
+        /// <param name="currentStep">当前的美容步骤。</param>
+        /// <returns>下一个美容步骤。</returns>
         public static GroomingStep GetNextStep(GroomingStep currentStep)
         {
             return currentStep switch
@@ -288,10 +288,10 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Gets the step index (0-3) for a given step.
+        /// 获取指定美容步骤对应的索引（0-3）。
         /// </summary>
-        /// <param name="step">The grooming step.</param>
-        /// <returns>The step index (0 for None, 1 for Brush, etc.).</returns>
+        /// <param name="step">美容步骤。</param>
+        /// <returns>步骤索引（None 为 0，Brush 为 1，依此类推）。</returns>
         public static int GetStepIndex(GroomingStep step)
         {
             return step switch
@@ -306,14 +306,14 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Calculates the escape chance based on completed grooming steps.
-        /// Property 9: Escape Chance Reduction Formula
-        /// Requirement 4.5: Escape chance = base_chance - (n * reduction_per_step)
+        /// 根据已完成的美容步骤计算逃脱几率。
+        /// 属性 9：逃脱几率衰减公式。
+        /// 需求 4.5：逃脱几率 = 基础几率 - (完成步数 × 每步衰减)。
         /// </summary>
-        /// <param name="completedSteps">Number of completed grooming steps (0-3).</param>
-        /// <param name="baseChance">Base escape chance (default 0.4).</param>
-        /// <param name="reductionPerStep">Reduction per step (default 0.1).</param>
-        /// <returns>The calculated escape chance (clamped to 0.0 minimum).</returns>
+        /// <param name="completedSteps">已完成的美容步骤数量（0-3）。</param>
+        /// <param name="baseChance">基础逃脱几率（默认 0.4）。</param>
+        /// <param name="reductionPerStep">每一步降低的几率（默认 0.1）。</param>
+        /// <returns>计算得到的逃脱几率（下限为 0.0）。</returns>
         public static float CalculateEscapeChance(int completedSteps, float baseChance, float reductionPerStep)
         {
             float reduction = completedSteps * reductionPerStep;
@@ -321,11 +321,11 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Validates that a step sequence is correct.
-        /// Property 8: Grooming Step Sequence
+        /// 校验给定的步骤序列是否正确。
+        /// 属性 8：美容步骤顺序。
         /// </summary>
-        /// <param name="steps">Array of steps to validate.</param>
-        /// <returns>True if the sequence is valid.</returns>
+        /// <param name="steps">要校验的步骤数组。</param>
+        /// <returns>如果序列合法则返回 true。</returns>
         public static bool IsValidStepSequence(GroomingStep[] steps)
         {
             if (steps == null || steps.Length == 0) return true;
@@ -342,10 +342,10 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Gets the complete valid grooming sequence.
-        /// Property 8: Grooming Step Sequence
+        /// 获取完整的合法美容步骤序列。
+        /// 属性 8：美容步骤顺序。
         /// </summary>
-        /// <returns>Array of steps in correct order.</returns>
+        /// <returns>按正确顺序排列的步骤数组。</returns>
         public static GroomingStep[] GetCompleteSequence()
         {
             return new[]
@@ -359,20 +359,20 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Checks if grooming is complete based on step.
-        /// Requirement 4.6: All 3 steps completed marks pet as groomed.
+        /// 根据当前步骤判断美容是否已经完成。
+        /// 需求 4.6：三个步骤全部完成后宠物被视为已美容。
         /// </summary>
-        /// <param name="step">The current step.</param>
-        /// <returns>True if grooming is complete.</returns>
+        /// <param name="step">当前步骤。</param>
+        /// <returns>如果美容已完成则返回 true。</returns>
         public static bool IsGroomingComplete(GroomingStep step)
         {
             return step == GroomingStep.Complete;
         }
         
         /// <summary>
-        /// Gets the number of steps required to complete grooming.
+        /// 获取完成一次完整美容所需的步骤数。
         /// </summary>
-        /// <returns>Number of grooming steps (3).</returns>
+        /// <returns>美容步骤数量（3）。</returns>
         public static int GetTotalStepsRequired()
         {
             return 3; // Brush, Clean, Dry
@@ -384,7 +384,7 @@ namespace PetGrooming.Systems
         
 #if UNITY_EDITOR
         /// <summary>
-        /// Sets the game config for testing purposes.
+        /// 设置 GameConfig（测试用）。
         /// </summary>
         public void SetConfigForTesting(GameConfig config)
         {
@@ -392,7 +392,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Sets the current step for testing purposes.
+        /// 设置当前步骤（测试用）。
         /// </summary>
         public void SetStepForTesting(GroomingStep step)
         {
@@ -400,7 +400,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Sets the completed steps count for testing purposes.
+        /// 设置已完成步骤数（测试用）。
         /// </summary>
         public void SetCompletedStepsForTesting(int count)
         {

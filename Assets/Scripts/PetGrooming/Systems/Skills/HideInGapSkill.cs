@@ -6,31 +6,31 @@ using PetGrooming.AI;
 namespace PetGrooming.Systems.Skills
 {
     /// <summary>
-    /// Hide In Gap skill for Cat pets.
-    /// Makes the cat invisible while stationary, semi-transparent when moving.
-    /// Requirement 4.4: Invisible for 3 seconds while stationary with 14 second cooldown.
-    /// Requirement 4.5: Semi-transparent (50% opacity) when moving while using skill.
+    /// 猫咪宠物的钻空躲藏技能。
+    /// 在静止时使猫咪隐身，在移动时半透明。
+    /// 需求 4.4：静止时隐身 3 秒，冷却时间 14 秒。
+    /// 需求 4.5：使用技能移动时半透明（50% 不透明度）。
     /// </summary>
     public class HideInGapSkill : SkillBase
     {
         #region Serialized Fields
-        [Header("Hide In Gap Settings")]
-        [Tooltip("Duration of the invisibility effect in seconds")]
+        [Header("钻空躲藏设置")]
+        [Tooltip("隐身效果的持续时间（秒）")]
         public float InvisibilityDuration = 3f;
         
-        [Tooltip("Opacity when stationary (0 = fully invisible)")]
+        [Tooltip("静止时的不透明度 (0 = 完全隐身)")]
         [Range(0f, 1f)]
         public float StationaryOpacity = 0f;
         
-        [Tooltip("Opacity when moving (0.5 = 50% visible)")]
+        [Tooltip("移动时的不透明度 (0.5 = 50% 可见)")]
         [Range(0f, 1f)]
         public float MovingOpacity = 0.5f;
         
-        [Tooltip("Movement threshold to determine if cat is moving")]
+        [Tooltip("用于判断猫咪是否正在移动的移动阈值")]
         public float MovementThreshold = 0.1f;
         
-        [Header("Configuration")]
-        [Tooltip("Phase 2 game configuration")]
+        [Header("配置")]
+        [Tooltip("第二阶段游戏配置")]
         public Phase2GameConfig GameConfig;
         #endregion
 
@@ -45,34 +45,34 @@ namespace PetGrooming.Systems.Skills
 
         #region Properties
         /// <summary>
-        /// Whether the cat is currently hiding.
+        /// 猫咪当前是否正在躲藏。
         /// </summary>
         public bool IsHiding => _isHiding;
         
         /// <summary>
-        /// Current opacity of the cat (0 = invisible, 1 = fully visible).
+        /// 猫咪当前的不透明度 (0 = 隐身, 1 = 完全可见)。
         /// </summary>
         public float CurrentOpacity => _currentOpacity;
         
         /// <summary>
-        /// Remaining time for the hide effect.
+        /// 躲藏效果的剩余时间。
         /// </summary>
         public float RemainingHideTime => _hideTimer;
         #endregion
 
         #region Events
         /// <summary>
-        /// Fired when hiding starts.
+        /// 当躲藏开始时触发。
         /// </summary>
         public event Action OnHideStarted;
         
         /// <summary>
-        /// Fired when hiding ends.
+        /// 当躲藏结束时触发。
         /// </summary>
         public event Action OnHideEnded;
         
         /// <summary>
-        /// Fired when opacity changes. Parameter is the new opacity value.
+        /// 当不透明度改变时触发。参数是新的不透明度值。
         /// </summary>
         public event Action<float> OnOpacityChanged;
         #endregion
@@ -82,9 +82,9 @@ namespace PetGrooming.Systems.Skills
         {
             base.Awake();
             
-            SkillName = "Hide In Gap";
+            SkillName = "钻空躲藏";
             
-            // Apply config values if available
+            // 如果有配置则应用配置值
             if (GameConfig != null)
             {
                 Cooldown = GameConfig.HideInGapCooldown;
@@ -93,7 +93,7 @@ namespace PetGrooming.Systems.Skills
             }
             else
             {
-                // Default cooldown: 14 seconds (Requirement 4.4)
+                // 默认冷却时间：14 秒 (需求 4.4)
                 Cooldown = 14f;
                 InvisibilityDuration = 3f;
                 MovingOpacity = 0.5f;
@@ -116,7 +116,7 @@ namespace PetGrooming.Systems.Skills
 
         #region Public Methods
         /// <summary>
-        /// Sets the owner pet for this skill.
+        /// 为该技能设置所有者宠物。
         /// </summary>
         public void SetOwner(PetAI pet)
         {
@@ -126,17 +126,17 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Checks if the skill can be activated.
+        /// 检查技能是否可以激活。
         /// </summary>
         public override bool CanActivate()
         {
-            // Can activate if ready and not currently hiding
+            // 如果准备就绪且当前未在躲藏，则可以激活
             return base.CanActivate() && !_isHiding;
         }
 
         /// <summary>
-        /// Activates the Hide In Gap skill.
-        /// Requirement 4.4: Becomes invisible for 3 seconds while stationary.
+        /// 激活钻空躲藏技能。
+        /// 需求 4.4：在静止时隐身 3 秒。
         /// </summary>
         public override void Activate()
         {
@@ -145,7 +145,7 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Cancels the hide effect early.
+        /// 提前取消躲藏效果。
         /// </summary>
         public void CancelHide()
         {
@@ -156,9 +156,9 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Gets the current visibility state based on movement.
+        /// 根据移动情况获取当前的可见性状态。
         /// </summary>
-        /// <returns>True if the cat is currently visible (moving while hiding)</returns>
+        /// <returns>如果猫咪当前可见（躲藏时移动），则为 True</returns>
         public bool IsCurrentlyVisible()
         {
             if (!_isHiding) return true;
@@ -173,44 +173,44 @@ namespace PetGrooming.Systems.Skills
             _hideTimer = InvisibilityDuration;
             _lastPosition = _ownerTransform.position;
             
-            // Start fully invisible (stationary)
+            // 开始时完全隐身（静止）
             SetOpacity(StationaryOpacity);
             
-            // Apply invisibility effect to pet
+            // 对宠物应用隐身效果
             if (_ownerPet != null)
             {
                 _ownerPet.SetInvisible(true, StationaryOpacity, InvisibilityDuration);
             }
             
             OnHideStarted?.Invoke();
-            Debug.Log("[HideInGapSkill] Hiding started");
+            Debug.Log("[钻空躲藏] 躲藏开始");
         }
 
         private void UpdateHideState()
         {
             _hideTimer -= Time.deltaTime;
             
-            // Check if cat is moving
+            // 检查猫咪是否正在移动
             bool isMoving = IsMoving(_ownerTransform.position, _lastPosition, MovementThreshold, Time.deltaTime);
             _lastPosition = _ownerTransform.position;
             
-            // Update opacity based on movement
-            // Requirement 4.4: Fully invisible while stationary
-            // Requirement 4.5: Semi-transparent (50%) when moving
+            // 根据移动情况更新不透明度
+            // 需求 4.4：静止时完全隐身
+            // 需求 4.5：移动时半透明 (50%)
             float targetOpacity = CalculateOpacity(isMoving, StationaryOpacity, MovingOpacity);
             
             if (!Mathf.Approximately(_currentOpacity, targetOpacity))
             {
                 SetOpacity(targetOpacity);
                 
-                // Update pet's invisibility state
+                // 更新宠物的隐身状态
                 if (_ownerPet != null)
                 {
                     _ownerPet.UpdateInvisibilityOpacity(isMoving);
                 }
             }
             
-            // Check if hide duration has ended
+            // 检查躲藏持续时间是否已结束
             if (_hideTimer <= 0f)
             {
                 EndHiding();
@@ -222,17 +222,17 @@ namespace PetGrooming.Systems.Skills
             _isHiding = false;
             _hideTimer = 0f;
             
-            // Restore full visibility
+            // 恢复完全可见
             SetOpacity(1f);
             
-            // Remove invisibility effect from pet
+            // 移除宠物的隐身效果
             if (_ownerPet != null)
             {
                 _ownerPet.SetInvisible(false);
             }
             
             OnHideEnded?.Invoke();
-            Debug.Log("[HideInGapSkill] Hiding ended");
+            Debug.Log("[钻空躲藏] 躲藏结束");
         }
 
         private void SetOpacity(float opacity)
@@ -244,13 +244,13 @@ namespace PetGrooming.Systems.Skills
 
         #region Static Methods (Testable)
         /// <summary>
-        /// Determines if the cat is moving based on position change.
+        /// 根据位置变化判断猫咪是否正在移动。
         /// </summary>
-        /// <param name="currentPosition">Current position</param>
-        /// <param name="lastPosition">Previous position</param>
-        /// <param name="threshold">Movement threshold</param>
-        /// <param name="deltaTime">Time since last check</param>
-        /// <returns>True if moving</returns>
+        /// <param name="currentPosition">当前位置</param>
+        /// <param name="lastPosition">上一个位置</param>
+        /// <param name="threshold">移动阈值</param>
+        /// <param name="deltaTime">自上次检查以来的时间</param>
+        /// <returns>如果正在移动则为 True</returns>
         public static bool IsMoving(Vector3 currentPosition, Vector3 lastPosition, float threshold, float deltaTime)
         {
             if (deltaTime <= 0f) return false;
@@ -262,49 +262,49 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Calculates the opacity based on movement state.
-        /// Property 11: Hide In Gap Visibility State
-        /// Requirement 4.4: Invisible (0%) while stationary
-        /// Requirement 4.5: Semi-transparent (50%) when moving
+        /// 根据移动状态计算不透明度。
+        /// 属性 11：钻空躲藏可见性状态
+        /// 需求 4.4：静止时隐身 (0%)
+        /// 需求 4.5：移动时半透明 (50%)
         /// </summary>
-        /// <param name="isMoving">Whether the cat is moving</param>
-        /// <param name="stationaryOpacity">Opacity when stationary</param>
-        /// <param name="movingOpacity">Opacity when moving</param>
-        /// <returns>Target opacity value</returns>
+        /// <param name="isMoving">猫咪是否正在移动</param>
+        /// <param name="stationaryOpacity">静止时的不透明度</param>
+        /// <param name="movingOpacity">移动时的不透明度</param>
+        /// <returns>目标不透明度值</returns>
         public static float CalculateOpacity(bool isMoving, float stationaryOpacity, float movingOpacity)
         {
             return isMoving ? movingOpacity : stationaryOpacity;
         }
 
         /// <summary>
-        /// Validates the visibility state matches requirements.
-        /// Property 11: Hide In Gap Visibility State
+        /// 验证可见性状态是否符合要求。
+        /// 属性 11：钻空躲藏可见性状态
         /// </summary>
-        /// <param name="isMoving">Whether the cat is moving</param>
-        /// <param name="opacity">Current opacity</param>
-        /// <returns>True if opacity matches expected state</returns>
+        /// <param name="isMoving">猫咪是否正在移动</param>
+        /// <param name="opacity">当前不透明度</param>
+        /// <returns>如果不透明度符合预期状态则为 True</returns>
         public static bool ValidateVisibilityState(bool isMoving, float opacity)
         {
             const float Tolerance = 0.001f;
             
             if (isMoving)
             {
-                // Requirement 4.5: 50% opacity when moving
+                // 需求 4.5：移动时 50% 不透明度
                 return Mathf.Abs(opacity - 0.5f) < Tolerance;
             }
             else
             {
-                // Requirement 4.4: 0% opacity (invisible) when stationary
+                // 需求 4.4：静止时 0% 不透明度（隐身）
                 return Mathf.Abs(opacity - 0f) < Tolerance;
             }
         }
 
         /// <summary>
-        /// Validates the cooldown matches requirements.
-        /// Requirement 4.4: 14 second cooldown.
+        /// 验证冷却时间是否符合要求。
+        /// 需求 4.4：14 秒冷却时间。
         /// </summary>
-        /// <param name="cooldown">The cooldown to validate</param>
-        /// <returns>True if cooldown matches requirement</returns>
+        /// <param name="cooldown">要验证的冷却时间</param>
+        /// <returns>如果冷却时间符合要求则为 True</returns>
         public static bool ValidateCooldown(float cooldown)
         {
             const float RequiredCooldown = 14f;
@@ -313,11 +313,11 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Validates the invisibility duration matches requirements.
-        /// Requirement 4.4: 3 second duration.
+        /// 验证隐身持续时间是否符合要求。
+        /// 需求 4.4：3 秒持续时间。
         /// </summary>
-        /// <param name="duration">The duration to validate</param>
-        /// <returns>True if duration matches requirement</returns>
+        /// <param name="duration">要验证的持续时间</param>
+        /// <returns>如果持续时间符合要求则为 True</returns>
         public static bool ValidateDuration(float duration)
         {
             const float RequiredDuration = 3f;
@@ -326,15 +326,15 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Gets the expected opacity for a given movement state.
-        /// Used for property testing.
+        /// 获取给定移动状态下的预期不透明度。
+        /// 用于属性测试。
         /// </summary>
-        /// <param name="isMoving">Whether the cat is moving</param>
-        /// <returns>Expected opacity value</returns>
+        /// <param name="isMoving">猫咪是否正在移动</param>
+        /// <returns>预期不透明度值</returns>
         public static float GetExpectedOpacity(bool isMoving)
         {
-            // Requirement 4.4: 0% when stationary
-            // Requirement 4.5: 50% when moving
+            // 需求 4.4：静止时 0%
+            // 需求 4.5：移动时 50%
             return isMoving ? 0.5f : 0f;
         }
         #endregion
@@ -342,7 +342,7 @@ namespace PetGrooming.Systems.Skills
         #region Editor Support
 #if UNITY_EDITOR
         /// <summary>
-        /// Sets config for testing purposes.
+        /// 设置用于测试的配置。
         /// </summary>
         public void SetConfigForTesting(Phase2GameConfig config)
         {
@@ -356,7 +356,7 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Sets the hiding state for testing.
+        /// 设置用于测试的躲藏状态。
         /// </summary>
         public void SetHidingStateForTesting(bool isHiding, float remainingTime = 0f)
         {
@@ -365,7 +365,7 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Sets the opacity for testing.
+        /// 设置用于测试的不透明度。
         /// </summary>
         public void SetOpacityForTesting(float opacity)
         {
@@ -373,7 +373,7 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Sets the last position for testing movement detection.
+        /// 设置用于测试移动检测的上一个位置。
         /// </summary>
         public void SetLastPositionForTesting(Vector3 position)
         {
@@ -383,7 +383,7 @@ namespace PetGrooming.Systems.Skills
 
         private void OnDrawGizmosSelected()
         {
-            // Draw visibility indicator
+            // 绘制可见性指示器
             if (_isHiding)
             {
                 Gizmos.color = new Color(0f, 1f, 1f, _currentOpacity);

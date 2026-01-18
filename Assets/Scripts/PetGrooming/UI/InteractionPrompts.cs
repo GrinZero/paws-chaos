@@ -7,37 +7,37 @@ using PetGrooming.Core;
 namespace PetGrooming.UI
 {
     /// <summary>
-    /// Manages interaction prompt UI elements for capture, grooming, and distance feedback.
-    /// Requirements: 3.5, 8.3, 8.4
+    /// 管理捕获、洗护和距离反馈的交互提示 UI 元素。
+    /// 需求：3.5, 8.3, 8.4
     /// </summary>
     public class InteractionPrompts : MonoBehaviour
     {
         #region Serialized Fields
         
         [Header("Capture Prompt")]
-        [Tooltip("Panel for capture interaction prompt")]
+        [Tooltip("捕获交互提示的面板")]
         [SerializeField] private GameObject _capturePromptPanel;
-        [Tooltip("Text for capture prompt message")]
+        [Tooltip("捕获提示消息的文本")]
         [SerializeField] private TextMeshProUGUI _capturePromptText;
         
-        [Header("Groom Prompt")]
-        [Tooltip("Panel for grooming interaction prompt")]
+        [Header("洗护提示")]
+        [Tooltip("洗护交互提示的面板")]
         [SerializeField] private GameObject _groomPromptPanel;
-        [Tooltip("Text for groom prompt message")]
+        [Tooltip("洗护提示消息的文本")]
         [SerializeField] private TextMeshProUGUI _groomPromptText;
         
-        [Header("Distance Warning")]
-        [Tooltip("Panel for 'too far' warning")]
+        [Header("距离警告")]
+        [Tooltip("'太远'警告的面板")]
         [SerializeField] private GameObject _tooFarPanel;
-        [Tooltip("Text for distance warning message")]
+        [Tooltip("距离警告消息的文本")]
         [SerializeField] private TextMeshProUGUI _tooFarText;
-        [Tooltip("Duration to show the 'too far' warning")]
+        [Tooltip("显示'太远'警告的持续时间")]
         [SerializeField] private float _tooFarDisplayDuration = 1.5f;
         
-        [Header("Struggle Prompt")]
-        [Tooltip("Panel for pet struggle indicator")]
+        [Header("挣扎提示")]
+        [Tooltip("宠物挣扎指示器的面板")]
         [SerializeField] private GameObject _strugglePromptPanel;
-        [Tooltip("Text for struggle prompt message")]
+        [Tooltip("挣扎提示消息的文本")]
         [SerializeField] private TextMeshProUGUI _strugglePromptText;
         
         [Header("Prompt Messages")]
@@ -77,10 +77,10 @@ namespace PetGrooming.UI
         #region Public Methods
         
         /// <summary>
-        /// Shows or hides the capture prompt.
-        /// Requirement 8.3: Display capture prompts when pet is captured.
+        /// 显示或隐藏捕获提示。
+        /// 需求 8.3：当宠物被捕获时显示捕获提示。
         /// </summary>
-        /// <param name="show">Whether to show the prompt.</param>
+        /// <param name="show">是否显示提示。</param>
         public void ShowCapturePrompt(bool show)
         {
             if (_capturePromptPanel != null)
@@ -95,10 +95,10 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Shows or hides the groom prompt.
-        /// Requirement 8.4: Display "Press E to start grooming" near grooming station.
+        /// 显示或隐藏洗护提示。
+        /// 需求 8.4：在洗护站附近显示"按 E 开始洗护"。
         /// </summary>
-        /// <param name="show">Whether to show the prompt.</param>
+        /// <param name="show">是否显示提示。</param>
         public void ShowGroomPrompt(bool show)
         {
             if (_groomPromptPanel != null)
@@ -113,8 +113,8 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Shows the "too far" warning.
-        /// Requirement 3.5: Display "Too far" indicator when capture fails due to distance.
+        /// 显示"太远"警告。
+        /// 需求 3.5：当由于距离原因捕获失败时显示"太远"指示器。
         /// </summary>
         public void ShowTooFarPrompt()
         {
@@ -133,7 +133,7 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Hides the "too far" warning.
+        /// 隐藏"太远"警告。
         /// </summary>
         public void HideTooFarPrompt()
         {
@@ -146,10 +146,10 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Shows or hides the struggle prompt.
-        /// Requirement 8.3: Display struggle prompts for the Pet AI.
+        /// 显示或隐藏挣扎提示。
+        /// 需求 8.3：为 Pet AI 显示挣扎提示。
         /// </summary>
-        /// <param name="show">Whether to show the prompt.</param>
+        /// <param name="show">是否显示提示。</param>
         public void ShowStrugglePrompt(bool show)
         {
             if (_strugglePromptPanel != null)
@@ -164,7 +164,7 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Hides all interaction prompts.
+        /// 隐藏所有交互提示。
         /// </summary>
         public void HideAllPrompts()
         {
@@ -175,9 +175,9 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Updates the capture prompt with custom message.
+        /// 使用自定义消息更新捕获提示。
         /// </summary>
-        /// <param name="message">Custom message to display.</param>
+        /// <param name="message">要显示的自定义消息。</param>
         public void SetCapturePromptMessage(string message)
         {
             _captureMessage = message;
@@ -188,9 +188,9 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Updates the groom prompt with custom message.
+        /// 使用自定义消息更新洗护提示。
         /// </summary>
-        /// <param name="message">Custom message to display.</param>
+        /// <param name="message">要显示的自定义消息。</param>
         public void SetGroomPromptMessage(string message)
         {
             _groomMessage = message;

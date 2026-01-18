@@ -8,31 +8,31 @@ using PetGrooming.Systems;
 namespace PetGrooming.UI
 {
     /// <summary>
-    /// Main game HUD component that displays timer, mischief value, and grooming steps.
-    /// Requirements: 6.2, 5.4, 8.1, 8.2, 8.5
+    /// 显示计时器、恶作剧值和洗护步骤的主要游戏 HUD 组件。
+    /// 需求：6.2, 5.4, 8.1, 8.2, 8.5
     /// </summary>
     public class GameHUD : MonoBehaviour
     {
         #region Serialized Fields
         
         [Header("Timer Display")]
-        [Tooltip("Text component for displaying remaining match time")]
+        [Tooltip("显示剩余比赛时间的文本组件")]
         [SerializeField] private TextMeshProUGUI _timerText;
         
-        [Header("Mischief Display")]
-        [Tooltip("Slider for mischief progress bar")]
+        [Header("恶作剧显示")]
+        [Tooltip("恶作剧进度条的滑块")]
         [SerializeField] private Slider _mischiefBar;
-        [Tooltip("Text component for mischief numeric value")]
+        [Tooltip("显示恶作剧数值的文本组件")]
         [SerializeField] private TextMeshProUGUI _mischiefValueText;
-        [Tooltip("Fill image for mischief bar color changes")]
+        [Tooltip("恶作剧条颜色变化的填充图像")]
         [SerializeField] private Image _mischiefBarFill;
         
-        [Header("Grooming Display")]
-        [Tooltip("Panel containing grooming step UI")]
+        [Header("洗护显示")]
+        [Tooltip("包含洗护步骤 UI 的面板")]
         [SerializeField] private GameObject _groomingPanel;
-        [Tooltip("Text component for current grooming step")]
+        [Tooltip("显示当前洗护步骤的文本组件")]
         [SerializeField] private TextMeshProUGUI _groomingStepText;
-        [Tooltip("Text component for grooming key prompt")]
+        [Tooltip("显示洗护按键提示的文本组件")]
         [SerializeField] private TextMeshProUGUI _groomingKeyPromptText;
         
         [Header("Colors")]
@@ -69,10 +69,10 @@ namespace PetGrooming.UI
         #region Public Methods
         
         /// <summary>
-        /// Updates the timer display.
-        /// Requirement 8.1: Display remaining match time in MM:SS format.
+        /// 更新计时器显示。
+        /// 需求 8.1：以 MM:SS 格式显示剩余比赛时间。
         /// </summary>
-        /// <param name="remainingTime">Remaining time in seconds.</param>
+        /// <param name="remainingTime">剩余时间（秒）。</param>
         public void UpdateTimer(float remainingTime)
         {
             if (_timerText == null) return;
@@ -81,11 +81,11 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Updates the mischief value display.
-        /// Requirement 8.2: Display mischief value as filled progress bar with numeric value.
+        /// 更新恶作剧值显示。
+        /// 需求 8.2：将恶作剧值显示为带数值的填充进度条。
         /// </summary>
-        /// <param name="current">Current mischief value.</param>
-        /// <param name="max">Maximum mischief value (threshold).</param>
+        /// <param name="current">当前恶作剧值。</param>
+        /// <param name="max">最大恶作剧值（阈值）。</param>
         public void UpdateMischiefValue(int current, int max)
         {
             _maxMischiefValue = max;

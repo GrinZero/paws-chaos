@@ -6,43 +6,43 @@ using PetGrooming.AI;
 namespace PetGrooming.Systems.Skills
 {
     /// <summary>
-    /// Manages all skills for Cat pets.
-    /// Integrates Agile Jump, Fur Distraction, and Hide In Gap skills.
-    /// Implements AI decision logic for skill usage.
-    /// Requirements: 4.1, 4.6
+    /// 管理猫咪宠物的所有技能。
+    /// 集成敏捷跳跃、毛发干扰和躲入缝隙技能。
+    /// 实现技能使用的 AI 决策逻辑。
+    /// 需求：4.1, 4.6
     /// </summary>
     public class CatSkillManager : MonoBehaviour
     {
         #region Serialized Fields
-        [Header("Skills")]
-        [Tooltip("Agile Jump skill component")]
+        [Header("技能")]
+        [Tooltip("敏捷跳跃技能组件")]
         public AgileJumpSkill AgileJump;
         
-        [Tooltip("Fur Distraction skill component")]
+        [Tooltip("毛发干扰技能组件")]
         public FurDistractionSkill FurDistraction;
         
-        [Tooltip("Hide In Gap skill component")]
+        [Tooltip("躲入缝隙技能组件")]
         public HideInGapSkill HideInGap;
         
-        [Header("AI Decision Settings")]
-        [Tooltip("Distance at which to consider using Agile Jump")]
+        [Header("AI 决策设置")]
+        [Tooltip("考虑使用敏捷跳跃的距离")]
         public float AgileJumpTriggerDistance = 5f;
         
-        [Tooltip("Distance at which to consider using Fur Distraction")]
+        [Tooltip("考虑使用毛发干扰的距离")]
         public float FurDistractionTriggerDistance = 8f;
         
-        [Tooltip("Distance at which to consider using Hide In Gap")]
+        [Tooltip("考虑使用躲入缝隙的距离")]
         public float HideInGapTriggerDistance = 6f;
         
-        [Tooltip("Minimum time between skill usage attempts")]
+        [Tooltip("技能使用尝试之间的最小时间间隔")]
         public float SkillDecisionInterval = 1f;
         
-        [Tooltip("Random chance factor for skill usage (0-1)")]
+        [Tooltip("技能使用的随机机会因子 (0-1)")]
         [Range(0f, 1f)]
         public float SkillUsageChance = 0.7f;
         
-        [Header("Configuration")]
-        [Tooltip("Phase 2 game configuration")]
+        [Header("配置")]
+        [Tooltip("阶段 2 游戏配置")]
         public Phase2GameConfig GameConfig;
         #endregion
 
@@ -55,8 +55,8 @@ namespace PetGrooming.Systems.Skills
 
         #region Properties
         /// <summary>
-        /// Array of all skills managed by this manager.
-        /// Requirement 4.1: Cat has 3 skills.
+        /// 由此管理器管理的所有技能的数组。
+        /// 需求 4.1: 猫咪有 3 个技能。
         /// </summary>
         public SkillBase[] AllSkills
         {
@@ -71,29 +71,29 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Number of skills available.
+        /// 可用技能的数量。
         /// </summary>
         public int SkillCount => 3;
 
         /// <summary>
-        /// Reference to the owner pet.
+        /// 对所有者宠物的引用。
         /// </summary>
         public PetAI OwnerPet => _ownerPet;
         #endregion
 
         #region Events
         /// <summary>
-        /// Fired when any skill is activated.
+        /// 当任何技能激活时触发。
         /// </summary>
         public event Action<int, SkillBase> OnSkillActivated;
         
         /// <summary>
-        /// Fired when a skill activation fails (on cooldown).
+        /// 当技能激活失败（冷却中）时触发。
         /// </summary>
         public event Action<int, SkillBase> OnSkillActivationFailed;
         
         /// <summary>
-        /// Fired when the AI decides to use a skill.
+        /// 当 AI 决定使用技能时触发。
         /// </summary>
         public event Action<SkillBase> OnAISkillDecision;
         #endregion
@@ -113,9 +113,9 @@ namespace PetGrooming.Systems.Skills
 
         #region Public Methods
         /// <summary>
-        /// Sets the owner pet for this skill manager.
+        /// 设置此技能管理器的所有者宠物。
         /// </summary>
-        /// <param name="pet">The pet that owns these skills</param>
+        /// <param name="pet">拥有这些技能的宠物</param>
         public void SetOwner(PetAI pet)
         {
             _ownerPet = pet;
@@ -123,26 +123,26 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Evaluates the current situation and uses skills strategically.
-        /// Requirement 4.6: Cat AI uses skills strategically based on distance and state.
+        /// 评估当前情况并策略性地使用技能。
+        /// 需求 4.6: 猫咪 AI 根据距离和状态策略性地使用技能。
         /// </summary>
-        /// <param name="pet">The pet using the skills</param>
-        /// <param name="groomer">The groomer to evaluate against</param>
+        /// <param name="pet">使用技能的宠物</param>
+        /// <param name="groomer">用于评估的美容师</param>
         public void EvaluateAndUseSkills(PetAI pet, GroomerController groomer)
         {
             if (pet == null || groomer == null) return;
             
-            // Check decision interval
+            // 检查决策间隔
             if (Time.time - _lastDecisionTime < SkillDecisionInterval) return;
             _lastDecisionTime = Time.time;
             
-            // Calculate distance to groomer
+            // 计算到美容师的距离
             float distance = Vector3.Distance(pet.transform.position, groomer.transform.position);
             
-            // Get pet state
+            // 获取宠物状态
             PetAI.PetState state = pet.CurrentState;
             
-            // Evaluate and potentially use a skill
+            // 评估并可能使用技能
             SkillBase skillToUse = EvaluateSkillChoice(distance, state, groomer);
             
             if (skillToUse != null && ShouldUseSkill())
@@ -153,10 +153,10 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Attempts to activate a skill by index.
+        /// 尝试按索引激活技能。
         /// </summary>
-        /// <param name="skillIndex">Index of the skill (0-2)</param>
-        /// <returns>True if activation was successful</returns>
+        /// <param name="skillIndex">技能索引 (0-2)</param>
+        /// <returns>如果激活成功则为 True</returns>
         public bool TryActivateSkill(int skillIndex)
         {
             SkillBase skill = GetSkill(skillIndex);
@@ -181,10 +181,10 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Gets a skill by index.
+        /// 按索引获取技能。
         /// </summary>
-        /// <param name="index">Index of the skill (0-2)</param>
-        /// <returns>The skill at the given index, or null if invalid</returns>
+        /// <param name="index">技能索引 (0-2)</param>
+        /// <returns>给定索引处的技能，如果无效则为 null</returns>
         public SkillBase GetSkill(int index)
         {
             switch (index)
@@ -197,10 +197,10 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Gets the index of a skill.
+        /// 获取技能的索引。
         /// </summary>
-        /// <param name="skill">The skill to find</param>
-        /// <returns>Index of the skill, or -1 if not found</returns>
+        /// <param name="skill">要查找的技能</param>
+        /// <returns>技能的索引，如果未找到则为 -1</returns>
         public int GetSkillIndex(SkillBase skill)
         {
             if (skill == AgileJump) return 0;
@@ -210,10 +210,10 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Checks if a skill is ready by index.
+        /// 检查技能是否已就绪。
         /// </summary>
-        /// <param name="skillIndex">Index of the skill</param>
-        /// <returns>True if the skill is ready</returns>
+        /// <param name="skillIndex">技能索引</param>
+        /// <returns>如果技能已就绪则为 True</returns>
         public bool IsSkillReady(int skillIndex)
         {
             SkillBase skill = GetSkill(skillIndex);
@@ -221,10 +221,10 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Gets the remaining cooldown for a skill.
+        /// 获取技能的剩余冷却时间。
         /// </summary>
-        /// <param name="skillIndex">Index of the skill</param>
-        /// <returns>Remaining cooldown in seconds</returns>
+        /// <param name="skillIndex">技能索引</param>
+        /// <returns>剩余冷却时间（秒）</returns>
         public float GetSkillCooldown(int skillIndex)
         {
             SkillBase skill = GetSkill(skillIndex);
@@ -232,7 +232,7 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Resets all skill cooldowns.
+        /// 重置所有技能冷却时间。
         /// </summary>
         public void ResetAllCooldowns()
         {
@@ -249,7 +249,7 @@ namespace PetGrooming.Systems.Skills
         #region Private Methods
         private void InitializeSkills()
         {
-            // Create skill components if not assigned
+            // 如果未分配则创建技能组件
             if (AgileJump == null)
             {
                 AgileJump = GetComponentInChildren<AgileJumpSkill>();
@@ -277,13 +277,13 @@ namespace PetGrooming.Systems.Skills
                 }
             }
             
-            // Apply config if available
+            // 如果可用则应用配置
             if (GameConfig != null)
             {
                 ApplyConfig();
             }
             
-            // Rebuild skills array
+            // 重建技能数组
             _allSkills = new SkillBase[] { AgileJump, FurDistraction, HideInGap };
         }
 
@@ -328,14 +328,14 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Evaluates which skill to use based on current situation.
-        /// Requirement 4.6: Strategic skill usage based on distance and state.
+        /// 根据当前情况评估要使用的技能。
+        /// 需求 4.6: 基于距离和状态的策略性技能使用。
         /// </summary>
         private SkillBase EvaluateSkillChoice(float distanceToGroomer, PetAI.PetState state, GroomerController groomer)
         {
-            // Priority-based skill selection
+            // 基于优先级的技能选择
             
-            // 1. If groomer is very close and we're fleeing, try to hide
+            // 1. 如果美容师非常近且我们正在逃跑，尝试躲藏
             if (state == PetAI.PetState.Fleeing && distanceToGroomer <= HideInGapTriggerDistance)
             {
                 if (HideInGap != null && HideInGap.IsReady && !HideInGap.IsHiding)
@@ -344,7 +344,7 @@ namespace PetGrooming.Systems.Skills
                 }
             }
             
-            // 2. If groomer is at medium range, throw fur distraction
+            // 2. 如果美容师在中等距离，投掷毛发干扰
             if (distanceToGroomer <= FurDistractionTriggerDistance && distanceToGroomer > AgileJumpTriggerDistance)
             {
                 if (FurDistraction != null && FurDistraction.IsReady)
@@ -353,7 +353,7 @@ namespace PetGrooming.Systems.Skills
                 }
             }
             
-            // 3. If groomer is close and we need to escape, use agile jump
+            // 3. 如果美容师很近且我们需要逃跑，使用敏捷跳跃
             if (state == PetAI.PetState.Fleeing && distanceToGroomer <= AgileJumpTriggerDistance)
             {
                 if (AgileJump != null && AgileJump.IsReady && !AgileJump.IsJumping)
@@ -362,10 +362,10 @@ namespace PetGrooming.Systems.Skills
                 }
             }
             
-            // 4. Fallback: If any skill is ready and groomer is in range, consider using it
+            // 4. 后备：如果任何技能已就绪且美容师在范围内，考虑使用它
             if (distanceToGroomer <= FurDistractionTriggerDistance)
             {
-                // Check skills in priority order
+                // 按优先级顺序检查技能
                 if (HideInGap != null && HideInGap.IsReady && !HideInGap.IsHiding)
                 {
                     return HideInGap;
@@ -384,7 +384,7 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Determines if a skill should be used based on random chance.
+        /// 根据随机机会确定是否应使用技能。
         /// </summary>
         private bool ShouldUseSkill()
         {
@@ -394,41 +394,41 @@ namespace PetGrooming.Systems.Skills
 
         #region Static Methods (Testable)
         /// <summary>
-        /// Validates that all required skills are present.
-        /// Requirement 4.1: Cat has 3 skills.
+        /// 验证所有必需的技能是否存在。
+        /// 需求 4.1: 猫咪有 3 个技能。
         /// </summary>
-        /// <param name="agileJump">Agile Jump skill</param>
-        /// <param name="furDistraction">Fur Distraction skill</param>
-        /// <param name="hideInGap">Hide In Gap skill</param>
-        /// <returns>True if all skills are present</returns>
+        /// <param name="agileJump">敏捷跳跃技能</param>
+        /// <param name="furDistraction">毛发干扰技能</param>
+        /// <param name="hideInGap">躲入缝隙技能</param>
+        /// <returns>如果所有技能都存在则为 True</returns>
         public static bool ValidateSkillsPresent(SkillBase agileJump, SkillBase furDistraction, SkillBase hideInGap)
         {
             return agileJump != null && furDistraction != null && hideInGap != null;
         }
 
         /// <summary>
-        /// Gets the expected skill count for Cat.
-        /// Requirement 4.1: Cat has 3 skills.
+        /// 获取猫咪的预期技能数量。
+        /// 需求 4.1: 猫咪有 3 个技能。
         /// </summary>
-        /// <returns>Expected skill count (3)</returns>
+        /// <returns>预期技能数量 (3)</returns>
         public static int GetExpectedSkillCount()
         {
             return 3;
         }
 
         /// <summary>
-        /// Evaluates the best skill to use based on distance and state.
-        /// Requirement 4.6: Strategic skill usage.
+        /// 根据距离和状态评估要使用的最佳技能。
+        /// 需求 4.6: 策略性技能使用。
         /// </summary>
-        /// <param name="distance">Distance to groomer</param>
-        /// <param name="state">Current pet state</param>
-        /// <param name="agileJumpReady">Whether Agile Jump is ready</param>
-        /// <param name="furDistractionReady">Whether Fur Distraction is ready</param>
-        /// <param name="hideInGapReady">Whether Hide In Gap is ready</param>
-        /// <param name="agileJumpDistance">Trigger distance for Agile Jump</param>
-        /// <param name="furDistractionDistance">Trigger distance for Fur Distraction</param>
-        /// <param name="hideInGapDistance">Trigger distance for Hide In Gap</param>
-        /// <returns>Index of recommended skill (0-2) or -1 if none</returns>
+        /// <param name="distance">到美容师的距离</param>
+        /// <param name="state">当前宠物状态</param>
+        /// <param name="agileJumpReady">敏捷跳跃是否就绪</param>
+        /// <param name="furDistractionReady">毛发干扰是否就绪</param>
+        /// <param name="hideInGapReady">躲入缝隙是否就绪</param>
+        /// <param name="agileJumpDistance">敏捷跳跃的触发距离</param>
+        /// <param name="furDistractionDistance">毛发干扰的触发距离</param>
+        /// <param name="hideInGapDistance">躲入缝隙的触发距离</param>
+        /// <returns>推荐技能的索引 (0-2)，如果没有则为 -1</returns>
         public static int EvaluateBestSkill(
             float distance, 
             PetAI.PetState state,
@@ -465,15 +465,16 @@ namespace PetGrooming.Systems.Skills
                 if (agileJumpReady) return 0;
             }
             
-            return -1; // No skill recommended
+            return -1; // 不推荐任何技能
         }
         #endregion
 
         #region Editor Support
 #if UNITY_EDITOR
         /// <summary>
-        /// Sets config for testing purposes.
+        /// 设置用于测试的配置。
         /// </summary>
+
         public void SetConfigForTesting(Phase2GameConfig config)
         {
             GameConfig = config;
@@ -481,7 +482,7 @@ namespace PetGrooming.Systems.Skills
         }
         
         /// <summary>
-        /// Sets skills for testing purposes.
+        /// 设置用于测试的技能。
         /// </summary>
         public void SetSkillsForTesting(AgileJumpSkill agileJump, FurDistractionSkill furDistraction, HideInGapSkill hideInGap)
         {
@@ -492,7 +493,7 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Sets the owner pet for testing.
+        /// 设置用于测试的所有者宠物。
         /// </summary>
         public void SetOwnerForTesting(PetAI pet)
         {

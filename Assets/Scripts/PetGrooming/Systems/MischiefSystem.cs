@@ -5,8 +5,8 @@ using PetGrooming.Core;
 namespace PetGrooming.Systems
 {
     /// <summary>
-    /// Manages the mischief value accumulation and threshold detection.
-    /// Requirements: 5.1, 5.2, 5.3, 5.5, 6.1, 6.2, 6.6
+    /// 管理恶作剧值的累积与阈值检测。
+    /// 需求：5.1, 5.2, 5.3, 5.5, 6.1, 6.2, 6.6
     /// </summary>
     public class MischiefSystem : MonoBehaviour
     {
@@ -52,15 +52,15 @@ namespace PetGrooming.Systems
         #region Properties
         
         /// <summary>
-        /// Current accumulated mischief value.
-        /// Requirement 5.1: Track cumulative mischief value starting at 0.
+        /// 当前累积的恶作剧值。
+        /// 需求 5.1：从 0 开始累积恶作剧值。
         /// </summary>
         public int CurrentMischiefValue { get; private set; }
         
         /// <summary>
-        /// Mischief threshold for Pet victory.
-        /// Property 15: Mischief Threshold Matches Game Mode
-        /// Requirements 6.1, 6.2: Dynamic threshold based on game mode (2-pet: 800, 3-pet: 1000)
+        /// 宠物获胜所需的恶作剧阈值。
+        /// 属性 15：恶作剧阈值与游戏模式匹配。
+        /// 需求 6.1, 6.2：2 宠模式 800，3 宠模式 1000。
         /// </summary>
         public int MischiefThreshold
         {
@@ -75,30 +75,30 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Mischief points added when a pet skill hits the Groomer.
-        /// Requirement 6.6: Pet skill hit adds 30 points.
+        /// 宠物技能击中 Groomer 时增加的恶作剧值。
+        /// 需求 6.6：每次命中增加 30 分。
         /// </summary>
         public int PetSkillHitMischief => _phase2Config != null ? _phase2Config.PetSkillHitMischief : 30;
         
         /// <summary>
-        /// Reference to the Phase 2 game configuration.
+        /// 第二阶段游戏配置引用。
         /// </summary>
         public Phase2GameConfig Phase2Config => _phase2Config;
         
         /// <summary>
-        /// Mischief value for shelf items.
-        /// Requirement 5.2: Shelf item adds 50 points.
+        /// 货架物品被破坏时增加的恶作剧值。
+        /// 需求 5.2：每件货架物品增加 50 分。
         /// </summary>
         public int ShelfItemMischief => _gameConfig != null ? _gameConfig.ShelfItemMischief : 50;
         
         /// <summary>
-        /// Mischief value for cleaning carts.
-        /// Requirement 5.3: Cleaning cart adds 80 points.
+        /// 清洁车被破坏时增加的恶作剧值。
+        /// 需求 5.3：每辆清洁车增加 80 分。
         /// </summary>
         public int CleaningCartMischief => _gameConfig != null ? _gameConfig.CleaningCartMischief : 80;
         
         /// <summary>
-        /// Reference to the game configuration.
+        /// 游戏配置引用。
         /// </summary>
         public GameConfig Config => _gameConfig;
         
@@ -107,19 +107,19 @@ namespace PetGrooming.Systems
         #region Events
         
         /// <summary>
-        /// Fired when the mischief value changes.
+        /// 恶作剧值变化时触发。
         /// </summary>
         public event Action<int> OnMischiefValueChanged;
         
         /// <summary>
-        /// Fired when the mischief threshold is reached.
-        /// Requirement 5.5: When mischief value reaches threshold, trigger Pet victory.
+        /// 当恶作剧值达到阈值时触发。
+        /// 需求 5.5：达到阈值后触发宠物胜利。
         /// </summary>
         public event Action OnThresholdReached;
         
         /// <summary>
-        /// Fired when a pet skill hits the Groomer.
-        /// Requirement 6.6: Pet skill hit adds 30 points.
+        /// 当宠物技能击中 Groomer 时触发。
+        /// 需求 6.6：命中时增加 30 分恶作剧值。
         /// </summary>
         public event Action<int> OnPetSkillHitMischief;
         
@@ -129,7 +129,7 @@ namespace PetGrooming.Systems
         
         private void Awake()
         {
-            // Singleton setup
+            // 单例初始化
             if (_instance != null && _instance != this)
             {
                 Debug.LogWarning("[MischiefSystem] Duplicate MischiefSystem detected, destroying this instance.");
@@ -139,7 +139,7 @@ namespace PetGrooming.Systems
             
             _instance = this;
             
-            // Validate configuration
+            // 校验配置
             if (_gameConfig == null)
             {
                 Debug.LogError("[MischiefSystem] GameConfig is not assigned!");
@@ -164,11 +164,11 @@ namespace PetGrooming.Systems
         #region Public Methods
         
         /// <summary>
-        /// Sets the dynamic mischief threshold based on game mode.
-        /// Property 15: Mischief Threshold Matches Game Mode
-        /// Requirements 6.1, 6.2: 2-pet mode = 800, 3-pet mode = 1000
+        /// 根据游戏模式设置动态恶作剧阈值。
+        /// 属性 15：恶作剧阈值与游戏模式匹配。
+        /// 需求 6.1, 6.2：2 宠模式 800，3 宠模式 1000。
         /// </summary>
-        /// <param name="gameMode">The current game mode</param>
+        /// <param name="gameMode">当前游戏模式。</param>
         public void SetDynamicThreshold(PetSpawnManager.GameMode gameMode)
         {
             _useDynamicThreshold = true;
@@ -178,11 +178,11 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Sets the dynamic mischief threshold based on pet count.
-        /// Property 15: Mischief Threshold Matches Game Mode
-        /// Requirements 6.1, 6.2: 2-pet mode = 800, 3-pet mode = 1000
+        /// 根据宠物数量设置动态恶作剧阈值。
+        /// 属性 15：恶作剧阈值与游戏模式匹配。
+        /// 需求 6.1, 6.2：2 宠模式 800，3 宠模式 1000。
         /// </summary>
-        /// <param name="petCount">Number of pets in the match</param>
+        /// <param name="petCount">当前对局中的宠物数量。</param>
         public void SetDynamicThresholdByPetCount(int petCount)
         {
             _useDynamicThreshold = true;
@@ -192,10 +192,10 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Adds mischief points to the current value.
-        /// Requirements: 5.2, 5.3, 5.5
+        /// 向当前恶作剧值中增加一定数值。
+        /// 相关需求：5.2, 5.3, 5.5。
         /// </summary>
-        /// <param name="amount">The amount of mischief to add.</param>
+        /// <param name="amount">要增加的恶作剧值。</param>
         public void AddMischief(int amount)
         {
             if (amount <= 0)
@@ -211,14 +211,14 @@ namespace PetGrooming.Systems
             
             OnMischiefValueChanged?.Invoke(CurrentMischiefValue);
             
-            // Notify GameManager of mischief change
+            // 通知 GameManager 恶作剧值已变化
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.OnMischiefValueChanged(CurrentMischiefValue);
             }
             
-            // Check threshold
-            // Requirement 5.5: When mischief value reaches 500 points, Pet wins
+            // 检查是否到达阈值
+            // 需求 5.5：当恶作剧值达到阈值时，宠物获胜
             if (previousValue < MischiefThreshold && CurrentMischiefValue >= MischiefThreshold)
             {
                 Debug.Log($"[MischiefSystem] Threshold reached! ({CurrentMischiefValue} >= {MischiefThreshold})");
@@ -227,8 +227,8 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Adds mischief for a shelf item collision.
-        /// Requirement 5.2: Shelf item adds 50 points.
+        /// 货架物品碰撞时增加恶作剧值。
+        /// 需求 5.2：每件货架物品增加 50 分。
         /// </summary>
         public void AddShelfItemMischief()
         {
@@ -236,8 +236,8 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Adds mischief for a cleaning cart collision.
-        /// Requirement 5.3: Cleaning cart adds 80 points.
+        /// 清洁车碰撞时增加恶作剧值。
+        /// 需求 5.3：每辆清洁车增加 80 分。
         /// </summary>
         public void AddCleaningCartMischief()
         {
@@ -245,7 +245,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Resets the mischief value to 0.
+        /// 将恶作剧值重置为 0。
         /// </summary>
         public void Reset()
         {
@@ -255,9 +255,9 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Adds mischief when a pet skill hits the Groomer.
-        /// Property 18: Pet Skill Hit Mischief Value
-        /// Requirement 6.6: Pet skill hit adds 30 points.
+        /// 当宠物技能击中 Groomer 时增加恶作剧值。
+        /// 属性 18：宠物技能命中恶作剧加成。
+        /// 需求 6.6：每次命中增加 30 分。
         /// </summary>
         public void AddPetSkillHitMischief()
         {
@@ -273,12 +273,12 @@ namespace PetGrooming.Systems
         #region Static Calculation Methods (Testable)
         
         /// <summary>
-        /// Gets the mischief threshold for a given game mode.
-        /// Property 15: Mischief Threshold Matches Game Mode
-        /// Requirements 6.1, 6.2: 2-pet mode = 800, 3-pet mode = 1000
+        /// 获取指定游戏模式下的恶作剧阈值。
+        /// 属性 15：恶作剧阈值与游戏模式匹配。
+        /// 需求 6.1, 6.2：2 宠模式 800，3 宠模式 1000。
         /// </summary>
-        /// <param name="gameMode">The game mode</param>
-        /// <returns>The mischief threshold for the game mode</returns>
+        /// <param name="gameMode">游戏模式。</param>
+        /// <returns>对应游戏模式下的恶作剧阈值。</returns>
         public static int GetThresholdForGameMode(PetSpawnManager.GameMode gameMode)
         {
             return gameMode switch
@@ -290,35 +290,35 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Gets the mischief threshold for a given pet count.
-        /// Property 15: Mischief Threshold Matches Game Mode
-        /// Requirements 6.1, 6.2: 2-pet mode = 800, 3-pet mode = 1000
+        /// 根据宠物数量获取恶作剧阈值。
+        /// 属性 15：恶作剧阈值与游戏模式匹配。
+        /// 需求 6.1, 6.2：2 宠模式 800，3 宠模式 1000。
         /// </summary>
-        /// <param name="petCount">Number of pets in the match</param>
-        /// <returns>The mischief threshold for the pet count</returns>
+        /// <param name="petCount">对局中宠物数量。</param>
+        /// <returns>对应宠物数量的恶作剧阈值。</returns>
         public static int GetThresholdForPetCount(int petCount)
         {
             return petCount >= 3 ? 1000 : 800;
         }
         
         /// <summary>
-        /// Gets the mischief value added when a pet skill hits the Groomer.
-        /// Property 18: Pet Skill Hit Mischief Value
-        /// Requirement 6.6: Pet skill hit adds 30 points.
+        /// 获取一次宠物技能命中 Groomer 时的恶作剧增量。
+        /// 属性 18：宠物技能命中恶作剧加成。
+        /// 需求 6.6：命中增加 30 分。
         /// </summary>
-        /// <returns>The mischief value for pet skill hit (30 points)</returns>
+        /// <returns>宠物技能命中时增加的恶作剧值（30 分）。</returns>
         public static int GetPetSkillHitMischiefValue()
         {
             return 30;
         }
         
         /// <summary>
-        /// Calculates the new mischief value after adding an amount.
-        /// This method is designed to be testable for property-based testing.
+        /// 计算在增加一定数值后的新恶作剧值。
+        /// 该方法用于性质测试，便于单元测试验证。
         /// </summary>
-        /// <param name="currentValue">Current mischief value.</param>
-        /// <param name="amountToAdd">Amount to add.</param>
-        /// <returns>The new mischief value.</returns>
+        /// <param name="currentValue">当前恶作剧值。</param>
+        /// <param name="amountToAdd">要增加的数值。</param>
+        /// <returns>增加后的恶作剧值。</returns>
         public static int CalculateMischiefValue(int currentValue, int amountToAdd)
         {
             if (amountToAdd <= 0)
@@ -329,13 +329,13 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Gets the mischief value for a specific object type.
-        /// Property 5: Mischief Value Calculation
+        /// 获取某个可破坏物体类型对应的恶作剧值。
+        /// 属性 5：恶作剧值计算。
         /// </summary>
-        /// <param name="objectType">Type of destructible object.</param>
-        /// <param name="shelfItemValue">Configured shelf item mischief value.</param>
-        /// <param name="cleaningCartValue">Configured cleaning cart mischief value.</param>
-        /// <returns>The mischief value for the object type.</returns>
+        /// <param name="objectType">可破坏物体的类型。</param>
+        /// <param name="shelfItemValue">货架物品的恶作剧值。</param>
+        /// <param name="cleaningCartValue">清洁车的恶作剧值。</param>
+        /// <returns>该物体类型对应的恶作剧值。</returns>
         public static int GetMischiefValueForObjectType(
             DestructibleObjectType objectType, 
             int shelfItemValue = 50, 
@@ -350,11 +350,11 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Checks if the threshold has been reached.
+        /// 检查当前恶作剧值是否达到阈值。
         /// </summary>
-        /// <param name="currentValue">Current mischief value.</param>
-        /// <param name="threshold">Mischief threshold.</param>
-        /// <returns>True if threshold is reached.</returns>
+        /// <param name="currentValue">当前恶作剧值。</param>
+        /// <param name="threshold">阈值。</param>
+        /// <returns>达到或超过阈值时返回 true。</returns>
         public static bool IsThresholdReached(int currentValue, int threshold)
         {
             return currentValue >= threshold;
@@ -366,7 +366,7 @@ namespace PetGrooming.Systems
         
 #if UNITY_EDITOR
         /// <summary>
-        /// Sets the game config for testing purposes.
+        /// 设置 GameConfig（测试用）。
         /// </summary>
         public void SetConfigForTesting(GameConfig config)
         {
@@ -374,7 +374,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Sets the Phase 2 config for testing purposes.
+        /// 设置 Phase2GameConfig（测试用）。
         /// </summary>
         public void SetPhase2ConfigForTesting(Phase2GameConfig config)
         {
@@ -382,7 +382,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Sets the mischief value directly for testing purposes.
+        /// 直接设置恶作剧值（测试用）。
         /// </summary>
         public void SetMischiefValueForTesting(int value)
         {
@@ -390,7 +390,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Sets the dynamic threshold directly for testing purposes.
+        /// 直接设置动态阈值（测试用）。
         /// </summary>
         public void SetDynamicThresholdForTesting(int threshold)
         {
@@ -399,7 +399,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Resets the dynamic threshold for testing purposes.
+        /// 重置动态阈值（测试用）。
         /// </summary>
         public void ResetDynamicThresholdForTesting()
         {
@@ -408,7 +408,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Gets whether dynamic threshold is being used (for testing).
+        /// 获取当前是否使用动态阈值（测试用）。
         /// </summary>
         public bool IsUsingDynamicThreshold => _useDynamicThreshold;
 #endif
@@ -417,7 +417,7 @@ namespace PetGrooming.Systems
     }
     
     /// <summary>
-    /// Types of destructible objects in the scene.
+    /// 场景中可破坏物体的类型。
     /// </summary>
     public enum DestructibleObjectType
     {

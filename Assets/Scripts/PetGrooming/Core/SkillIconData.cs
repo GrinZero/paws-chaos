@@ -3,61 +3,61 @@ using UnityEngine;
 namespace PetGrooming.Core
 {
     /// <summary>
-    /// ScriptableObject containing skill icon configuration data.
-    /// Defines icons, theme colors, and glow effects for each skill.
-    /// Requirements: 3.5.1-3.5.8
-    /// </summary>
+/// 包含技能图标配置数据的 ScriptableObject。
+/// 为每个技能定义图标、主题颜色和发光效果。
+/// 需求：3.5.1-3.5.8
+/// </summary>
     [CreateAssetMenu(fileName = "SkillIconData", menuName = "PetGrooming/SkillIconData")]
     public class SkillIconData : ScriptableObject
     {
         #region Skill Icon Entry
         /// <summary>
-        /// Configuration for a single skill icon.
+        /// 单个技能图标的配置。
         /// </summary>
         [System.Serializable]
         public class SkillIconEntry
         {
-            [Tooltip("Unique identifier for the skill")]
+            [Tooltip("技能的唯一标识符")]
             public string SkillId;
             
-            [Tooltip("Main icon sprite for the skill")]
+            [Tooltip("技能的主图标精灵")]
             public Sprite Icon;
             
-            [Tooltip("Theme color for the skill")]
+            [Tooltip("技能的主题颜色")]
             public Color ThemeColor = Color.white;
             
-            [Tooltip("Glow effect sprite (optional)")]
+            [Tooltip("发光效果精灵（可选）")]
             public Sprite GlowSprite;
             
-            [Tooltip("Desaturated icon for cooldown state (auto-generated if null)")]
+            [Tooltip("冷却状态的去饱和图标（如果为 null 则自动生成）")]
             public Sprite CooldownIcon;
         }
         #endregion
 
         #region Groomer Skills
         [Header("Groomer Skills")]
-        [Tooltip("Capture Net skill - Blue net/mesh visual")]
+        [Tooltip("捕获网技能 - 蓝色网/网格视觉效果")]
         public SkillIconEntry CaptureNet = new SkillIconEntry
         {
             SkillId = "capture_net",
             ThemeColor = new Color(0.29f, 0.56f, 0.85f, 1f) // #4A90D9 Blue
         };
         
-        [Tooltip("Leash skill - Green rope/hook visual")]
+        [Tooltip("牵引绳技能 - 绿色绳索/钩子视觉效果")]
         public SkillIconEntry Leash = new SkillIconEntry
         {
             SkillId = "leash",
             ThemeColor = new Color(0.36f, 0.72f, 0.36f, 1f) // #5CB85C Green
         };
         
-        [Tooltip("Calming Spray skill - Purple spray/mist visual")]
+        [Tooltip("镇静喷雾技能 - 紫色喷雾/雾气视觉效果")]
         public SkillIconEntry CalmingSpray = new SkillIconEntry
         {
             SkillId = "calming_spray",
             ThemeColor = new Color(0.61f, 0.35f, 0.71f, 1f) // #9B59B6 Purple
         };
         
-        [Tooltip("Capture/Grab button - Gold/yellow hand visual")]
+        [Tooltip("捕获/抓取按钮 - 金色/黄色手形视觉效果")]
         public SkillIconEntry CaptureButton = new SkillIconEntry
         {
             SkillId = "capture",
@@ -67,7 +67,7 @@ namespace PetGrooming.Core
 
         #region Pet Skills
         [Header("Pet Skills")]
-        [Tooltip("Struggle button - Orange/red breaking chains visual")]
+        [Tooltip("挣扎按钮 - 橙红色断裂链条视觉效果")]
         public SkillIconEntry StruggleButton = new SkillIconEntry
         {
             SkillId = "struggle",
@@ -77,10 +77,10 @@ namespace PetGrooming.Core
 
         #region Helper Methods
         /// <summary>
-        /// Gets the icon entry for a skill by its ID.
+        /// 通过技能 ID 获取技能图标条目。
         /// </summary>
-        /// <param name="skillId">The skill identifier</param>
-        /// <returns>The SkillIconEntry for the skill, or null if not found</returns>
+        /// <param name="skillId">技能标识符</param>
+        /// <returns>技能的 SkillIconEntry，如果未找到则返回 null</returns>
         public SkillIconEntry GetIconForSkill(string skillId)
         {
             if (string.IsNullOrEmpty(skillId))
@@ -108,18 +108,18 @@ namespace PetGrooming.Core
         }
 
         /// <summary>
-        /// Gets all groomer skill icon entries.
+        /// 获取所有 groomer 技能图标条目。
         /// </summary>
-        /// <returns>Array of groomer skill icon entries</returns>
+        /// <returns>Groomer 技能图标条目的数组</returns>
         public SkillIconEntry[] GetGroomerSkillIcons()
         {
             return new SkillIconEntry[] { CaptureNet, Leash, CalmingSpray };
         }
 
         /// <summary>
-        /// Validates that all required icons are assigned.
+        /// 验证所有必需的图标是否已分配。
         /// </summary>
-        /// <returns>True if all icons are valid</returns>
+        /// <returns>如果所有图标都有效则返回 True</returns>
         public bool ValidateIcons()
         {
             bool isValid = true;

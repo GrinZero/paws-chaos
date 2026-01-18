@@ -6,16 +6,16 @@ using PetGrooming.Systems.Skills;
 namespace PetGrooming.UI
 {
     /// <summary>
-    /// UI component that manages the layout and display of multiple skill cooldown UIs.
-    /// Supports configurable HUD positioning and automatic skill binding.
-    /// Requirement 7.5: Skill icons positioned near character or in fixed HUD location.
+    /// 管理多个技能冷却 UI 布局和显示的 UI 组件。
+    /// 支持可配置的 HUD 定位和自动技能绑定。
+    /// 需求 7.5：技能图标定位在角色附近或固定的 HUD 位置。
     /// </summary>
     public class SkillBarUI : MonoBehaviour
     {
         #region Enums
         
         /// <summary>
-        /// Position presets for the skill bar.
+        /// 技能栏的位置预设。
         /// </summary>
         public enum SkillBarPosition
         {
@@ -31,7 +31,7 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Layout direction for skill icons.
+        /// 技能图标的布局方向。
         /// </summary>
         public enum LayoutDirection
         {
@@ -44,44 +44,44 @@ namespace PetGrooming.UI
         #region Serialized Fields
         
         [Header("Skill UI References")]
-        [Tooltip("Array of skill cooldown UI components")]
+        [Tooltip("技能冷却 UI 组件数组")]
         [SerializeField] private SkillCooldownUI[] _skillSlots;
         
-        [Tooltip("Container for skill icons")]
+        [Tooltip("技能图标的容器")]
         [SerializeField] private RectTransform _skillContainer;
         
-        [Header("Position Settings")]
-        [Tooltip("Preset position for the skill bar")]
+        [Header("位置设置")]
+        [Tooltip("技能栏的预设位置")]
         [SerializeField] private SkillBarPosition _position = SkillBarPosition.BottomCenter;
         
-        [Tooltip("Custom anchor position (used when position is Custom)")]
+        [Tooltip("自定义锚点位置（当位置为 Custom 时使用）")]
         [SerializeField] private Vector2 _customAnchor = new Vector2(0.5f, 0f);
         
-        [Tooltip("Offset from anchor position")]
+        [Tooltip("从锚点位置的偏移量")]
         [SerializeField] private Vector2 _offset = new Vector2(0f, 50f);
         
-        [Header("Layout Settings")]
-        [Tooltip("Layout direction for skill icons")]
+        [Header("布局设置")]
+        [Tooltip("技能图标的布局方向")]
         [SerializeField] private LayoutDirection _layoutDirection = LayoutDirection.Horizontal;
         
-        [Tooltip("Spacing between skill icons")]
+        [Tooltip("技能图标之间的间距")]
         [SerializeField] private float _spacing = 10f;
         
-        [Tooltip("Size of each skill icon")]
+        [Tooltip("每个技能图标的大小")]
         [SerializeField] private Vector2 _iconSize = new Vector2(64f, 64f);
         
-        [Header("Key Prompt Settings")]
-        [Tooltip("Show key prompts below skill icons")]
+        [Header("按键提示设置")]
+        [Tooltip("在技能图标下方显示按键提示")]
         [SerializeField] private bool _showKeyPrompts = true;
         
-        [Tooltip("Key prompt labels")]
+        [Tooltip("按键提示标签")]
         [SerializeField] private string[] _keyPromptLabels = new string[] { "1", "2", "3" };
         
-        [Header("Auto-Bind Settings")]
-        [Tooltip("Automatically find and bind to GroomerSkillManager")]
+        [Header("自动绑定设置")]
+        [Tooltip("自动查找并绑定到 GroomerSkillManager")]
         [SerializeField] private bool _autoBindToGroomer = true;
         
-        [Tooltip("Tag to search for Groomer")]
+        [Tooltip("用于搜索 Groomer 的标签")]
         [SerializeField] private string _groomerTag = "Player";
         
         #endregion
@@ -97,17 +97,17 @@ namespace PetGrooming.UI
         #region Properties
         
         /// <summary>
-        /// The currently bound skill manager.
+        /// 当前绑定的技能管理器。
         /// </summary>
         public GroomerSkillManager BoundSkillManager => _boundSkillManager;
         
         /// <summary>
-        /// Number of skill slots available.
+        /// 可用的技能槽数量。
         /// </summary>
         public int SlotCount => _skillSlots != null ? _skillSlots.Length : 0;
         
         /// <summary>
-        /// Current position setting.
+        /// 当前位置设置。
         /// </summary>
         public SkillBarPosition Position
         {
@@ -124,7 +124,7 @@ namespace PetGrooming.UI
         #region Events
         
         /// <summary>
-        /// Fired when a skill becomes ready.
+        /// 当技能准备就绪时触发。
         /// </summary>
         public event Action<int> OnSkillReady;
         
@@ -153,7 +153,7 @@ namespace PetGrooming.UI
         #region Public Methods
         
         /// <summary>
-        /// Initializes the skill bar UI.
+        /// 初始化技能栏 UI。
         /// </summary>
         public void Initialize()
         {
@@ -171,9 +171,9 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Binds the skill bar to a skill manager.
+        /// 将技能栏绑定到技能管理器。
         /// </summary>
-        /// <param name="skillManager">The skill manager to bind to</param>
+        /// <param name="skillManager">要绑定的技能管理器</param>
         public void BindToSkillManager(GroomerSkillManager skillManager)
         {
             UnbindFromSkillManager();
@@ -198,7 +198,7 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Unbinds from the current skill manager.
+        /// 从当前技能管理器解绑。
         /// </summary>
         public void UnbindFromSkillManager()
         {
@@ -216,10 +216,10 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Sets the position of the skill bar.
-        /// Requirement 7.5: Skill icons positioned based on settings.
+        /// 设置技能栏的位置。
+        /// 需求 7.5：技能图标根据设置定位。
         /// </summary>
-        /// <param name="position">Position preset</param>
+        /// <param name="position">位置预设</param>
         public void SetPosition(SkillBarPosition position)
         {
             _position = position;
@@ -227,10 +227,10 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Sets a custom position for the skill bar.
+        /// 为技能栏设置自定义位置。
         /// </summary>
-        /// <param name="anchor">Anchor position (0-1)</param>
-        /// <param name="offset">Offset from anchor</param>
+        /// <param name="anchor">锚点位置 (0-1)</param>
+        /// <param name="offset">从锚点的偏移量</param>
         public void SetCustomPosition(Vector2 anchor, Vector2 offset)
         {
             _position = SkillBarPosition.Custom;
@@ -240,10 +240,10 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Gets a skill slot by index.
+        /// 通过索引获取技能槽。
         /// </summary>
-        /// <param name="index">Slot index</param>
-        /// <returns>The skill cooldown UI at the index, or null</returns>
+        /// <param name="index">槽位索引</param>
+        /// <returns>索引处的技能冷却 UI，如果不存在则返回 null</returns>
         public SkillCooldownUI GetSlot(int index)
         {
             if (index < 0 || index >= _skillSlots.Length) return null;
@@ -251,9 +251,9 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Shows or hides the skill bar.
+        /// 显示或隐藏技能栏。
         /// </summary>
-        /// <param name="visible">Whether to show the skill bar</param>
+        /// <param name="visible">是否显示技能栏</param>
         public void SetVisible(bool visible)
         {
             gameObject.SetActive(visible);
@@ -405,12 +405,12 @@ namespace PetGrooming.UI
         #region Static Helper Methods
         
         /// <summary>
-        /// Calculates the total width of a horizontal skill bar.
+        /// 计算水平技能栏的总宽度。
         /// </summary>
-        /// <param name="slotCount">Number of slots</param>
-        /// <param name="iconWidth">Width of each icon</param>
-        /// <param name="spacing">Spacing between icons</param>
-        /// <returns>Total width</returns>
+        /// <param name="slotCount">槽位数量</param>
+        /// <param name="iconWidth">每个图标的宽度</param>
+        /// <param name="spacing">图标之间的间距</param>
+        /// <returns>总宽度</returns>
         public static float CalculateBarWidth(int slotCount, float iconWidth, float spacing)
         {
             if (slotCount <= 0) return 0f;
@@ -418,13 +418,13 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Calculates the position of a slot in a horizontal layout.
+        /// 计算水平布局中槽位的位置。
         /// </summary>
-        /// <param name="slotIndex">Index of the slot</param>
-        /// <param name="totalSlots">Total number of slots</param>
-        /// <param name="iconWidth">Width of each icon</param>
-        /// <param name="spacing">Spacing between icons</param>
-        /// <returns>X position of the slot center</returns>
+        /// <param name="slotIndex">槽位索引</param>
+        /// <param name="totalSlots">总槽位数量</param>
+        /// <param name="iconWidth">每个图标的宽度</param>
+        /// <param name="spacing">图标之间的间距</param>
+        /// <returns>槽位中心的 X 位置</returns>
         public static float CalculateSlotPosition(int slotIndex, int totalSlots, float iconWidth, float spacing)
         {
             float totalWidth = CalculateBarWidth(totalSlots, iconWidth, spacing);
@@ -436,7 +436,7 @@ namespace PetGrooming.UI
         #region Editor Support
 #if UNITY_EDITOR
         /// <summary>
-        /// Sets skill slots for testing purposes.
+        /// 为测试目的设置技能槽。
         /// </summary>
         public void SetSlotsForTesting(SkillCooldownUI[] slots)
         {
@@ -444,7 +444,7 @@ namespace PetGrooming.UI
         }
         
         /// <summary>
-        /// Sets layout settings for testing purposes.
+        /// 为测试目的设置布局设置。
         /// </summary>
         public void SetLayoutForTesting(LayoutDirection direction, float spacing, Vector2 iconSize)
         {

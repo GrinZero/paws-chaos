@@ -7,9 +7,9 @@ using PetGrooming.AI;
 namespace PetGrooming.Systems
 {
     /// <summary>
-    /// Controller for the Groomer character, extending ThirdPersonController functionality.
-    /// Handles capture mechanics and movement speed adjustments when carrying a pet.
-    /// Requirements: 1.1, 1.2, 1.3, 3.1, 3.2
+    /// Groomer 角色控制器，扩展 ThirdPersonController 功能。
+    /// 处理捕捉机制以及在抱起宠物时的移动速度调整。
+    /// 需求：1.1, 1.2, 1.3, 3.1, 3.2
     /// </summary>
     public class GroomerController : MonoBehaviour
     {
@@ -44,36 +44,36 @@ namespace PetGrooming.Systems
         #region Properties
         
         /// <summary>
-        /// Whether the groomer is currently carrying a captured pet.
+        /// Groomer 当前是否正抱着一只被捕获的宠物。
         /// </summary>
         public bool IsCarryingPet { get; private set; }
         
         /// <summary>
-        /// Reference to the currently captured pet.
+        /// 当前被捕获的宠物引用。
         /// </summary>
         public PetAI CapturedPet { get; private set; }
         
         /// <summary>
-        /// Capture range from config.
-        /// Requirement 3.1: Capture within 1.5 units.
+        /// 配置中的捕捉范围。
+        /// 需求 3.1：在 1.5 单位内可以捕捉。
         /// </summary>
         public float CaptureRange => _gameConfig != null ? _gameConfig.CaptureRange : 1.5f;
         
         /// <summary>
-        /// Speed multiplier when carrying a pet.
-        /// Requirement 1.3: 15% speed reduction (0.85 multiplier).
+        /// 抱着宠物时的速度倍率。
+        /// 需求 1.3：移动速度降低 15%（倍率 0.85）。
         /// </summary>
         public float CarrySpeedMultiplier => _gameConfig != null ? _gameConfig.CarrySpeedMultiplier : 0.85f;
         
         /// <summary>
-        /// Base movement speed.
-        /// Requirement 1.1: 5 units per second.
+        /// 基础移动速度。
+        /// 需求 1.1：每秒 5 个单位。
         /// </summary>
         public float BaseMoveSpeed => _gameConfig != null ? _gameConfig.GroomerMoveSpeed : 5f;
         
         /// <summary>
-        /// Current effective movement speed (accounting for carry state and alert bonus).
-        /// Requirement 6.5: 10% speed bonus during alert state.
+        /// 当前实际移动速度（考虑抱宠减速和警戒加速）。
+        /// 需求 6.5：警戒状态下获得 10% 速度加成。
         /// </summary>
         public float CurrentMoveSpeed => CalculateFullEffectiveSpeed(
             BaseMoveSpeed, 
@@ -83,13 +83,13 @@ namespace PetGrooming.Systems
             AlertSystem.Instance != null ? AlertSystem.Instance.GroomerSpeedBonus : 0.1f);
         
         /// <summary>
-        /// Reference to the game configuration.
+        /// 游戏配置引用。
         /// </summary>
         public GameConfig Config => _gameConfig;
         
         /// <summary>
-        /// Whether mobile input mode is enabled.
-        /// Requirement 1.8: Support mobile joystick input.
+        /// 是否启用了移动端输入模式。
+        /// 需求 1.8：支持虚拟摇杆输入。
         /// </summary>
         public bool UseMobileInput => _useMobileInput;
         
@@ -98,34 +98,34 @@ namespace PetGrooming.Systems
         #region Events
         
         /// <summary>
-        /// Fired when a pet is successfully captured.
+        /// 成功捕获宠物时触发。
         /// </summary>
         public event Action<PetAI> OnPetCaptured;
         
         /// <summary>
-        /// Fired when the captured pet escapes.
+        /// 被捕获的宠物逃脱时触发。
         /// </summary>
         public event Action OnPetEscaped;
         
         /// <summary>
-        /// Fired when a capture attempt fails due to distance.
+        /// 由于距离原因导致捕捉失败时触发。
         /// </summary>
         public event Action OnCaptureFailed;
         
         /// <summary>
-        /// Fired when a capture attempt is rejected because already carrying a pet.
-        /// Requirement 1.3: Groomer can only carry one pet at a time.
+        /// 当已经抱着宠物而再次尝试捕捉被拒绝时触发。
+        /// 需求 1.3：Groomer 同时只能携带一只宠物。
         /// </summary>
         public event Action OnCaptureRejectedAlreadyCarrying;
         
         /// <summary>
-        /// Fired when a pet is stored in a cage.
+        /// 把宠物存入笼子时触发。
         /// </summary>
         public event Action<PetCage> OnPetStoredInCage;
         
         /// <summary>
-        /// Fired when a pet is manually released from a cage.
-        /// Requirement 8.5: Groomer can manually release pet from cage.
+        /// 从笼子中手动放出宠物时触发。
+        /// 需求 8.5：Groomer 可以手动从笼子释放宠物。
         /// </summary>
         public event Action<PetCage> OnPetReleasedFromCage;
         
@@ -142,7 +142,7 @@ namespace PetGrooming.Systems
                 Debug.LogWarning("[GroomerController] GameConfig is not assigned, using default values.");
             }
             
-            // Create pet hold point if not assigned
+            // 如果未指定宠物挂点，则创建一个默认挂点
             if (_petHoldPoint == null)
             {
                 GameObject holdPoint = new GameObject("PetHoldPoint");
@@ -175,16 +175,16 @@ namespace PetGrooming.Systems
         #region Public Methods
         
         /// <summary>
-        /// Attempts to capture a nearby pet.
-        /// Requirement 1.3: Groomer can only carry one pet at a time.
-        /// Requirement 3.1: Capture within 1.5 units.
-        /// Requirement 3.2: Pet enters captured state on success.
+        /// 尝试捕捉附近的宠物。
+        /// 需求 1.3：Groomer 同时只能抱一只宠物。
+        /// 需求 3.1：在 1.5 单位内可以捕捉。
+        /// 需求 3.2：成功后宠物进入被捕获状态。
         /// </summary>
-        /// <returns>True if capture was successful.</returns>
+        /// <returns>如果捕捉成功返回 true。</returns>
         public bool TryCapturePet()
         {
-            // Property 2: Single Pet Carry Constraint
-            // Requirement 1.3: Reject capture if already carrying a pet
+            // 属性 2：单宠物携带约束
+            // 需求 1.3：已经抱着宠物时应拒绝新的捕捉尝试
             if (IsCarryingPet)
             {
                 Debug.Log("[GroomerController] Already carrying a pet - capture rejected.");
@@ -200,7 +200,7 @@ namespace PetGrooming.Systems
                 return false;
             }
             
-            // Check if pet is invulnerable
+            // 检查宠物是否处于无敌状态
             if (nearestPet.IsInvulnerable)
             {
                 Debug.Log("[GroomerController] Pet is invulnerable - capture rejected.");
@@ -210,7 +210,7 @@ namespace PetGrooming.Systems
             
             float distance = CalculateDistanceToPet(transform.position, nearestPet.transform.position);
             
-            // Property 6: Capture Distance Validation
+            // 属性 6：捕捉距离校验
             if (!IsWithinCaptureRange(distance, CaptureRange))
             {
                 Debug.Log($"[GroomerController] Pet too far. Distance: {distance}, Range: {CaptureRange}");
@@ -218,13 +218,13 @@ namespace PetGrooming.Systems
                 return false;
             }
             
-            // Capture successful
+            // 捕捉成功
             CapturePet(nearestPet);
             return true;
         }
         
         /// <summary>
-        /// Releases the currently captured pet.
+        /// 放下当前被捕获的宠物。
         /// </summary>
         public void ReleasePet()
         {
@@ -241,7 +241,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Called when the captured pet escapes.
+        /// 被抱着的宠物逃脱时调用。
         /// </summary>
         public void OnPetEscape()
         {
@@ -252,7 +252,7 @@ namespace PetGrooming.Systems
             
             PetAI escapedPet = CapturedPet;
             
-            // Clear capture state
+            // 清理本地的捕捉状态
             CapturedPet.transform.SetParent(null);
             CapturedPet = null;
             IsCarryingPet = false;
@@ -263,7 +263,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Sets a reference to a nearby pet for capture detection.
+        /// 设置附近宠物引用，用于捕捉检测。
         /// </summary>
         public void SetNearbyPet(PetAI pet)
         {
@@ -271,7 +271,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Clears the nearby pet reference.
+        /// 清除附近宠物引用。
         /// </summary>
         public void ClearNearbyPet()
         {
@@ -279,7 +279,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Sets a reference to a nearby cage for interaction.
+        /// 设置附近笼子的引用，用于交互。
         /// </summary>
         public void SetNearbyCage(PetCage cage)
         {
@@ -287,7 +287,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Clears the nearby cage reference.
+        /// 清除附近笼子引用。
         /// </summary>
         public void ClearNearbyCage()
         {
@@ -295,10 +295,10 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Attempts to store the carried pet in a nearby cage.
-        /// Requirements: 1.4, 1.5
+        /// 尝试将怀中的宠物存入附近笼子。
+        /// 需求：1.4, 1.5
         /// </summary>
-        /// <returns>True if storage was successful.</returns>
+        /// <returns>如果存入成功返回 true。</returns>
         public bool TryStorePetInCage()
         {
             if (!IsCarryingPet || CapturedPet == null)
@@ -326,18 +326,18 @@ namespace PetGrooming.Systems
                 return false;
             }
             
-            // Store the pet
+            // 将宠物存入笼子
             PetAI petToStore = CapturedPet;
             
-            // Unsubscribe from escape event
+            // 取消订阅宠物逃脱事件
             petToStore.OnEscaped -= OnPetEscape;
             
-            // Clear carry state
+            // 清除携带状态
             petToStore.transform.SetParent(null);
             CapturedPet = null;
             IsCarryingPet = false;
             
-            // Store in cage
+            // 存入笼子
             if (nearestCage.StorePet(petToStore))
             {
                 OnPetStoredInCage?.Invoke(nearestCage);
@@ -345,16 +345,16 @@ namespace PetGrooming.Systems
                 return true;
             }
             
-            // If storage failed, restore carry state
+            // 如果存储失败，恢复携带状态
             CapturePet(petToStore);
             return false;
         }
         
         /// <summary>
-        /// Attempts to manually release a pet from a nearby cage.
-        /// Requirement 8.5: Groomer can manually release pet from cage.
+        /// 尝试从附近笼子中手动释放宠物。
+        /// 需求 8.5：Groomer 可以手动从笼子释放宠物。
         /// </summary>
-        /// <returns>True if release was successful.</returns>
+        /// <returns>如果释放成功返回 true。</returns>
         public bool TryReleasePetFromCage()
         {
             PetCage nearestCage = FindNearestCage();
@@ -377,7 +377,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Gets the pet hold point transform.
+        /// 获取宠物挂点的 Transform。
         /// </summary>
         public Transform GetPetHoldPoint()
         {
@@ -385,8 +385,8 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Enables mobile input mode.
-        /// Requirement 1.8: Support mobile joystick input.
+        /// 启用移动端输入模式。
+        /// 需求 1.8：支持虚拟摇杆输入。
         /// </summary>
         public void EnableMobileInput()
         {
@@ -395,7 +395,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Disables mobile input mode.
+        /// 禁用移动端输入模式。
         /// </summary>
         public void DisableMobileInput()
         {
@@ -404,8 +404,8 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Called when capture button is pressed from mobile UI.
-        /// Requirement 2.4: Capture button triggers capture attempt.
+        /// 当移动端 UI 的捕捉按钮被按下时调用。
+        /// 需求 2.4：捕捉按钮应触发一次捕捉尝试。
         /// </summary>
         public void OnCaptureButtonPressed()
         {
@@ -442,7 +442,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Checks if a key was pressed this frame using the new Input System.
+        /// 使用新输入系统检查某个按键在本帧是否被按下。
         /// </summary>
         private bool WasKeyPressedThisFrame(KeyCode keyCode)
         {
@@ -454,7 +454,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Converts legacy KeyCode to new Input System Key.
+        /// 将旧版 KeyCode 转换为新输入系统中的 Key。
         /// </summary>
         private static Key KeyCodeToKey(KeyCode keyCode)
         {
@@ -483,20 +483,20 @@ namespace PetGrooming.Systems
         
         private PetAI FindNearestPet()
         {
-            // First check if we have a nearby pet reference
+            // 优先使用已有的附近宠物引用
             if (_nearbyPet != null)
             {
                 return _nearbyPet;
             }
             
-            // Otherwise search for pets in the scene
+            // 否则在场景中搜索所有宠物
             PetAI[] pets = FindObjectsOfType<PetAI>();
             PetAI nearest = null;
             float nearestDistance = float.MaxValue;
             
             foreach (PetAI pet in pets)
             {
-                // Skip pets that are already captured or being groomed
+                // 跳过已经被捕获或正在被美容的宠物
                 if (pet.CurrentState == PetAI.PetState.Captured || 
                     pet.CurrentState == PetAI.PetState.BeingGroomed)
                 {
@@ -516,13 +516,13 @@ namespace PetGrooming.Systems
         
         private PetCage FindNearestCage()
         {
-            // First check if we have a nearby cage reference
+            // 优先使用已有的附近笼子引用
             if (_nearbyCage != null)
             {
                 return _nearbyCage;
             }
             
-            // Otherwise search for cages in the scene
+            // 否则在场景中搜索所有笼子
             PetCage[] cages = FindObjectsOfType<PetCage>();
             PetCage nearest = null;
             float nearestDistance = float.MaxValue;
@@ -545,15 +545,15 @@ namespace PetGrooming.Systems
             CapturedPet = pet;
             IsCarryingPet = true;
             
-            // Parent pet to hold point
+            // 将宠物作为子物体挂到挂点上
             pet.transform.SetParent(_petHoldPoint);
             pet.transform.localPosition = Vector3.zero;
             pet.transform.localRotation = Quaternion.identity;
             
-            // Notify pet of capture
+            // 通知宠物已被捕获
             pet.OnCaptured(transform);
             
-            // Subscribe to escape event
+            // 订阅宠物逃脱事件
             pet.OnEscaped += OnPetEscape;
             
             OnPetCaptured?.Invoke(pet);
@@ -566,14 +566,14 @@ namespace PetGrooming.Systems
         #region Static Calculation Methods (Testable)
         
         /// <summary>
-        /// Calculates the effective movement speed based on carry state.
-        /// Property 1: Carry Speed Reduction
-        /// Requirement 1.3: 15% speed reduction when carrying pet.
+        /// 根据是否抱宠物计算有效移动速度。
+        /// 属性 1：抱宠物速度衰减。
+        /// 需求 1.3：抱宠物时速度降低 15%。
         /// </summary>
-        /// <param name="baseSpeed">Base movement speed.</param>
-        /// <param name="carryMultiplier">Speed multiplier when carrying (0.85 for 15% reduction).</param>
-        /// <param name="isCarrying">Whether currently carrying a pet.</param>
-        /// <returns>Effective movement speed.</returns>
+        /// <param name="baseSpeed">基础移动速度。</param>
+        /// <param name="carryMultiplier">抱宠物时的速度倍率（0.85 代表降低 15%）。</param>
+        /// <param name="isCarrying">当前是否正在抱宠物。</param>
+        /// <returns>计算后的有效移动速度。</returns>
         public static float CalculateEffectiveSpeed(float baseSpeed, float carryMultiplier, bool isCarrying)
         {
             if (isCarrying)
@@ -584,16 +584,16 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Calculates the full effective movement speed including carry state and alert bonus.
-        /// Property 17: Alert State Speed Bonus
-        /// Requirement 6.5: 10% speed bonus during alert state.
+        /// 计算包含抱宠减速与警戒加速在内的最终移动速度。
+        /// 属性 17：警戒状态速度加成。
+        /// 需求 6.5：警戒状态下获得 10% 速度加成。
         /// </summary>
-        /// <param name="baseSpeed">Base movement speed.</param>
-        /// <param name="carryMultiplier">Speed multiplier when carrying (0.85 for 15% reduction).</param>
-        /// <param name="isCarrying">Whether currently carrying a pet.</param>
-        /// <param name="isAlertActive">Whether alert state is active.</param>
-        /// <param name="alertSpeedBonus">Speed bonus during alert (0.1 = 10%).</param>
-        /// <returns>Full effective movement speed.</returns>
+        /// <param name="baseSpeed">基础移动速度。</param>
+        /// <param name="carryMultiplier">抱宠物时的速度倍率（0.85 代表降低 15%）。</param>
+        /// <param name="isCarrying">当前是否正在抱宠物。</param>
+        /// <param name="isAlertActive">当前是否处于警戒状态。</param>
+        /// <param name="alertSpeedBonus">警戒状态下的速度加成（0.1 = 10%）。</param>
+        /// <returns>最终有效移动速度。</returns>
         public static float CalculateFullEffectiveSpeed(
             float baseSpeed, 
             float carryMultiplier, 
@@ -613,43 +613,43 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Calculates the distance between groomer and pet positions.
+        /// 计算 Groomer 与宠物之间的距离。
         /// </summary>
-        /// <param name="groomerPosition">Groomer's position.</param>
-        /// <param name="petPosition">Pet's position.</param>
-        /// <returns>Distance between positions.</returns>
+        /// <param name="groomerPosition">Groomer 位置。</param>
+        /// <param name="petPosition">宠物位置。</param>
+        /// <returns>两者之间的距离。</returns>
         public static float CalculateDistanceToPet(Vector3 groomerPosition, Vector3 petPosition)
         {
-            // Calculate horizontal distance (ignoring Y for ground-based capture)
+            // 只计算水平距离（忽略 Y 轴，用于地面捕捉）
             Vector3 diff = groomerPosition - petPosition;
             diff.y = 0f;
             return diff.magnitude;
         }
         
         /// <summary>
-        /// Determines if a capture attempt should succeed based on distance.
-        /// Property 6: Capture Distance Validation
-        /// Requirement 3.1: Capture within 1.5 units.
+        /// 根据距离判断捕捉尝试是否应该成功。
+        /// 属性 6：捕捉距离校验。
+        /// 需求 3.1：在 1.5 单位内可以捕捉。
         /// </summary>
-        /// <param name="distance">Distance to pet.</param>
-        /// <param name="captureRange">Maximum capture range.</param>
-        /// <returns>True if within capture range.</returns>
+        /// <param name="distance">与宠物的距离。</param>
+        /// <param name="captureRange">最大捕捉范围。</param>
+        /// <returns>在捕捉范围内返回 true。</returns>
         public static bool IsWithinCaptureRange(float distance, float captureRange)
         {
             return distance <= captureRange;
         }
         
         /// <summary>
-        /// Determines the capture result based on distance and state.
-        /// Property 6: Capture Distance Validation
+        /// 根据距离和宠物状态判断捕捉是否应成功。
+        /// 属性 6：捕捉距离校验。
         /// </summary>
-        /// <param name="distance">Distance to pet.</param>
-        /// <param name="captureRange">Maximum capture range.</param>
-        /// <param name="petState">Current state of the pet.</param>
-        /// <returns>True if capture should succeed.</returns>
+        /// <param name="distance">与宠物的距离。</param>
+        /// <param name="captureRange">最大捕捉范围。</param>
+        /// <param name="petState">当前宠物状态。</param>
+        /// <returns>捕捉应成功则返回 true。</returns>
         public static bool ShouldCaptureSucceed(float distance, float captureRange, PetAI.PetState petState)
         {
-            // Cannot capture already captured or grooming pets
+            // 不能捕捉已经被捕获或正在美容的宠物
             if (petState == PetAI.PetState.Captured || petState == PetAI.PetState.BeingGroomed)
             {
                 return false;
@@ -659,30 +659,29 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Determines if a capture attempt should be rejected due to already carrying a pet.
-        /// Property 2: Single Pet Carry Constraint
-        /// Requirement 1.3: Groomer can only carry one pet at a time.
+        /// 判断由于已在抱宠物，捕捉尝试是否应该被拒绝。
+        /// 属性 2：单宠物携带约束。
+        /// 需求 1.3：Groomer 同时只能携带一只宠物。
         /// </summary>
-        /// <param name="isCurrentlyCarrying">Whether the groomer is currently carrying a pet.</param>
-        /// <param name="currentPet">The currently carried pet (can be null).</param>
-        /// <returns>True if capture should be rejected (already carrying).</returns>
+        /// <param name="isCurrentlyCarrying">当前是否正在抱宠物。</param>
+        /// <param name="currentPet">当前抱着的宠物（可为 null）。</param>
+        /// <returns>如果因已抱宠物而应拒绝捕捉，返回 true。</returns>
         public static bool ShouldRejectCaptureAlreadyCarrying(bool isCurrentlyCarrying, PetAI currentPet)
         {
             return isCurrentlyCarrying && currentPet != null;
         }
         
         /// <summary>
-        /// Validates the single pet carry constraint.
-        /// Property 2: Single Pet Carry Constraint
-        /// Requirement 1.3: When Groomer captures a Pet while already carrying one, 
-        /// the Capture_System SHALL reject the capture attempt.
+        /// 校验“单宠物携带”约束是否被满足。
+        /// 属性 2：单宠物携带约束。
+        /// 需求 1.3：当 Groomer 已经抱着一只宠物时，再次捕捉必须被系统拒绝。
         /// </summary>
-        /// <param name="isCarryingBefore">Whether carrying a pet before capture attempt.</param>
-        /// <param name="capturedPetBefore">The pet being carried before capture attempt.</param>
-        /// <param name="captureAttemptResult">Result of the capture attempt.</param>
-        /// <param name="isCarryingAfter">Whether carrying a pet after capture attempt.</param>
-        /// <param name="capturedPetAfter">The pet being carried after capture attempt.</param>
-        /// <returns>True if the constraint is satisfied.</returns>
+        /// <param name="isCarryingBefore">捕捉尝试前是否在抱宠物。</param>
+        /// <param name="capturedPetBefore">尝试前抱着的宠物。</param>
+        /// <param name="captureAttemptResult">本次捕捉尝试结果。</param>
+        /// <param name="isCarryingAfter">尝试后是否在抱宠物。</param>
+        /// <param name="capturedPetAfter">尝试后抱着的宠物。</param>
+        /// <returns>如果该约束被满足则返回 true。</returns>
         public static bool ValidateSinglePetCarryConstraint(
             bool isCarryingBefore, 
             PetAI capturedPetBefore,
@@ -715,7 +714,7 @@ namespace PetGrooming.Systems
         
 #if UNITY_EDITOR
         /// <summary>
-        /// Sets the game config for testing purposes.
+        /// 设置用于测试的 GameConfig。
         /// </summary>
         public void SetConfigForTesting(GameConfig config)
         {
@@ -723,7 +722,7 @@ namespace PetGrooming.Systems
         }
         
         /// <summary>
-        /// Sets the carrying state for testing purposes.
+        /// 设置携带状态（测试用）。
         /// </summary>
         public void SetCarryingStateForTesting(bool isCarrying, PetAI pet = null)
         {
@@ -734,11 +733,11 @@ namespace PetGrooming.Systems
         
         private void OnDrawGizmosSelected()
         {
-            // Draw capture range
+            // 绘制捕捉范围
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, CaptureRange);
             
-            // Draw pet hold point
+            // 绘制宠物挂点位置
             if (_petHoldPoint != null)
             {
                 Gizmos.color = Color.cyan;

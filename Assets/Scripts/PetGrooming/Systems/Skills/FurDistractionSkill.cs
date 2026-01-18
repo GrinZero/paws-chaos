@@ -6,32 +6,32 @@ using PetGrooming.AI;
 namespace PetGrooming.Systems.Skills
 {
     /// <summary>
-    /// Fur Distraction skill for Cat pets.
-    /// Throws a fur ball that blocks Groomer vision for 2 seconds.
-    /// Requirement 4.3: Fur ball blocks vision for 2 seconds with 10 second cooldown.
+    /// 猫咪宠物的毛球干扰技能。
+    /// 投掷一个毛球，阻挡美容师视线 2 秒。
+    /// 需求 4.3：毛球阻挡视线 2 秒，冷却时间 10 秒。
     /// </summary>
     public class FurDistractionSkill : SkillBase
     {
         #region Serialized Fields
-        [Header("Fur Distraction Settings")]
-        [Tooltip("Speed of the fur ball projectile")]
+        [Header("毛球干扰设置")]
+        [Tooltip("毛球投射物的速度")]
         public float ProjectileSpeed = 10f;
         
-        [Tooltip("Duration of the vision block effect in seconds")]
+        [Tooltip("视线阻挡效果的持续时间（秒）")]
         public float VisionBlockDuration = 2f;
         
-        [Tooltip("Maximum range of the projectile")]
+        [Tooltip("投射物的最大范围")]
         public float MaxRange = 12f;
         
-        [Tooltip("Prefab for the fur ball projectile")]
+        [Tooltip("毛球投射物的预制体")]
         public GameObject FurBallPrefab;
         
-        [Header("Visual Effect Settings")]
-        [Tooltip("Prefab for the vision block effect on the Groomer")]
+        [Header("视觉效果设置")]
+        [Tooltip("美容师身上视线阻挡效果的预制体")]
         public GameObject VisionBlockEffectPrefab;
         
-        [Header("Configuration")]
-        [Tooltip("Phase 2 game configuration")]
+        [Header("配置")]
+        [Tooltip("第二阶段游戏配置")]
         public Phase2GameConfig GameConfig;
         #endregion
 
@@ -42,17 +42,17 @@ namespace PetGrooming.Systems.Skills
 
         #region Events
         /// <summary>
-        /// Fired when the fur ball is thrown.
+        /// 投掷毛球时触发。
         /// </summary>
         public event Action OnFurBallThrown;
         
         /// <summary>
-        /// Fired when the fur ball hits the Groomer.
+        /// 当毛球撞击到美容师时触发。
         /// </summary>
         public event Action<GroomerController> OnGroomerHit;
         
         /// <summary>
-        /// Fired when the vision block effect ends.
+        /// 当视线阻挡效果结束时触发。
         /// </summary>
         public event Action OnVisionBlockEnded;
         #endregion
@@ -62,9 +62,9 @@ namespace PetGrooming.Systems.Skills
         {
             base.Awake();
             
-            SkillName = "Fur Distraction";
+            SkillName = "毛球干扰";
             
-            // Apply config values if available
+            // 如果有配置则应用配置值
             if (GameConfig != null)
             {
                 Cooldown = GameConfig.FurDistractionCooldown;
@@ -72,7 +72,7 @@ namespace PetGrooming.Systems.Skills
             }
             else
             {
-                // Default cooldown: 10 seconds (Requirement 4.3)
+                // 默认冷却时间：10 秒 (需求 4.3)
                 Cooldown = 10f;
                 VisionBlockDuration = 2f;
             }
@@ -83,7 +83,7 @@ namespace PetGrooming.Systems.Skills
 
         #region Public Methods
         /// <summary>
-        /// Sets the owner pet for this skill.
+        /// 为该技能设置所有者宠物。
         /// </summary>
         public void SetOwner(PetAI pet)
         {
@@ -92,8 +92,8 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Activates the Fur Distraction skill.
-        /// Requirement 4.3: Throws a fur ball that blocks Groomer vision for 2 seconds.
+        /// 激活毛球干扰技能。
+        /// 需求 4.3：投掷一个毛球，阻挡美容师视线 2 秒。
         /// </summary>
         public override void Activate()
         {
@@ -102,19 +102,19 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Called when the fur ball hits the Groomer.
-        /// Applies the vision block effect.
+        /// 当毛球撞击到美容师时调用。
+        /// 应用视线阻挡效果。
         /// </summary>
-        /// <param name="groomer">The Groomer that was hit</param>
+        /// <param name="groomer">被撞击的美容师</param>
         public void OnProjectileHit(GroomerController groomer)
         {
             if (groomer == null) return;
             
             ApplyVisionBlockEffect(groomer, VisionBlockDuration);
             
-            // Add mischief for pet skill hitting Groomer
-            // Property 18: Pet Skill Hit Mischief Value
-            // Requirement 6.6: Pet skill hit adds 30 points
+            // 增加宠物技能撞击美容师的恶作剧值
+            // 属性 18：宠物技能撞击恶作剧值
+            // 需求 6.6：宠物技能撞击增加 30 分
             if (MischiefSystem.Instance != null)
             {
                 MischiefSystem.Instance.AddPetSkillHitMischief();
@@ -122,7 +122,7 @@ namespace PetGrooming.Systems.Skills
             
             OnGroomerHit?.Invoke(groomer);
             
-            Debug.Log($"[FurDistractionSkill] Hit Groomer, blocking vision for {VisionBlockDuration}s");
+            Debug.Log($"[毛球干扰] 撞击了美容师，阻挡视线 {VisionBlockDuration} 秒");
         }
         #endregion
 
@@ -131,7 +131,7 @@ namespace PetGrooming.Systems.Skills
         {
             Vector3 launchPosition = _ownerTransform.position + Vector3.up * 0.5f;
             
-            // Find the Groomer to aim at
+            // 寻找要瞄准的美容师
             GroomerController groomer = FindObjectOfType<GroomerController>();
             Vector3 targetDirection;
             
@@ -148,7 +148,7 @@ namespace PetGrooming.Systems.Skills
             {
                 GameObject projectile = Instantiate(FurBallPrefab, launchPosition, Quaternion.LookRotation(targetDirection));
                 
-                // Initialize the projectile
+                // 初始化投射物
                 FurBallProjectile furBall = projectile.GetComponent<FurBallProjectile>();
                 if (furBall != null)
                 {
@@ -156,25 +156,25 @@ namespace PetGrooming.Systems.Skills
                 }
                 else
                 {
-                    // Fallback: Add basic movement
+                    // 备选方案：添加基础移动
                     Rigidbody rb = projectile.GetComponent<Rigidbody>();
                     if (rb != null)
                     {
                         rb.linearVelocity = targetDirection * ProjectileSpeed;
                     }
                     
-                    // Destroy after max range time
+                    // 在达到最大范围时间后销毁
                     Destroy(projectile, MaxRange / ProjectileSpeed);
                 }
             }
             else
             {
-                // No prefab - do raycast-based hit detection
+                // 没有预制体 - 执行基于射线的命中检测
                 PerformRaycastHit(launchPosition, targetDirection);
             }
             
             OnFurBallThrown?.Invoke();
-            Debug.Log("[FurDistractionSkill] Fur ball thrown");
+            Debug.Log("[毛球干扰] 投掷了毛球");
         }
 
         private void PerformRaycastHit(Vector3 origin, Vector3 direction)
@@ -198,35 +198,35 @@ namespace PetGrooming.Systems.Skills
 
         #region Static Methods (Testable)
         /// <summary>
-        /// Applies the vision block effect to the Groomer.
-        /// Requirement 4.3: Blocks Groomer vision for 2 seconds.
+        /// 向美容师应用视线阻挡效果。
+        /// 需求 4.3：阻挡美容师视线 2 秒。
         /// </summary>
-        /// <param name="groomer">The Groomer to affect</param>
-        /// <param name="duration">Duration of the effect in seconds</param>
+        /// <param name="groomer">受影响的美容师</param>
+        /// <param name="duration">效果持续时间（秒）</param>
         public static void ApplyVisionBlockEffect(GroomerController groomer, float duration)
         {
             if (groomer == null) return;
             
-            // Create a vision block effect data
-            // This could be implemented as a UI overlay or post-processing effect
-            // For now, we'll use the effect receiver interface if available
+            // 创建视线阻挡效果数据
+            // 这可以实现为 UI 叠加层或后期处理效果
+            // 目前，如果可用，我们将使用效果接收器接口
             IEffectReceiver effectReceiver = groomer.GetComponent<IEffectReceiver>();
             if (effectReceiver != null)
             {
-                // Use a custom effect type or stun-like effect for vision block
+                // 使用自定义效果类型或类似眩晕的效果来实现视线阻挡
                 var effect = new SkillEffectData(SkillEffectType.Stun, 0.5f, duration, "Fur Distraction");
                 effectReceiver.ApplyEffect(effect);
             }
             
-            Debug.Log($"[FurDistractionSkill] Applied vision block effect for {duration}s");
+            Debug.Log($"[毛球干扰] 应用了视线阻挡效果，持续 {duration} 秒");
         }
 
         /// <summary>
-        /// Validates the vision block duration matches requirements.
-        /// Requirement 4.3: 2 second vision block.
+        /// 验证视线阻挡持续时间是否符合要求。
+        /// 需求 4.3：2 秒视线阻挡。
         /// </summary>
-        /// <param name="duration">The duration to validate</param>
-        /// <returns>True if duration matches requirement</returns>
+        /// <param name="duration">要验证的持续时间</param>
+        /// <returns>如果持续时间符合要求则为 True</returns>
         public static bool ValidateVisionBlockDuration(float duration)
         {
             const float RequiredDuration = 2f;
@@ -235,11 +235,11 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Validates the cooldown matches requirements.
-        /// Requirement 4.3: 10 second cooldown.
+        /// 验证冷却时间是否符合要求。
+        /// 需求 4.3：10 秒冷却时间。
         /// </summary>
-        /// <param name="cooldown">The cooldown to validate</param>
-        /// <returns>True if cooldown matches requirement</returns>
+        /// <param name="cooldown">要验证的冷却时间</param>
+        /// <returns>如果冷却时间符合要求则为 True</returns>
         public static bool ValidateCooldown(float cooldown)
         {
             const float RequiredCooldown = 10f;
@@ -248,11 +248,11 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Calculates the projectile travel time.
+        /// 计算投射物飞行时间。
         /// </summary>
-        /// <param name="distance">Distance to target</param>
-        /// <param name="speed">Projectile speed</param>
-        /// <returns>Travel time in seconds</returns>
+        /// <param name="distance">到目标的距离</param>
+        /// <param name="speed">投射物速度</param>
+        /// <returns>飞行时间（秒）</returns>
         public static float CalculateTravelTime(float distance, float speed)
         {
             if (speed <= 0f) return float.MaxValue;
@@ -263,7 +263,7 @@ namespace PetGrooming.Systems.Skills
         #region Editor Support
 #if UNITY_EDITOR
         /// <summary>
-        /// Sets config for testing purposes.
+        /// 设置用于测试的配置。
         /// </summary>
         public void SetConfigForTesting(Phase2GameConfig config)
         {
@@ -278,7 +278,7 @@ namespace PetGrooming.Systems.Skills
 
         private void OnDrawGizmosSelected()
         {
-            // Draw max range
+            // 绘制最大范围
             Gizmos.color = Color.magenta;
             Vector3 start = transform.position + Vector3.up * 0.5f;
             Gizmos.DrawLine(start, start + transform.forward * MaxRange);
@@ -288,7 +288,7 @@ namespace PetGrooming.Systems.Skills
     }
 
     /// <summary>
-    /// Projectile component for the fur ball.
+    /// 毛球的投射物组件。
     /// </summary>
     public class FurBallProjectile : MonoBehaviour
     {
@@ -313,10 +313,10 @@ namespace PetGrooming.Systems.Skills
         {
             if (_hasHit) return;
             
-            // Move projectile
+            // 移动投射物
             transform.position += _direction * _speed * Time.deltaTime;
             
-            // Check if exceeded max range
+            // 检查是否超过了最大范围
             float distanceTraveled = Vector3.Distance(_startPosition, transform.position);
             if (distanceTraveled >= _maxRange)
             {

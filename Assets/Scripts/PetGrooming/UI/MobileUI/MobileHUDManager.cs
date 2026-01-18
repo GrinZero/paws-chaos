@@ -8,12 +8,12 @@ using PetGrooming.Systems;
 namespace PetGrooming.UI.MobileUI
 {
     /// <summary>
-    /// Main controller for mobile HUD, managing mobile UI components lifecycle.
-    /// Implements singleton pattern for global access.
-    /// Handles device detection and UI mode switching.
-    /// Integrates joystick input to character movement.
+    /// 移动HUD的主控制器，管理移动UI组件的生命周期。
+    /// 实现单例模式以实现全局访问。
+    /// 处理设备检测和UI模式切换。
+    /// 将摇杆输入集成到角色移动中。
     /// 
-    /// Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 1.8
+    /// 需求：5.1, 5.2, 5.3, 5.4, 5.5, 1.8
     /// </summary>
     public class MobileHUDManager : MonoBehaviour
     {
@@ -22,7 +22,7 @@ namespace PetGrooming.UI.MobileUI
         private static MobileHUDManager _instance;
         
         /// <summary>
-        /// Singleton instance accessor.
+        /// 单例实例访问器。
         /// </summary>
         public static MobileHUDManager Instance
         {
@@ -40,58 +40,58 @@ namespace PetGrooming.UI.MobileUI
 
         #region Serialized Fields
         
-        [Header("UI Component References")]
-        [Tooltip("Virtual joystick for movement input")]
+        [Header("UI组件引用")]
+        [Tooltip("用于移动输入的虚拟摇杆")]
         [SerializeField] private VirtualJoystick _joystick;
         
-        [Tooltip("Skill wheel UI for groomer skills")]
+        [Tooltip("美容师技能的技能轮UI")]
         [SerializeField] private SkillWheelUI _skillWheel;
         
-        [Tooltip("Struggle button UI for pet escape")]
+        [Tooltip("宠物逃脱的挣扎按钮UI")]
         [SerializeField] private StruggleButtonUI _struggleButton;
         
-        [Tooltip("Desktop UI root to hide when mobile mode is active")]
+        [Tooltip("移动模式激活时要隐藏的桌面UI根节点")]
         [SerializeField] private GameObject _desktopUI;
         
-        [Header("Settings")]
-        [Tooltip("Mobile HUD settings asset")]
+        [Header("设置")]
+        [Tooltip("移动HUD设置资源")]
         [SerializeField] private MobileHUDSettings _settings;
         
-        [Tooltip("Auto-detect touch device on start")]
+        [Tooltip("启动时自动检测触摸设备")]
         [SerializeField] private bool _autoDetectDevice = true;
         
-        [Tooltip("Force mobile mode in editor (for testing)")]
+        [Tooltip("在编辑器中强制移动模式（用于测试）")]
         [SerializeField] private bool _forceMobileInEditor = true;
         
-        [Tooltip("PlayerPrefs key for UI mode preference")]
+        [Tooltip("UI模式偏好的PlayerPrefs键")]
         [SerializeField] private string _uiModePrefsKey = "MobileUIMode";
         
         /// <summary>
-        /// Default PlayerPrefs key for UI mode preference.
+        /// UI模式偏好的默认PlayerPrefs键。
         /// </summary>
         public const string DefaultUIModePrefKey = "MobileUIMode";
         
-        [Header("Character References")]
-        [Tooltip("Reference to groomer controller")]
+        [Header("角色引用")]
+        [Tooltip("美容师控制器引用")]
         [SerializeField] private GroomerController _groomerController;
         
-        [Header("Screen Adaptation")]
-        [Tooltip("Screen adapter component for UI scaling")]
+        [Header("屏幕适配")]
+        [Tooltip("用于UI缩放的屏幕适配器组件")]
         [SerializeField] private ScreenAdapter _screenAdapter;
         
-        [Header("Multi-Touch")]
-        [Tooltip("Multi-touch handler for simultaneous inputs")]
+        [Header("多点触控")]
+        [Tooltip("用于同时输入的多点触控处理器")]
         [SerializeField] private MultiTouchHandler _multiTouchHandler;
         
-        [Header("OnScreen Controls (Input System)")]
-        [Tooltip("OnScreenStick for movement input (replaces VirtualJoystick)")]
+        [Header("屏幕控制（输入系统）")]
+        [Tooltip("移动输入的OnScreenStick（替代VirtualJoystick）")]
         [SerializeField] private OnScreenStick _onScreenStick;
         
-        [Tooltip("OnScreenButton array for skill buttons")]
+        [Tooltip("技能按钮的OnScreenButton数组")]
         [SerializeField] private OnScreenButton[] _skillButtons;
         
-        [Header("Skill Button Visuals")]
-        [Tooltip("SkillButtonVisual components for cooldown display")]
+        [Header("技能按钮视觉效果")]
+        [Tooltip("用于冷却显示的SkillButtonVisual组件")]
         [SerializeField] private SkillButtonVisual[] _skillButtonVisuals;
         
         #endregion
@@ -107,7 +107,7 @@ namespace PetGrooming.UI.MobileUI
         #region Enums
         
         /// <summary>
-        /// Type of character being controlled.
+        /// 正在控制的角色类型。
         /// </summary>
         public enum CharacterType
         {
@@ -120,58 +120,58 @@ namespace PetGrooming.UI.MobileUI
         #region Properties
         
         /// <summary>
-        /// Whether mobile HUD mode is currently active.
-        /// Requirement 5.4, 5.5: UI mode visibility toggle.
+        /// 移动HUD模式当前是否激活。
+        /// 需求 5.4, 5.5: UI模式可见性切换。
         /// </summary>
         public bool IsMobileMode => _isMobileMode;
         
         /// <summary>
-        /// Reference to the virtual joystick.
+        /// 虚拟摇杆的引用。
         /// </summary>
         public VirtualJoystick Joystick => _joystick;
         
         /// <summary>
-        /// Reference to the skill wheel.
+        /// 技能轮的引用。
         /// </summary>
         public SkillWheelUI SkillWheel => _skillWheel;
         
         /// <summary>
-        /// Reference to the struggle button.
+        /// 挣扎按钮的引用。
         /// </summary>
         public StruggleButtonUI StruggleButton => _struggleButton;
         
         /// <summary>
-        /// Reference to the desktop UI.
+        /// 桌面UI的引用。
         /// </summary>
         public GameObject DesktopUI => _desktopUI;
         
         /// <summary>
-        /// Reference to the screen adapter.
+        /// 屏幕适配器的引用。
         /// </summary>
         public ScreenAdapter ScreenAdapter => _screenAdapter;
         
         /// <summary>
-        /// Reference to the multi-touch handler.
+        /// 多点触控处理器的引用。
         /// </summary>
         public MultiTouchHandler MultiTouchHandler => _multiTouchHandler;
         
         /// <summary>
-        /// Reference to the OnScreenStick (Input System).
+        /// OnScreenStick的引用（输入系统）。
         /// </summary>
         public OnScreenStick OnScreenStick => _onScreenStick;
         
         /// <summary>
-        /// Reference to the OnScreenButton array (Input System).
+        /// OnScreenButton数组的引用（输入系统）。
         /// </summary>
         public OnScreenButton[] SkillButtons => _skillButtons;
         
         /// <summary>
-        /// Reference to the SkillButtonVisual array.
+        /// SkillButtonVisual数组的引用。
         /// </summary>
         public SkillButtonVisual[] SkillButtonVisuals => _skillButtonVisuals;
         
         /// <summary>
-        /// Currently controlled character type.
+        /// 当前控制的角色类型。
         /// </summary>
         public CharacterType ControlledCharacter => _controlledCharacter;
         
@@ -180,12 +180,12 @@ namespace PetGrooming.UI.MobileUI
         #region Events
         
         /// <summary>
-        /// Fired when UI mode changes.
+        /// 当UI模式改变时触发。
         /// </summary>
         public event Action<bool> OnMobileModeChanged;
         
         /// <summary>
-        /// Fired when controlled character changes.
+        /// 当控制的角色改变时触发。
         /// </summary>
         public event Action<CharacterType> OnControlledCharacterChanged;
         
@@ -232,9 +232,9 @@ namespace PetGrooming.UI.MobileUI
         #region Public Methods
         
         /// <summary>
-        /// Enables mobile HUD mode.
-        /// Requirement 5.1: Enable Mobile_HUD on touch device.
-        /// Requirement 5.4: Hide standard skill bar when mobile mode enabled.
+        /// 启用移动HUD模式。
+        /// 需求 5.1: 在触摸设备上启用Mobile_HUD。
+        /// 需求 5.4: 当移动模式启用时隐藏标准技能栏。
         /// </summary>
         public void EnableMobileHUD()
         {
@@ -257,9 +257,9 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Disables mobile HUD mode.
-        /// Requirement 5.2: Use standard keyboard/mouse UI on desktop.
-        /// Requirement 5.5: Hide mobile UI when disabled.
+        /// 禁用移动HUD模式。
+        /// 需求 5.2: 在桌面端使用标准键盘/鼠标UI。
+        /// 需求 5.5: 当禁用时隐藏移动UI。
         /// </summary>
         public void DisableMobileHUD()
         {
@@ -282,8 +282,8 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Toggles between mobile and desktop UI modes.
-        /// Requirement 5.3: Manual toggle between modes.
+        /// 在移动和桌面UI模式之间切换。
+        /// 需求 5.3: 手动在模式之间切换。
         /// </summary>
         public void ToggleMobileHUD()
         {
@@ -298,8 +298,8 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Sets the controlled character type.
-        /// Adjusts UI based on character (Groomer shows skill wheel, Pet shows struggle button).
+        /// 设置控制的角色类型。
+        /// 根据角色调整UI（美容师显示技能轮，宠物显示挣扎按钮）。
         /// </summary>
         public void SetControlledCharacter(CharacterType characterType)
         {
@@ -315,11 +315,11 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Gets the current movement input from the joystick.
+        /// 从摇杆获取当前移动输入。
         /// 注意：迁移后，输入由 OnScreenStick 直接发送到 Input System，
         /// 此方法仅用于兼容性，返回 VirtualJoystick 的当前值。
         /// </summary>
-        /// <returns>Normalized movement vector from joystick.</returns>
+        /// <returns>从摇杆获取的归一化移动向量。</returns>
         public Vector2 GetMovementInput()
         {
             if (!_isMobileMode || _joystick == null)
@@ -331,7 +331,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Sets the groomer controller reference.
+        /// 设置美容师控制器引用。
         /// </summary>
         public void SetGroomerController(GroomerController groomerController)
         {
@@ -443,7 +443,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Applies settings from MobileHUDSettings asset.
+        /// 应用来自MobileHUDSettings资源的设置。
         /// </summary>
         public void ApplySettings()
         {
@@ -471,7 +471,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Sets the settings asset and applies it.
+        /// 设置设置资源并应用它。
         /// </summary>
         public void SetSettings(MobileHUDSettings settings)
         {
@@ -482,10 +482,10 @@ namespace PetGrooming.UI.MobileUI
         #region UI Preference Persistence (Requirement 5.6)
         
         /// <summary>
-        /// Gets the saved UI mode preference.
-        /// Requirement 5.6: UI mode preference saved and restored.
+        /// 获取保存的UI模式偏好。
+        /// 需求 5.6: UI模式偏好已保存并恢复。
         /// </summary>
-        /// <returns>True if mobile mode was saved, false if desktop mode, null if no preference saved.</returns>
+        /// <returns>如果保存了移动模式则为true，如果保存了桌面模式则为false，如果没有保存偏好则为null。</returns>
         public bool? GetSavedUIPreference()
         {
             if (!PlayerPrefs.HasKey(_uiModePrefsKey))
@@ -496,8 +496,8 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Clears the saved UI mode preference.
-        /// Useful for testing or resetting to default behavior.
+        /// 清除保存的UI模式偏好。
+        /// 用于测试或重置为默认行为。
         /// </summary>
         public void ClearSavedUIPreference()
         {
@@ -510,16 +510,16 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Checks if a UI mode preference has been saved.
+        /// 检查是否保存了UI模式偏好。
         /// </summary>
-        /// <returns>True if a preference exists.</returns>
+        /// <returns>如果存在偏好则为true。</returns>
         public bool HasSavedUIPreference()
         {
             return PlayerPrefs.HasKey(_uiModePrefsKey);
         }
         
         /// <summary>
-        /// Gets the PlayerPrefs key used for UI mode preference.
+        /// 获取用于UI模式偏好的PlayerPrefs键。
         /// </summary>
         public string UIModePrefKey => _uiModePrefsKey;
         
@@ -528,11 +528,11 @@ namespace PetGrooming.UI.MobileUI
         #region OnScreenControl Management (Requirement 4.4)
         
         /// <summary>
-        /// Enables all OnScreenControl components (OnScreenStick and OnScreenButtons).
-        /// Requirement 4.4: Support enabling/disabling OnScreenControl components.
+        /// 启用所有OnScreenControl组件（OnScreenStick和OnScreenButtons）。
+        /// 需求 4.4: 支持启用/禁用OnScreenControl组件。
         /// 
-        /// Property 3: 控件启用/禁用状态同步
-        /// Validates: Requirements 4.4
+        /// 属性 3: 控件启用/禁用状态同步
+        /// 验证: 需求 4.4
         /// </summary>
         public void EnableMobileControls()
         {
@@ -558,11 +558,11 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Disables all OnScreenControl components (OnScreenStick and OnScreenButtons).
-        /// Requirement 4.4: Support enabling/disabling OnScreenControl components.
+        /// 禁用所有OnScreenControl组件（OnScreenStick和OnScreenButtons）。
+        /// 需求 4.4: 支持启用/禁用OnScreenControl组件。
         /// 
-        /// Property 3: 控件启用/禁用状态同步
-        /// Validates: Requirements 4.4
+        /// 属性 3: 控件启用/禁用状态同步
+        /// 验证: 需求 4.4
         /// </summary>
         public void DisableMobileControls()
         {
@@ -588,10 +588,10 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Gets the enabled state of all OnScreenControl components.
-        /// Used for property-based testing.
+        /// 获取所有OnScreenControl组件的启用状态。
+        /// 用于基于属性的测试。
         /// </summary>
-        /// <returns>Tuple of (stickEnabled, allButtonsEnabled)</returns>
+        /// <returns>(stickEnabled, allButtonsEnabled)的元组</returns>
         public (bool stickEnabled, bool allButtonsEnabled) GetOnScreenControlStates()
         {
             bool stickEnabled = _onScreenStick != null && _onScreenStick.enabled;
@@ -619,42 +619,42 @@ namespace PetGrooming.UI.MobileUI
         #region Static Methods (for testing)
         
         /// <summary>
-        /// Determines the expected visibility state of mobile UI based on mode.
-        /// Used for property-based testing.
+        /// 根据模式确定移动UI的预期可见性状态。
+        /// 用于基于属性的测试。
         /// 
-        /// Property 11: UI Mode Visibility Toggle
-        /// Validates: Requirements 5.4, 5.5
+        /// 属性 11: UI模式可见性切换
+        /// 验证: 需求 5.4, 5.5
         /// </summary>
-        /// <param name="isMobileMode">Whether mobile mode is enabled</param>
-        /// <returns>Expected mobile UI visibility</returns>
+        /// <param name="isMobileMode">移动模式是否启用</param>
+        /// <returns>预期的移动UI可见性</returns>
         public static bool GetExpectedMobileUIVisibility(bool isMobileMode)
         {
             return isMobileMode;
         }
         
         /// <summary>
-        /// Determines the expected visibility state of desktop UI based on mode.
-        /// Used for property-based testing.
+        /// 根据模式确定桌面UI的预期可见性状态。
+        /// 用于基于属性的测试。
         /// 
-        /// Property 11: UI Mode Visibility Toggle
-        /// Validates: Requirements 5.4, 5.5
+        /// 属性 11: UI模式可见性切换
+        /// 验证: 需求 5.4, 5.5
         /// </summary>
-        /// <param name="isMobileMode">Whether mobile mode is enabled</param>
-        /// <returns>Expected desktop UI visibility</returns>
+        /// <param name="isMobileMode">移动模式是否启用</param>
+        /// <returns>预期的桌面UI可见性</returns>
         public static bool GetExpectedDesktopUIVisibility(bool isMobileMode)
         {
             return !isMobileMode;
         }
         
         /// <summary>
-        /// Validates that UI visibility states are mutually exclusive.
-        /// Used for property-based testing.
+        /// 验证UI可见性状态是否互斥。
+        /// 用于基于属性的测试。
         /// 
-        /// Property 11: UI Mode Visibility Toggle
+        /// 属性 11: UI模式可见性切换
         /// </summary>
-        /// <param name="mobileUIVisible">Whether mobile UI is visible</param>
-        /// <param name="desktopUIVisible">Whether desktop UI is visible</param>
-        /// <returns>True if visibility states are valid (mutually exclusive)</returns>
+        /// <param name="mobileUIVisible">移动UI是否可见</param>
+        /// <param name="desktopUIVisible">桌面UI是否可见</param>
+        /// <returns>如果可见性状态有效（互斥）则为true</returns>
         public static bool ValidateUIVisibilityStates(bool mobileUIVisible, bool desktopUIVisible)
         {
             // Mobile and desktop UI should be mutually exclusive
@@ -662,26 +662,26 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Determines if device should use mobile mode based on touch support.
-        /// Used for property-based testing.
+        /// 根据触摸支持确定设备是否应该使用移动模式。
+        /// 用于基于属性的测试。
         /// 
-        /// Requirement 5.1, 5.2: Auto-detect device type.
+        /// 需求 5.1, 5.2: 自动检测设备类型。
         /// </summary>
-        /// <param name="isTouchDevice">Whether device supports touch</param>
-        /// <returns>Whether mobile mode should be enabled</returns>
+        /// <param name="isTouchDevice">设备是否支持触摸</param>
+        /// <returns>是否应该启用移动模式</returns>
         public static bool ShouldUseMobileMode(bool isTouchDevice)
         {
             return isTouchDevice;
         }
         
         /// <summary>
-        /// Validates UI mode transition.
-        /// Used for property-based testing.
+        /// 验证UI模式转换。
+        /// 用于基于属性的测试。
         /// </summary>
-        /// <param name="previousMode">Previous mobile mode state</param>
-        /// <param name="toggleAction">Whether toggle was called</param>
-        /// <param name="newMode">New mobile mode state</param>
-        /// <returns>True if transition is valid</returns>
+        /// <param name="previousMode">之前的移动模式状态</param>
+        /// <param name="toggleAction">是否调用了切换</param>
+        /// <param name="newMode">新的移动模式状态</param>
+        /// <returns>如果转换有效则为true</returns>
         public static bool ValidateUIToggle(bool previousMode, bool toggleAction, bool newMode)
         {
             if (toggleAction)
@@ -697,31 +697,31 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Validates that UI preference persistence works correctly.
-        /// Used for property-based testing.
+        /// 验证UI偏好持久化是否正常工作。
+        /// 用于基于属性的测试。
         /// 
-        /// Requirement 5.6: UI mode preference saved and restored.
+        /// 需求 5.6: UI模式偏好已保存并恢复。
         /// </summary>
-        /// <param name="savedMode">The mode that was saved</param>
-        /// <param name="loadedMode">The mode that was loaded</param>
-        /// <returns>True if saved and loaded modes match</returns>
+        /// <param name="savedMode">保存的模式</param>
+        /// <param name="loadedMode">加载的模式</param>
+        /// <returns>如果保存和加载的模式匹配则为true</returns>
         public static bool ValidateUIPreferencePersistence(bool savedMode, bool loadedMode)
         {
             return savedMode == loadedMode;
         }
         
         /// <summary>
-        /// Validates that initial UI mode is determined correctly.
-        /// Used for property-based testing.
+        /// 验证初始UI模式是否正确确定。
+        /// 用于基于属性的测试。
         /// 
-        /// Requirement 5.6: Restore saved preference on startup.
+        /// 需求 5.6: 在启动时恢复保存的偏好。
         /// </summary>
-        /// <param name="hasSavedPreference">Whether a preference was saved</param>
-        /// <param name="savedPreference">The saved preference value (if any)</param>
-        /// <param name="isTouchDevice">Whether device supports touch</param>
-        /// <param name="autoDetect">Whether auto-detection is enabled</param>
-        /// <param name="resultMode">The resulting UI mode</param>
-        /// <returns>True if result mode is correct</returns>
+        /// <param name="hasSavedPreference">是否保存了偏好</param>
+        /// <param name="savedPreference">保存的偏好值（如果有）</param>
+        /// <param name="isTouchDevice">设备是否支持触摸</param>
+        /// <param name="autoDetect">是否启用自动检测</param>
+        /// <param name="resultMode">结果UI模式</param>
+        /// <returns>如果结果模式正确则为true</returns>
         public static bool ValidateInitialUIMode(
             bool hasSavedPreference, 
             bool savedPreference, 
@@ -746,16 +746,16 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Validates that OnScreenControl enabled states match the expected state.
-        /// Used for property-based testing.
+        /// 验证OnScreenControl启用状态是否与预期状态匹配。
+        /// 用于基于属性的测试。
         /// 
-        /// Property 3: 控件启用/禁用状态同步
-        /// Validates: Requirements 4.4
+        /// 属性 3: 控件启用/禁用状态同步
+        /// 验证: 需求 4.4
         /// </summary>
-        /// <param name="expectedEnabled">Expected enabled state</param>
-        /// <param name="stickEnabled">Actual OnScreenStick enabled state</param>
-        /// <param name="allButtonsEnabled">Whether all OnScreenButtons are enabled</param>
-        /// <returns>True if all states match expected</returns>
+        /// <param name="expectedEnabled">预期的启用状态</param>
+        /// <param name="stickEnabled">实际的OnScreenStick启用状态</param>
+        /// <param name="allButtonsEnabled">所有OnScreenButtons是否启用</param>
+        /// <returns>如果所有状态都匹配预期则为true</returns>
         public static bool ValidateOnScreenControlStates(bool expectedEnabled, bool stickEnabled, bool allButtonsEnabled)
         {
             return stickEnabled == expectedEnabled && allButtonsEnabled == expectedEnabled;
@@ -1290,7 +1290,7 @@ namespace PetGrooming.UI.MobileUI
         #region Editor Support
 #if UNITY_EDITOR
         /// <summary>
-        /// Sets references for testing purposes.
+        /// 为测试目的设置引用。
         /// </summary>
         public void SetReferencesForTesting(
             VirtualJoystick joystick, 
@@ -1305,7 +1305,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Sets OnScreenControl references for testing purposes.
+        /// 为测试目的设置OnScreenControl引用。
         /// </summary>
         public void SetOnScreenControlsForTesting(
             OnScreenStick onScreenStick,
@@ -1318,7 +1318,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Sets mobile mode directly for testing.
+        /// 为测试直接设置移动模式。
         /// </summary>
         public void SetMobileModeForTesting(bool isMobileMode)
         {
@@ -1326,12 +1326,12 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Gets initialization state for testing.
+        /// 获取测试的初始化状态。
         /// </summary>
         public bool IsInitializedForTesting => _isInitialized;
         
         /// <summary>
-        /// Forces initialization for testing.
+        /// 为测试强制初始化。
         /// </summary>
         public void InitializeForTesting()
         {
@@ -1340,7 +1340,7 @@ namespace PetGrooming.UI.MobileUI
         }
         
         /// <summary>
-        /// Resets singleton for testing.
+        /// 为测试重置单例。
         /// </summary>
         public static void ResetInstanceForTesting()
         {

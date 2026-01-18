@@ -6,43 +6,43 @@ using PetGrooming.AI;
 namespace PetGrooming.Systems.Skills
 {
     /// <summary>
-    /// Manages all skills for Dog pets.
-    /// Integrates Power Charge, Intimidating Bark, and Steal Tool skills.
-    /// Implements AI decision logic for skill usage.
-    /// Requirements: 5.1, 5.6
+    /// 管理狗狗宠物的所有技能。
+    /// 集成强力冲锋、威吓吠叫和偷取工具技能。
+    /// 实现技能使用的 AI 决策逻辑。
+    /// 需求：5.1, 5.6
     /// </summary>
     public class DogSkillManager : MonoBehaviour
     {
         #region Serialized Fields
         [Header("Skills")]
-        [Tooltip("Power Charge skill component")]
+        [Tooltip("强力冲锋技能组件")]
         public PowerChargeSkill PowerCharge;
         
-        [Tooltip("Intimidating Bark skill component")]
+        [Tooltip("威吓吠叫技能组件")]
         public IntimidatingBarkSkill IntimidatingBark;
         
-        [Tooltip("Steal Tool skill component")]
+        [Tooltip("偷取工具技能组件")]
         public StealToolSkill StealTool;
         
         [Header("AI Decision Settings")]
-        [Tooltip("Distance at which to consider using Power Charge")]
+        [Tooltip("考虑使用强力冲锋的距离")]
         public float PowerChargeTriggerDistance = 4f;
         
-        [Tooltip("Distance at which to consider using Intimidating Bark")]
+        [Tooltip("考虑使用威吓吠叫的距离")]
         public float IntimidatingBarkTriggerDistance = 5f;
         
-        [Tooltip("Distance at which to consider using Steal Tool")]
+        [Tooltip("考虑使用偷取工具的距离")]
         public float StealToolTriggerDistance = 6f;
         
-        [Tooltip("Minimum time between skill usage attempts")]
+        [Tooltip("技能使用尝试之间的最小时间间隔")]
         public float SkillDecisionInterval = 1f;
         
-        [Tooltip("Random chance factor for skill usage (0-1)")]
+        [Tooltip("技能使用的随机机会因子 (0-1)")]
         [Range(0f, 1f)]
         public float SkillUsageChance = 0.7f;
         
         [Header("Configuration")]
-        [Tooltip("Phase 2 game configuration")]
+        [Tooltip("阶段 2 游戏配置")]
         public Phase2GameConfig GameConfig;
         #endregion
 
@@ -55,8 +55,8 @@ namespace PetGrooming.Systems.Skills
 
         #region Properties
         /// <summary>
-        /// Array of all skills managed by this manager.
-        /// Requirement 5.1: Dog has 3 skills.
+        /// 由此管理器管理的所有技能的数组。
+        /// 需求 5.1: 狗狗有 3 个技能。
         /// </summary>
         public SkillBase[] AllSkills
         {
@@ -71,29 +71,29 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Number of skills available.
+        /// 可用技能的数量。
         /// </summary>
         public int SkillCount => 3;
 
         /// <summary>
-        /// Reference to the owner pet.
+        /// 对所有者宠物的引用。
         /// </summary>
         public PetAI OwnerPet => _ownerPet;
         #endregion
 
         #region Events
         /// <summary>
-        /// Fired when any skill is activated.
+        /// 当任何技能激活时触发。
         /// </summary>
         public event Action<int, SkillBase> OnSkillActivated;
         
         /// <summary>
-        /// Fired when a skill activation fails (on cooldown).
+        /// 当技能激活失败（冷却中）时触发。
         /// </summary>
         public event Action<int, SkillBase> OnSkillActivationFailed;
         
         /// <summary>
-        /// Fired when the AI decides to use a skill.
+        /// 当 AI 决定使用技能时触发。
         /// </summary>
         public event Action<SkillBase> OnAISkillDecision;
         #endregion
@@ -113,9 +113,9 @@ namespace PetGrooming.Systems.Skills
 
         #region Public Methods
         /// <summary>
-        /// Sets the owner pet for this skill manager.
+        /// 设置此技能管理器的所有者宠物。
         /// </summary>
-        /// <param name="pet">The pet that owns these skills</param>
+        /// <param name="pet">拥有这些技能的宠物</param>
         public void SetOwner(PetAI pet)
         {
             _ownerPet = pet;
@@ -123,11 +123,11 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Evaluates the current situation and uses skills strategically.
-        /// Requirement 5.6: Dog AI uses skills strategically based on distance and state.
+        /// 评估当前情况并策略性地使用技能。
+        /// 需求 5.6: 狗狗 AI 根据距离和状态策略性地使用技能。
         /// </summary>
-        /// <param name="pet">The pet using the skills</param>
-        /// <param name="groomer">The groomer to evaluate against</param>
+        /// <param name="pet">使用技能的宠物</param>
+        /// <param name="groomer">用于评估的美容师</param>
         public void EvaluateAndUseSkills(PetAI pet, GroomerController groomer)
         {
             if (pet == null || groomer == null) return;
@@ -331,15 +331,15 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Evaluates which skill to use based on current situation.
-        /// Requirement 5.6: Strategic skill usage based on distance and state.
+        /// 根据当前情况评估要使用的技能。
+        /// 需求 5.6: 基于距离和状态的策略性技能使用。
         /// </summary>
         private SkillBase EvaluateSkillChoice(float distanceToGroomer, PetAI.PetState state, GroomerController groomer, bool groomerCarryingPet)
         {
-            // Priority-based skill selection
+            // 基于优先级的技能选择
             
             // 1. HIGHEST PRIORITY: If groomer is carrying a pet, use Power Charge to free them
-            // Requirement 5.3: Power Charge releases captured pets
+            // 需求 5.3: 强力冲锋释放被捕获的宠物
             if (groomerCarryingPet && distanceToGroomer <= PowerChargeTriggerDistance)
             {
                 if (PowerCharge != null && PowerCharge.IsReady && !PowerCharge.IsCharging)
@@ -390,7 +390,7 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Determines if a skill should be used based on random chance.
+        /// 根据随机机会确定是否应使用技能。
         /// </summary>
         private bool ShouldUseSkill()
         {
@@ -400,42 +400,42 @@ namespace PetGrooming.Systems.Skills
 
         #region Static Methods (Testable)
         /// <summary>
-        /// Validates that all required skills are present.
-        /// Requirement 5.1: Dog has 3 skills.
+        /// 验证所有必需的技能是否存在。
+        /// 需求 5.1: 狗狗有 3 个技能。
         /// </summary>
-        /// <param name="powerCharge">Power Charge skill</param>
-        /// <param name="intimidatingBark">Intimidating Bark skill</param>
-        /// <param name="stealTool">Steal Tool skill</param>
-        /// <returns>True if all skills are present</returns>
+        /// <param name="powerCharge">强力冲锋技能</param>
+        /// <param name="intimidatingBark">威吓吠叫技能</param>
+        /// <param name="stealTool">偷取工具技能</param>
+        /// <returns>如果所有技能都存在则为 True</returns>
         public static bool ValidateSkillsPresent(SkillBase powerCharge, SkillBase intimidatingBark, SkillBase stealTool)
         {
             return powerCharge != null && intimidatingBark != null && stealTool != null;
         }
 
         /// <summary>
-        /// Gets the expected skill count for Dog.
-        /// Requirement 5.1: Dog has 3 skills.
+        /// 获取狗狗的预期技能数量。
+        /// 需求 5.1: 狗狗有 3 个技能。
         /// </summary>
-        /// <returns>Expected skill count (3)</returns>
+        /// <returns>预期技能数量 (3)</returns>
         public static int GetExpectedSkillCount()
         {
             return 3;
         }
 
         /// <summary>
-        /// Evaluates the best skill to use based on distance and state.
-        /// Requirement 5.6: Strategic skill usage.
+        /// 根据距离和状态评估要使用的最佳技能。
+        /// 需求 5.6: 策略性技能使用。
         /// </summary>
-        /// <param name="distance">Distance to groomer</param>
-        /// <param name="state">Current pet state</param>
-        /// <param name="groomerCarryingPet">Whether groomer is carrying a pet</param>
-        /// <param name="powerChargeReady">Whether Power Charge is ready</param>
-        /// <param name="intimidatingBarkReady">Whether Intimidating Bark is ready</param>
-        /// <param name="stealToolReady">Whether Steal Tool is ready</param>
-        /// <param name="stealToolCanActivate">Whether Steal Tool can activate (station in range)</param>
-        /// <param name="powerChargeDistance">Trigger distance for Power Charge</param>
-        /// <param name="intimidatingBarkDistance">Trigger distance for Intimidating Bark</param>
-        /// <returns>Index of recommended skill (0-2) or -1 if none</returns>
+        /// <param name="distance">到美容师的距离</param>
+        /// <param name="state">当前宠物状态</param>
+        /// <param name="groomerCarryingPet">美容师是否正抱着宠物</param>
+        /// <param name="powerChargeReady">强力冲锋是否就绪</param>
+        /// <param name="intimidatingBarkReady">威吓吠叫是否就绪</param>
+        /// <param name="stealToolReady">偷取工具是否就绪</param>
+        /// <param name="stealToolCanActivate">偷取工具是否可以激活（工作台在范围内）</param>
+        /// <param name="powerChargeDistance">强力冲锋的触发距离</param>
+        /// <param name="intimidatingBarkDistance">威吓吠叫的触发距离</param>
+        /// <returns>推荐技能的索引 (0-2)，如果没有则为 -1</returns>
         public static int EvaluateBestSkill(
             float distance, 
             PetAI.PetState state,
@@ -485,7 +485,7 @@ namespace PetGrooming.Systems.Skills
         #region Editor Support
 #if UNITY_EDITOR
         /// <summary>
-        /// Sets config for testing purposes.
+        /// 设置用于测试的配置。
         /// </summary>
         public void SetConfigForTesting(Phase2GameConfig config)
         {
@@ -494,7 +494,7 @@ namespace PetGrooming.Systems.Skills
         }
         
         /// <summary>
-        /// Sets skills for testing purposes.
+        /// 设置用于测试的技能。
         /// </summary>
         public void SetSkillsForTesting(PowerChargeSkill powerCharge, IntimidatingBarkSkill intimidatingBark, StealToolSkill stealTool)
         {
@@ -505,7 +505,7 @@ namespace PetGrooming.Systems.Skills
         }
 
         /// <summary>
-        /// Sets the owner pet for testing.
+        /// 设置用于测试的所有者宠物。
         /// </summary>
         public void SetOwnerForTesting(PetAI pet)
         {
